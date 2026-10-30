@@ -1,8 +1,10 @@
 using GeoConquest.Infrastructure.Identity;
+using GeoConquest.Web.Extensions;
 using GeoConquest.Web.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace GeoConquest.Web.Controllers;
 
@@ -19,6 +21,7 @@ public sealed class AccountController(
     public IActionResult Register() => View(new RegisterViewModel());
 
     [HttpPost]
+    [EnableRateLimiting(SecurityServiceCollectionExtensions.AuthRateLimitPolicy)]
     public async Task<IActionResult> Register(RegisterViewModel model)
     {
         if (!ModelState.IsValid)
@@ -49,6 +52,7 @@ public sealed class AccountController(
     public IActionResult Login(string? returnUrl = null) => View(new LoginViewModel { ReturnUrl = returnUrl });
 
     [HttpPost]
+    [EnableRateLimiting(SecurityServiceCollectionExtensions.AuthRateLimitPolicy)]
     public async Task<IActionResult> Login(LoginViewModel model)
     {
         if (!ModelState.IsValid)
