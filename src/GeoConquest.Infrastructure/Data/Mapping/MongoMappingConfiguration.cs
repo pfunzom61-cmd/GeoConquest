@@ -25,6 +25,9 @@ public static class MongoMappingConfiguration
                 return;
             }
 
+            // Identity user ids are Guids, and the driver refuses to store a Guid until a format is chosen.
+            BsonSerializer.RegisterSerializer(new GuidSerializer(GuidRepresentation.Standard));
+
             MapCountry();
             MapPlayer();
             MapTerritory();

@@ -1,5 +1,6 @@
 using GeoConquest.Core.Models;
 using GeoConquest.Infrastructure.Configuration;
+using GeoConquest.Infrastructure.Identity;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -12,6 +13,9 @@ namespace GeoConquest.Infrastructure.Data;
 /// </summary>
 public sealed class MongoContext
 {
+    public const string UsersCollectionName = "users";
+    public const string RolesCollectionName = "roles";
+
     private const string GamesCollectionName = "games";
     private const string GameEventsCollectionName = "gameEvents";
     private const string CountriesCollectionName = "countries";
@@ -32,6 +36,8 @@ public sealed class MongoContext
 
     public IMongoCollection<Country> Countries => Database.GetCollection<Country>(CountriesCollectionName);
 
+    public IMongoCollection<ApplicationUser> Users => Database.GetCollection<ApplicationUser>(UsersCollectionName);
+
     /// <summary>
     /// Creates the indexes the application relies on. Safe to run on every start: existing indexes are left alone.
     /// Countries need none because the ISO code is their <c>_id</c>, which MongoDB keeps unique.
@@ -50,6 +56,13 @@ public sealed class MongoContext
             new CreateIndexModel<GameEvent>(
                 eventIndexes.Ascending(gameEvent => gameEvent.GameId).Ascending(gameEvent => gameEvent.Sequence),
                 new CreateIndexOptions { Name = "gameId_sequence", Unique = true }),
+            cancellationToken: cancellationToken);
+
+        // Identity checks for a duplicate email before inserting; this closes the gap between that check and the insert.
+        await Users.Indexes.CreateOneAsync(
+            new CreateIndexModel<ApplicationUser>(
+                Builders<ApplicationUser>.IndexKeys.Ascending(user => user.NormalizedEmail),
+                new CreateIndexOptions { Name = "normalizedEmail", Unique = true }),
             cancellationToken: cancellationToken);
     }
 }

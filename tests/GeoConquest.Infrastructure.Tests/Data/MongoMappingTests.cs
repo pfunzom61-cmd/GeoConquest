@@ -1,6 +1,7 @@
 using GeoConquest.Core.Enums;
 using GeoConquest.Core.Models;
 using GeoConquest.Infrastructure.Data.Mapping;
+using GeoConquest.Infrastructure.Identity;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 
@@ -60,6 +61,17 @@ public sealed class MongoMappingTests
         Assert.Equal([6, 2], loaded.Payload!.AttackerDice);
         Assert.Null(loaded.Payload.DefenderDice);
         Assert.Equal(CreatedAt, loaded.CreatedAt);
+    }
+
+    [Fact]
+    public void ApplicationUser_SavedAndLoaded_KeepsGuidIdAndDisplayName()
+    {
+        var user = new ApplicationUser { UserName = "bob@example.org", DisplayName = "Bob" };
+
+        var loaded = BsonSerializer.Deserialize<ApplicationUser>(user.ToBsonDocument());
+
+        Assert.Equal(user.Id, loaded.Id);
+        Assert.Equal("Bob", loaded.DisplayName);
     }
 
     private static Game CreateGameMidAttack()
