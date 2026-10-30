@@ -1,6 +1,12 @@
+using GeoConquest.Infrastructure;
+using GeoConquest.Infrastructure.Identity;
+using GeoConquest.Web.Extensions;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddGeoConquestIdentity().AddMongoIdentityStores();
 
 var app = builder.Build();
 
@@ -11,6 +17,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseStaticFiles();
 app.UseRouting();
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));

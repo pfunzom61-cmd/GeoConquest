@@ -1,13 +1,13 @@
 using System.Net;
-using Microsoft.AspNetCore.Mvc.Testing;
+using GeoConquest.Web.Tests.Fakes;
 
 namespace GeoConquest.Web.Tests;
 
-public sealed class HealthEndpointTests : IClassFixture<WebApplicationFactory<Program>>
+public sealed class HealthEndpointTests : IClassFixture<GeoConquestWebFactory>
 {
-    private readonly WebApplicationFactory<Program> _factory;
+    private readonly GeoConquestWebFactory _factory;
 
-    public HealthEndpointTests(WebApplicationFactory<Program> factory)
+    public HealthEndpointTests(GeoConquestWebFactory factory)
     {
         _factory = factory;
     }

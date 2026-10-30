@@ -7,6 +7,23 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
+    <header>
+        <a asp-controller="Home" asp-action="Index">GeoConquest</a>
+        <nav aria-label="Account">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a asp-controller="Account" asp-action="Profile">Profile</a>
+                <form method="post" asp-controller="Account" asp-action="Logout">
+                    <button type="submit">Log out</button>
+                </form>
+            }
+            else
+            {
+                <a asp-controller="Account" asp-action="Login">Log in</a>
+                <a asp-controller="Account" asp-action="Register">Register</a>
+            }
+        </nav>
+    </header>
     <main>
         @RenderBody()
     </main>
