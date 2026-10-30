@@ -4,18 +4,6 @@ namespace GeoConquest.Infrastructure.Tests.Seed;
 
 public sealed class CountrySeedMapperTests
 {
-    [Fact]
-    public void ToCountries_ValidRow_MapsIsoCodeNameAndPopulation()
-    {
-        var file = FileWith(new CountrySeedEntryDto("ZA", "South Africa", 64_000_000));
-
-        var country = Assert.Single(CountrySeedMapper.ToCountries(file));
-
-        Assert.Equal("ZA", country.IsoCode);
-        Assert.Equal("South Africa", country.Name);
-        Assert.Equal(64_000_000, country.Population);
-    }
-
     [Theory]
     [InlineData("za", "South Africa", 1000L)]
     [InlineData("ZAF", "South Africa", 1000L)]

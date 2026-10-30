@@ -22,6 +22,9 @@ public sealed class GeoConquestWebFactory : WebApplicationFactory<Program>
         builder.UseEnvironment("Testing");
         builder.UseSetting("MongoDb:ConnectionString", "mongodb://unused.invalid:27017");
 
+        // Every test shares one client address, so ordinary tests must not use up the limit between them.
+        builder.UseSetting("RateLimiting:Auth:PermitLimit", "1000");
+
         builder.ConfigureTestServices(services =>
         {
             services.Remove(services.Single(service => service.ImplementationType == typeof(DatabaseInitializer)));
