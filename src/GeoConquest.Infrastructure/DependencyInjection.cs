@@ -44,6 +44,8 @@ public static class DependencyInjection
         services.AddSingleton<CountrySeeder>();
         services.AddHostedService<DatabaseInitializer>();
 
+        services.AddHealthChecks().AddCheck<MongoHealthCheck>("mongodb");
+
         return services;
     }
 }
