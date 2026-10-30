@@ -2,7 +2,7 @@
 
 A Risk-style single-player geopolitics strategy game built with ASP.NET Core MVC, SignalR and MongoDB.
 
-![CI](https://github.com/OWNER/REPO/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/pfunzom61-cmd/GeoConquest/actions/workflows/ci.yml/badge.svg)
 
 ## How to run
 
