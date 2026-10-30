@@ -1,0 +1,1177 @@
+{
+  "source": "https://www.worldometers.info/world-population/population-by-country/",
+  "dataset": "Worldometer 2026 table (UN World Population Prospects 2024 Revision, medium variant)",
+  "snapshotDate": "2026-10-30",
+  "countries": [
+    {
+      "isoCode": "IN",
+      "name": "India",
+      "population": 1476625576
+    },
+    {
+      "isoCode": "CN",
+      "name": "China",
+      "population": 1412914089
+    },
+    {
+      "isoCode": "US",
+      "name": "United States",
+      "population": 349035494
+    },
+    {
+      "isoCode": "ID",
+      "name": "Indonesia",
+      "population": 287886782
+    },
+    {
+      "isoCode": "PK",
+      "name": "Pakistan",
+      "population": 259299791
+    },
+    {
+      "isoCode": "NG",
+      "name": "Nigeria",
+      "population": 242431832
+    },
+    {
+      "isoCode": "BR",
+      "name": "Brazil",
+      "population": 213562666
+    },
+    {
+      "isoCode": "BD",
+      "name": "Bangladesh",
+      "population": 177818044
+    },
+    {
+      "isoCode": "RU",
+      "name": "Russia",
+      "population": 143394458
+    },
+    {
+      "isoCode": "ET",
+      "name": "Ethiopia",
+      "population": 138902185
+    },
+    {
+      "isoCode": "MX",
+      "name": "Mexico",
+      "population": 132997658
+    },
+    {
+      "isoCode": "JP",
+      "name": "Japan",
+      "population": 122427731
+    },
+    {
+      "isoCode": "EG",
+      "name": "Egypt",
+      "population": 120101175
+    },
+    {
+      "isoCode": "PH",
+      "name": "Philippines",
+      "population": 117724471
+    },
+    {
+      "isoCode": "CD",
+      "name": "DR Congo",
+      "population": 116452162
+    },
+    {
+      "isoCode": "VN",
+      "name": "Vietnam",
+      "population": 102177431
+    },
+    {
+      "isoCode": "IR",
+      "name": "Iran",
+      "population": 93168497
+    },
+    {
+      "isoCode": "TR",
+      "name": "Turkey",
+      "population": 87926082
+    },
+    {
+      "isoCode": "DE",
+      "name": "Germany",
+      "population": 83644258
+    },
+    {
+      "isoCode": "TZ",
+      "name": "Tanzania",
+      "population": 72563780
+    },
+    {
+      "isoCode": "TH",
+      "name": "Thailand",
+      "population": 71559614
+    },
+    {
+      "isoCode": "GB",
+      "name": "United Kingdom",
+      "population": 69931528
+    },
+    {
+      "isoCode": "FR",
+      "name": "France",
+      "population": 66746401
+    },
+    {
+      "isoCode": "ZA",
+      "name": "South Africa",
+      "population": 65453084
+    },
+    {
+      "isoCode": "IT",
+      "name": "Italy",
+      "population": 58926166
+    },
+    {
+      "isoCode": "KE",
+      "name": "Kenya",
+      "population": 58636412
+    },
+    {
+      "isoCode": "MM",
+      "name": "Myanmar",
+      "population": 55184819
+    },
+    {
+      "isoCode": "CO",
+      "name": "Colombia",
+      "population": 53936226
+    },
+    {
+      "isoCode": "SD",
+      "name": "Sudan",
+      "population": 53282719
+    },
+    {
+      "isoCode": "UG",
+      "name": "Uganda",
+      "population": 52761469
+    },
+    {
+      "isoCode": "KR",
+      "name": "South Korea",
+      "population": 51600388
+    },
+    {
+      "isoCode": "DZ",
+      "name": "Algeria",
+      "population": 48028334
+    },
+    {
+      "isoCode": "IQ",
+      "name": "Iraq",
+      "population": 48007437
+    },
+    {
+      "isoCode": "ES",
+      "name": "Spain",
+      "population": 47850793
+    },
+    {
+      "isoCode": "AR",
+      "name": "Argentina",
+      "population": 46003734
+    },
+    {
+      "isoCode": "AF",
+      "name": "Afghanistan",
+      "population": 45047069
+    },
+    {
+      "isoCode": "YE",
+      "name": "Yemen",
+      "population": 42961653
+    },
+    {
+      "isoCode": "CA",
+      "name": "Canada",
+      "population": 40467728
+    },
+    {
+      "isoCode": "AO",
+      "name": "Angola",
+      "population": 40215179
+    },
+    {
+      "isoCode": "UA",
+      "name": "Ukraine",
+      "population": 39535849
+    },
+    {
+      "isoCode": "MA",
+      "name": "Morocco",
+      "population": 38762441
+    },
+    {
+      "isoCode": "PL",
+      "name": "Poland",
+      "population": 37843188
+    },
+    {
+      "isoCode": "UZ",
+      "name": "Uzbekistan",
+      "population": 37724223
+    },
+    {
+      "isoCode": "MZ",
+      "name": "Mozambique",
+      "population": 36639851
+    },
+    {
+      "isoCode": "MY",
+      "name": "Malaysia",
+      "population": 36385115
+    },
+    {
+      "isoCode": "GH",
+      "name": "Ghana",
+      "population": 35697557
+    },
+    {
+      "isoCode": "SA",
+      "name": "Saudi Arabia",
+      "population": 35165787
+    },
+    {
+      "isoCode": "PE",
+      "name": "Peru",
+      "population": 34922148
+    },
+    {
+      "isoCode": "MG",
+      "name": "Madagascar",
+      "population": 33522052
+    },
+    {
+      "isoCode": "CI",
+      "name": "Côte d'Ivoire",
+      "population": 33494346
+    },
+    {
+      "isoCode": "CM",
+      "name": "Cameroon",
+      "population": 30640817
+    },
+    {
+      "isoCode": "NP",
+      "name": "Nepal",
+      "population": 29629410
+    },
+    {
+      "isoCode": "NE",
+      "name": "Niger",
+      "population": 28814878
+    },
+    {
+      "isoCode": "VE",
+      "name": "Venezuela",
+      "population": 28633711
+    },
+    {
+      "isoCode": "AU",
+      "name": "Australia",
+      "population": 27227096
+    },
+    {
+      "isoCode": "KP",
+      "name": "North Korea",
+      "population": 26633691
+    },
+    {
+      "isoCode": "SY",
+      "name": "Syria",
+      "population": 26472497
+    },
+    {
+      "isoCode": "ML",
+      "name": "Mali",
+      "population": 25932275
+    },
+    {
+      "isoCode": "BF",
+      "name": "Burkina Faso",
+      "population": 24601700
+    },
+    {
+      "isoCode": "LK",
+      "name": "Sri Lanka",
+      "population": 23348315
+    },
+    {
+      "isoCode": "TW",
+      "name": "Taiwan",
+      "population": 23011292
+    },
+    {
+      "isoCode": "MW",
+      "name": "Malawi",
+      "population": 22785535
+    },
+    {
+      "isoCode": "ZM",
+      "name": "Zambia",
+      "population": 22521915
+    },
+    {
+      "isoCode": "TD",
+      "name": "Chad",
+      "population": 21560380
+    },
+    {
+      "isoCode": "KZ",
+      "name": "Kazakhstan",
+      "population": 21083626
+    },
+    {
+      "isoCode": "SO",
+      "name": "Somalia",
+      "population": 20305907
+    },
+    {
+      "isoCode": "CL",
+      "name": "Chile",
+      "population": 19945850
+    },
+    {
+      "isoCode": "SN",
+      "name": "Senegal",
+      "population": 19366548
+    },
+    {
+      "isoCode": "GT",
+      "name": "Guatemala",
+      "population": 18967978
+    },
+    {
+      "isoCode": "RO",
+      "name": "Romania",
+      "population": 18800605
+    },
+    {
+      "isoCode": "NL",
+      "name": "Netherlands",
+      "population": 18448775
+    },
+    {
+      "isoCode": "EC",
+      "name": "Ecuador",
+      "population": 18444506
+    },
+    {
+      "isoCode": "KH",
+      "name": "Cambodia",
+      "population": 18051219
+    },
+    {
+      "isoCode": "ZW",
+      "name": "Zimbabwe",
+      "population": 17273580
+    },
+    {
+      "isoCode": "GN",
+      "name": "Guinea",
+      "population": 15441993
+    },
+    {
+      "isoCode": "BJ",
+      "name": "Benin",
+      "population": 15170419
+    },
+    {
+      "isoCode": "RW",
+      "name": "Rwanda",
+      "population": 14889693
+    },
+    {
+      "isoCode": "BI",
+      "name": "Burundi",
+      "population": 14729157
+    },
+    {
+      "isoCode": "BO",
+      "name": "Bolivia",
+      "population": 12749291
+    },
+    {
+      "isoCode": "SS",
+      "name": "South Sudan",
+      "population": 12436037
+    },
+    {
+      "isoCode": "TN",
+      "name": "Tunisia",
+      "population": 12415138
+    },
+    {
+      "isoCode": "HT",
+      "name": "Haiti",
+      "population": 12037506
+    },
+    {
+      "isoCode": "BE",
+      "name": "Belgium",
+      "population": 11774642
+    },
+    {
+      "isoCode": "DO",
+      "name": "Dominican Republic",
+      "population": 11609500
+    },
+    {
+      "isoCode": "JO",
+      "name": "Jordan",
+      "population": 11589532
+    },
+    {
+      "isoCode": "AE",
+      "name": "United Arab Emirates",
+      "population": 11574682
+    },
+    {
+      "isoCode": "HN",
+      "name": "Honduras",
+      "population": 11184760
+    },
+    {
+      "isoCode": "TJ",
+      "name": "Tajikistan",
+      "population": 10978599
+    },
+    {
+      "isoCode": "PG",
+      "name": "Papua New Guinea",
+      "population": 10947848
+    },
+    {
+      "isoCode": "CU",
+      "name": "Cuba",
+      "population": 10892659
+    },
+    {
+      "isoCode": "SE",
+      "name": "Sweden",
+      "population": 10701047
+    },
+    {
+      "isoCode": "CZ",
+      "name": "Czechia",
+      "population": 10527781
+    },
+    {
+      "isoCode": "AZ",
+      "name": "Azerbaijan",
+      "population": 10454855
+    },
+    {
+      "isoCode": "PT",
+      "name": "Portugal",
+      "population": 10395362
+    },
+    {
+      "isoCode": "TG",
+      "name": "Togo",
+      "population": 9930918
+    },
+    {
+      "isoCode": "GR",
+      "name": "Greece",
+      "population": 9897115
+    },
+    {
+      "isoCode": "IL",
+      "name": "Israel",
+      "population": 9647689
+    },
+    {
+      "isoCode": "HU",
+      "name": "Hungary",
+      "population": 9585818
+    },
+    {
+      "isoCode": "AT",
+      "name": "Austria",
+      "population": 9107266
+    },
+    {
+      "isoCode": "CH",
+      "name": "Switzerland",
+      "population": 9007798
+    },
+    {
+      "isoCode": "SL",
+      "name": "Sierra Leone",
+      "population": 8996745
+    },
+    {
+      "isoCode": "BY",
+      "name": "Belarus",
+      "population": 8937018
+    },
+    {
+      "isoCode": "LA",
+      "name": "Laos",
+      "population": 7974017
+    },
+    {
+      "isoCode": "TM",
+      "name": "Turkmenistan",
+      "population": 7736632
+    },
+    {
+      "isoCode": "LY",
+      "name": "Libya",
+      "population": 7539851
+    },
+    {
+      "isoCode": "KG",
+      "name": "Kyrgyzstan",
+      "population": 7400465
+    },
+    {
+      "isoCode": "HK",
+      "name": "Hong Kong",
+      "population": 7378602
+    },
+    {
+      "isoCode": "NI",
+      "name": "Nicaragua",
+      "population": 7097329
+    },
+    {
+      "isoCode": "PY",
+      "name": "Paraguay",
+      "population": 7095279
+    },
+    {
+      "isoCode": "BG",
+      "name": "Bulgaria",
+      "population": 6667659
+    },
+    {
+      "isoCode": "RS",
+      "name": "Serbia",
+      "population": 6641964
+    },
+    {
+      "isoCode": "CG",
+      "name": "Republic of the Congo",
+      "population": 6637785
+    },
+    {
+      "isoCode": "SV",
+      "name": "El Salvador",
+      "population": 6391253
+    },
+    {
+      "isoCode": "DK",
+      "name": "Denmark",
+      "population": 6023520
+    },
+    {
+      "isoCode": "SG",
+      "name": "Singapore",
+      "population": 5905748
+    },
+    {
+      "isoCode": "LB",
+      "name": "Lebanon",
+      "population": 5897467
+    },
+    {
+      "isoCode": "LR",
+      "name": "Liberia",
+      "population": 5853949
+    },
+    {
+      "isoCode": "CF",
+      "name": "Central African Republic",
+      "population": 5698984
+    },
+    {
+      "isoCode": "PS",
+      "name": "State of Palestine",
+      "population": 5692790
+    },
+    {
+      "isoCode": "OM",
+      "name": "Oman",
+      "population": 5671458
+    },
+    {
+      "isoCode": "NO",
+      "name": "Norway",
+      "population": 5652989
+    },
+    {
+      "isoCode": "FI",
+      "name": "Finland",
+      "population": 5621739
+    },
+    {
+      "isoCode": "MR",
+      "name": "Mauritania",
+      "population": 5461319
+    },
+    {
+      "isoCode": "SK",
+      "name": "Slovakia",
+      "population": 5451342
+    },
+    {
+      "isoCode": "IE",
+      "name": "Ireland",
+      "population": 5356950
+    },
+    {
+      "isoCode": "NZ",
+      "name": "New Zealand",
+      "population": 5287479
+    },
+    {
+      "isoCode": "CR",
+      "name": "Costa Rica",
+      "population": 5174789
+    },
+    {
+      "isoCode": "KW",
+      "name": "Kuwait",
+      "population": 5102773
+    },
+    {
+      "isoCode": "PA",
+      "name": "Panama",
+      "population": 4625718
+    },
+    {
+      "isoCode": "HR",
+      "name": "Croatia",
+      "population": 3822345
+    },
+    {
+      "isoCode": "GE",
+      "name": "Georgia",
+      "population": 3804642
+    },
+    {
+      "isoCode": "ER",
+      "name": "Eritrea",
+      "population": 3682669
+    },
+    {
+      "isoCode": "MN",
+      "name": "Mongolia",
+      "population": 3556798
+    },
+    {
+      "isoCode": "UY",
+      "name": "Uruguay",
+      "population": 3382537
+    },
+    {
+      "isoCode": "PR",
+      "name": "Puerto Rico",
+      "population": 3222688
+    },
+    {
+      "isoCode": "QA",
+      "name": "Qatar",
+      "population": 3173559
+    },
+    {
+      "isoCode": "NA",
+      "name": "Namibia",
+      "population": 3153246
+    },
+    {
+      "isoCode": "BA",
+      "name": "Bosnia and Herzegovina",
+      "population": 3114242
+    },
+    {
+      "isoCode": "MD",
+      "name": "Moldova",
+      "population": 2961253
+    },
+    {
+      "isoCode": "AM",
+      "name": "Armenia",
+      "population": 2930915
+    },
+    {
+      "isoCode": "GM",
+      "name": "Gambia",
+      "population": 2884079
+    },
+    {
+      "isoCode": "JM",
+      "name": "Jamaica",
+      "population": 2833403
+    },
+    {
+      "isoCode": "LT",
+      "name": "Lithuania",
+      "population": 2797338
+    },
+    {
+      "isoCode": "AL",
+      "name": "Albania",
+      "population": 2751025
+    },
+    {
+      "isoCode": "GA",
+      "name": "Gabon",
+      "population": 2647399
+    },
+    {
+      "isoCode": "BW",
+      "name": "Botswana",
+      "population": 2603388
+    },
+    {
+      "isoCode": "LS",
+      "name": "Lesotho",
+      "population": 2389336
+    },
+    {
+      "isoCode": "GW",
+      "name": "Guinea-Bissau",
+      "population": 2297808
+    },
+    {
+      "isoCode": "SI",
+      "name": "Slovenia",
+      "population": 2114573
+    },
+    {
+      "isoCode": "GQ",
+      "name": "Equatorial Guinea",
+      "population": 1984468
+    },
+    {
+      "isoCode": "LV",
+      "name": "Latvia",
+      "population": 1835935
+    },
+    {
+      "isoCode": "MK",
+      "name": "North Macedonia",
+      "population": 1804063
+    },
+    {
+      "isoCode": "BH",
+      "name": "Bahrain",
+      "population": 1675572
+    },
+    {
+      "isoCode": "TT",
+      "name": "Trinidad and Tobago",
+      "population": 1513268
+    },
+    {
+      "isoCode": "TL",
+      "name": "Timor-Leste",
+      "population": 1436923
+    },
+    {
+      "isoCode": "CY",
+      "name": "Cyprus",
+      "population": 1382334
+    },
+    {
+      "isoCode": "EE",
+      "name": "Estonia",
+      "population": 1331062
+    },
+    {
+      "isoCode": "SZ",
+      "name": "Eswatini",
+      "population": 1269859
+    },
+    {
+      "isoCode": "MU",
+      "name": "Mauritius",
+      "population": 1265059
+    },
+    {
+      "isoCode": "DJ",
+      "name": "Djibouti",
+      "population": 1199459
+    },
+    {
+      "isoCode": "FJ",
+      "name": "Fiji",
+      "population": 937282
+    },
+    {
+      "isoCode": "KM",
+      "name": "Comoros",
+      "population": 899010
+    },
+    {
+      "isoCode": "RE",
+      "name": "Réunion",
+      "population": 886298
+    },
+    {
+      "isoCode": "SB",
+      "name": "Solomon Islands",
+      "population": 858288
+    },
+    {
+      "isoCode": "GY",
+      "name": "Guyana",
+      "population": 840890
+    },
+    {
+      "isoCode": "BT",
+      "name": "Bhutan",
+      "population": 802214
+    },
+    {
+      "isoCode": "MO",
+      "name": "Macao",
+      "population": 723188
+    },
+    {
+      "isoCode": "LU",
+      "name": "Luxembourg",
+      "population": 687448
+    },
+    {
+      "isoCode": "SR",
+      "name": "Suriname",
+      "population": 645256
+    },
+    {
+      "isoCode": "ME",
+      "name": "Montenegro",
+      "population": 626233
+    },
+    {
+      "isoCode": "EH",
+      "name": "Western Sahara",
+      "population": 610813
+    },
+    {
+      "isoCode": "MT",
+      "name": "Malta",
+      "population": 549011
+    },
+    {
+      "isoCode": "MV",
+      "name": "Maldives",
+      "population": 531517
+    },
+    {
+      "isoCode": "CV",
+      "name": "Cabo Verde",
+      "population": 529630
+    },
+    {
+      "isoCode": "BN",
+      "name": "Brunei",
+      "population": 469775
+    },
+    {
+      "isoCode": "BZ",
+      "name": "Belize",
+      "population": 428644
+    },
+    {
+      "isoCode": "BS",
+      "name": "Bahamas",
+      "population": 404628
+    },
+    {
+      "isoCode": "IS",
+      "name": "Iceland",
+      "population": 402329
+    },
+    {
+      "isoCode": "GP",
+      "name": "Guadeloupe",
+      "population": 372453
+    },
+    {
+      "isoCode": "YT",
+      "name": "Mayotte",
+      "population": 347536
+    },
+    {
+      "isoCode": "VU",
+      "name": "Vanuatu",
+      "population": 342564
+    },
+    {
+      "isoCode": "MQ",
+      "name": "Martinique",
+      "population": 337711
+    },
+    {
+      "isoCode": "GF",
+      "name": "French Guiana",
+      "population": 318872
+    },
+    {
+      "isoCode": "NC",
+      "name": "New Caledonia",
+      "population": 297892
+    },
+    {
+      "isoCode": "PF",
+      "name": "French Polynesia",
+      "population": 283076
+    },
+    {
+      "isoCode": "BB",
+      "name": "Barbados",
+      "population": 282724
+    },
+    {
+      "isoCode": "ST",
+      "name": "Sao Tome and Principe",
+      "population": 244994
+    },
+    {
+      "isoCode": "WS",
+      "name": "Samoa",
+      "population": 220528
+    },
+    {
+      "isoCode": "CW",
+      "name": "Curaçao",
+      "population": 185440
+    },
+    {
+      "isoCode": "LC",
+      "name": "Saint Lucia",
+      "population": 180488
+    },
+    {
+      "isoCode": "GU",
+      "name": "Guam",
+      "population": 170185
+    },
+    {
+      "isoCode": "KI",
+      "name": "Kiribati",
+      "population": 138445
+    },
+    {
+      "isoCode": "SC",
+      "name": "Seychelles",
+      "population": 134959
+    },
+    {
+      "isoCode": "GD",
+      "name": "Grenada",
+      "population": 117362
+    },
+    {
+      "isoCode": "FM",
+      "name": "Micronesia",
+      "population": 114183
+    },
+    {
+      "isoCode": "AW",
+      "name": "Aruba",
+      "population": 108164
+    },
+    {
+      "isoCode": "TO",
+      "name": "Tonga",
+      "population": 103291
+    },
+    {
+      "isoCode": "VC",
+      "name": "Saint Vincent and the Grenadines",
+      "population": 99245
+    },
+    {
+      "isoCode": "AG",
+      "name": "Antigua and Barbuda",
+      "population": 94626
+    },
+    {
+      "isoCode": "IM",
+      "name": "Isle of Man",
+      "population": 84055
+    },
+    {
+      "isoCode": "AD",
+      "name": "Andorra",
+      "population": 83753
+    },
+    {
+      "isoCode": "VI",
+      "name": "U.S. Virgin Islands",
+      "population": 83400
+    },
+    {
+      "isoCode": "KY",
+      "name": "Cayman Islands",
+      "population": 77196
+    },
+    {
+      "isoCode": "DM",
+      "name": "Dominica",
+      "population": 65511
+    },
+    {
+      "isoCode": "BM",
+      "name": "Bermuda",
+      "population": 64459
+    },
+    {
+      "isoCode": "FO",
+      "name": "Faroe Islands",
+      "population": 56526
+    },
+    {
+      "isoCode": "GL",
+      "name": "Greenland",
+      "population": 55629
+    },
+    {
+      "isoCode": "TC",
+      "name": "Turks and Caicos Islands",
+      "population": 47148
+    },
+    {
+      "isoCode": "KN",
+      "name": "Saint Kitts and Nevis",
+      "population": 46992
+    },
+    {
+      "isoCode": "AS",
+      "name": "American Samoa",
+      "population": 45319
+    },
+    {
+      "isoCode": "SX",
+      "name": "Sint Maarten",
+      "population": 44447
+    },
+    {
+      "isoCode": "MP",
+      "name": "Northern Mariana Islands",
+      "population": 42914
+    },
+    {
+      "isoCode": "GI",
+      "name": "Gibraltar",
+      "population": 40867
+    },
+    {
+      "isoCode": "LI",
+      "name": "Liechtenstein",
+      "population": 40368
+    },
+    {
+      "isoCode": "VG",
+      "name": "British Virgin Islands",
+      "population": 39936
+    },
+    {
+      "isoCode": "MC",
+      "name": "Monaco",
+      "population": 38087
+    },
+    {
+      "isoCode": "MH",
+      "name": "Marshall Islands",
+      "population": 35075
+    },
+    {
+      "isoCode": "SM",
+      "name": "San Marino",
+      "population": 33605
+    },
+    {
+      "isoCode": "BQ",
+      "name": "Caribbean Netherlands",
+      "population": 31913
+    },
+    {
+      "isoCode": "MF",
+      "name": "Saint Martin",
+      "population": 23898
+    },
+    {
+      "isoCode": "PW",
+      "name": "Palau",
+      "population": 17614
+    },
+    {
+      "isoCode": "AI",
+      "name": "Anguilla",
+      "population": 14817
+    },
+    {
+      "isoCode": "CK",
+      "name": "Cook Islands",
+      "population": 12826
+    },
+    {
+      "isoCode": "NR",
+      "name": "Nauru",
+      "population": 12101
+    },
+    {
+      "isoCode": "BL",
+      "name": "Saint Barthélemy",
+      "population": 11550
+    },
+    {
+      "isoCode": "WF",
+      "name": "Wallis and Futuna",
+      "population": 11113
+    },
+    {
+      "isoCode": "TV",
+      "name": "Tuvalu",
+      "population": 9362
+    },
+    {
+      "isoCode": "PM",
+      "name": "Saint Pierre and Miquelon",
+      "population": 5513
+    },
+    {
+      "isoCode": "SH",
+      "name": "Saint Helena",
+      "population": 5147
+    },
+    {
+      "isoCode": "MS",
+      "name": "Montserrat",
+      "population": 4328
+    },
+    {
+      "isoCode": "FK",
+      "name": "Falkland Islands",
+      "population": 3465
+    },
+    {
+      "isoCode": "TK",
+      "name": "Tokelau",
+      "population": 2691
+    },
+    {
+      "isoCode": "NU",
+      "name": "Niue",
+      "population": 1822
+    },
+    {
+      "isoCode": "VA",
+      "name": "Vatican City",
+      "population": 506
+    }
+  ]
+}

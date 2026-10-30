@@ -83,6 +83,12 @@ public sealed class Game
     /// <summary>Sequence number of the last event logged for this game.</summary>
     public int LastEventSequence { get; private set; }
 
+    /// <summary>
+    /// Optimistic-concurrency counter. The repository saves a game only if the stored version still matches,
+    /// then calls <see cref="AdvanceVersion"/> so this instance mirrors what was written.
+    /// </summary>
+    public int Version { get; private set; }
+
     public DateTimeOffset CreatedAt { get; }
 
     public DateTimeOffset UpdatedAt { get; private set; }
@@ -174,4 +180,7 @@ public sealed class Game
     public int NextEventSequence() => ++LastEventSequence;
 
     public void Touch(DateTimeOffset now) => UpdatedAt = now;
+
+    /// <summary>Records that the repository has saved this game as the next version.</summary>
+    public void AdvanceVersion() => Version++;
 }
