@@ -24,6 +24,7 @@ public sealed class MongoMappingTests
         Assert.Equal(game.OwnerUserId, loaded.OwnerUserId);
         Assert.Equal(game.TurnOrder, loaded.TurnOrder);
         Assert.Equal(TurnPhase.Attacking, loaded.Phase);
+        Assert.True(loaded.IsFastForward);
         Assert.Equal(7, loaded.Version);
         Assert.Equal(3, loaded.LastEventSequence);
         Assert.Equal(CreatedAt, loaded.CreatedAt);
@@ -46,6 +47,17 @@ public sealed class MongoMappingTests
         Assert.Equal("InProgress", document["status"].AsString);
         Assert.Equal(BsonType.DateTime, document["createdAt"].BsonType);
         Assert.Equal("game-1", document["_id"].AsString);
+    }
+
+    [Fact]
+    public void Game_StoredBeforeFastForwardExisted_LoadsWithItOff()
+    {
+        var document = CreateNewGame().ToBsonDocument();
+        document.Remove("isFastForward");
+
+        var loaded = BsonSerializer.Deserialize<Game>(document);
+
+        Assert.False(loaded.IsFastForward);
     }
 
     [Fact]
@@ -115,6 +127,7 @@ public sealed class MongoMappingTests
         var game = CreateNewGame();
 
         game.GetPlayer("npc-FR").Eliminate();
+        game.SetFastForward(true);
         game.BeginBattle("ZA", "FR");
         game.ActiveBattle!.AddRound(new BattleRound([6, 2], [3, 3], 1, 1, BattleOutcome.Continuing, 0));
         game.NextEventSequence();

@@ -36,6 +36,13 @@ public sealed class GameQueryService(IGameRepository gameRepository, IGameEventR
         return newestFirst.Items.Reverse().ToList();
     }
 
+    public async Task<IReadOnlyList<GameEvent>> GetEventsAfterAsync(
+        string gameId, int afterSequence, int maxCount, CancellationToken cancellationToken)
+    {
+        var missed = await gameEventRepository.GetAfterSequenceAsync(gameId, afterSequence, cancellationToken);
+        return missed.TakeLast(maxCount).ToList();
+    }
+
     private static string HumanCountryName(Game game) => game.GetTerritory(game.HumanPlayer.HomeCountryCode).CountryName;
 
     private static bool Matches(Game game, string? search)

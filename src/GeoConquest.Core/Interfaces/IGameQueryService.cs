@@ -20,4 +20,10 @@ public interface IGameQueryService
 
     /// <summary>Returns the game's most recent events in the order they happened (oldest first).</summary>
     Task<IReadOnlyList<GameEvent>> GetRecentEventsAsync(string gameId, int count, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Returns the events logged after <paramref name="afterSequence"/>, oldest first. If more than
+    /// <paramref name="maxCount"/> were missed, only the newest ones are returned, which is all a board shows anyway.
+    /// </summary>
+    Task<IReadOnlyList<GameEvent>> GetEventsAfterAsync(string gameId, int afterSequence, int maxCount, CancellationToken cancellationToken);
 }

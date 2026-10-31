@@ -1,4 +1,4 @@
-using GeoConquest.Core.Enums;
+using GeoConquest.Core.Exceptions;
 using GeoConquest.Core.Interfaces;
 using GeoConquest.Core.Models;
 
@@ -7,12 +7,12 @@ namespace GeoConquest.Core.Services;
 /// <inheritdoc />
 public sealed class GameApplicationService(
     IGameEngine gameEngine,
-    INpcTurnRunner npcTurnRunner,
+    IGameProgressRecorder progressRecorder,
+    INpcTurnQueue npcTurnQueue,
     IGameRepository gameRepository,
-    IGameEventRepository gameEventRepository,
     ICountryRepository countryRepository) : IGameApplicationService
 {
-    private const int MaxAppendAttempts = 3;
+    private const int MaxFastForwardAttempts = 3;
 
     public async Task<Game> CreateGameAsync(
         string ownerUserId, string ownerDisplayName, string humanCountryCode, CancellationToken cancellationToken)
@@ -20,11 +20,15 @@ public sealed class GameApplicationService(
         var catalogue = await countryRepository.GetAllAsync(cancellationToken);
         var creation = gameEngine.CreateGame(ownerUserId, ownerDisplayName, humanCountryCode, catalogue);
 
-        var events = new List<GameEvent>(creation.Events);
-        PlayNpcTurnsUntilHumanTurn(creation.Game, events);
+        try
+        {
+            await progressRecorder.RecordNewGameAsync(creation.Game, creation.Events, cancellationToken);
+        }
+        finally
+        {
+            QueueNpcTurns(creation.Game);
+        }
 
-        await gameRepository.AddAsync(creation.Game, cancellationToken);
-        await AppendEventsAsync(events, cancellationToken);
         return creation.Game;
     }
 
@@ -52,40 +56,49 @@ public sealed class GameApplicationService(
     public Task<IReadOnlyList<GameEvent>> EndTurnAsync(Game game, CancellationToken cancellationToken) =>
         ApplyAsync(game, humanId => gameEngine.EndTurn(game, humanId), cancellationToken);
 
-    private async Task<IReadOnlyList<GameEvent>> ApplyAsync(
-        Game game, Func<string, IReadOnlyList<GameEvent>> humanAction, CancellationToken cancellationToken)
-    {
-        var events = new List<GameEvent>(humanAction(game.HumanPlayer.Id));
-        PlayNpcTurnsUntilHumanTurn(game, events);
-
-        // The game goes first: it is the source of truth and its version check rejects a stale copy. The events are
-        // only the log, and appending them is safe to repeat, so a failure here never leaves the game half-saved.
-        await gameRepository.UpdateAsync(game, cancellationToken);
-        await AppendEventsAsync(events, cancellationToken);
-        return events;
-    }
-
-    private void PlayNpcTurnsUntilHumanTurn(Game game, List<GameEvent> events)
-    {
-        while (game.Status == GameStatus.InProgress && !game.CurrentPlayer.IsHuman)
-        {
-            events.AddRange(npcTurnRunner.PlayTurn(game));
-        }
-    }
-
-    private async Task AppendEventsAsync(IReadOnlyCollection<GameEvent> events, CancellationToken cancellationToken)
+    public async Task<Game> SetFastForwardAsync(Game game, bool enabled, CancellationToken cancellationToken)
     {
         for (var attempt = 1; ; attempt++)
         {
+            game.SetFastForward(enabled);
+
             try
             {
-                await gameEventRepository.AppendAsync(events, cancellationToken);
-                return;
+                await progressRecorder.RecordProgressAsync(game, [], cancellationToken);
+                return game;
             }
-            catch (Exception) when (attempt < MaxAppendAttempts && !cancellationToken.IsCancellationRequested)
+            catch (ConcurrencyException) when (attempt < MaxFastForwardAttempts)
             {
-                // Appending is idempotent by sequence, so repeating a partly written batch cannot duplicate events.
+                game = await gameRepository.GetByIdAsync(game.Id, cancellationToken)
+                    ?? throw new GameRuleException("That game no longer exists.");
             }
+        }
+    }
+
+    private async Task<IReadOnlyList<GameEvent>> ApplyAsync(
+        Game game, Func<string, IReadOnlyList<GameEvent>> humanAction, CancellationToken cancellationToken)
+    {
+        var events = humanAction(game.HumanPlayer.Id);
+
+        try
+        {
+            await progressRecorder.RecordProgressAsync(game, events, cancellationToken);
+        }
+        finally
+        {
+            // Even if writing the log failed after the game was saved, the NPCs must still get their turn. If the game
+            // was not saved at all, the runner finds it still on the human's turn and does nothing.
+            QueueNpcTurns(game);
+        }
+
+        return events;
+    }
+
+    private void QueueNpcTurns(Game game)
+    {
+        if (game.AwaitsNpcTurn)
+        {
+            npcTurnQueue.Enqueue(game.Id);
         }
     }
 }

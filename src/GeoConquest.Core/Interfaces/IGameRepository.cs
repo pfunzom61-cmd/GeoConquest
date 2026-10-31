@@ -25,4 +25,10 @@ public interface IGameRepository
 
     /// <summary>Returns games still being played, most recently active first, at most <see cref="MaxInProgressGames"/> of them.</summary>
     Task<IReadOnlyList<Game>> ListInProgressAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Returns the ids of every game in progress whose current player is an NPC (see <see cref="Game.AwaitsNpcTurn"/>).
+    /// Uncapped, unlike <see cref="ListInProgressAsync"/>: it is how play resumes after a restart.
+    /// </summary>
+    Task<IReadOnlyList<string>> ListGameIdsAwaitingNpcTurnAsync(CancellationToken cancellationToken);
 }
