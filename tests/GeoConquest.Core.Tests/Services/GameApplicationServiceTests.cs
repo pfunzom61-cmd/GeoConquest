@@ -12,6 +12,7 @@ public sealed class GameApplicationServiceTests
 {
     private readonly IGameRepository _gameRepository = Substitute.For<IGameRepository>();
     private readonly IGameEventRepository _gameEventRepository = Substitute.For<IGameEventRepository>();
+    private readonly IGameUpdatePublisher _publisher = Substitute.For<IGameUpdatePublisher>();
     private readonly GameApplicationService _service;
 
     public GameApplicationServiceTests()
@@ -25,8 +26,7 @@ public sealed class GameApplicationServiceTests
         _service = new GameApplicationService(
             engine,
             new NpcTurnExecutor(engine, new PassiveNpcStrategy()),
-            _gameRepository,
-            _gameEventRepository,
+            new GameProgressRecorder(_gameRepository, _gameEventRepository, _publisher),
             Substitute.For<ICountryRepository>());
     }
 
@@ -42,6 +42,38 @@ public sealed class GameApplicationServiceTests
             _gameRepository.UpdateAsync(game, Arg.Any<CancellationToken>());
             _gameEventRepository.AppendAsync(Arg.Any<IReadOnlyCollection<GameEvent>>(), Arg.Any<CancellationToken>());
         });
+    }
+
+    [Fact]
+    public async Task SkipAsync_ValidTurn_PublishesTheEventsOnlyAfterTheyAreStored()
+    {
+        var game = GameBuilder.Create();
+
+        var events = await _service.SkipAsync(game, CancellationToken.None);
+
+        Received.InOrder(() =>
+        {
+            _gameEventRepository.AppendAsync(Arg.Any<IReadOnlyCollection<GameEvent>>(), Arg.Any<CancellationToken>());
+            _publisher.PublishAsync(game, events, Arg.Any<CancellationToken>());
+        });
+    }
+
+    [Fact]
+    public async Task SkipAsync_RequestCancelledOnceTheGameIsSaved_StillStoresAndPublishesTheEvents()
+    {
+        using var cancellation = new CancellationTokenSource();
+        _gameRepository
+            .UpdateAsync(Arg.Any<Game>(), Arg.Any<CancellationToken>())
+            .Returns(_ =>
+            {
+                cancellation.Cancel();
+                return Task.CompletedTask;
+            });
+
+        await _service.SkipAsync(GameBuilder.Create(), cancellation.Token);
+
+        await _gameEventRepository.Received(1).AppendAsync(Arg.Any<IReadOnlyCollection<GameEvent>>(), CancellationToken.None);
+        await _publisher.Received(1).PublishAsync(Arg.Any<Game>(), Arg.Any<IReadOnlyList<GameEvent>>(), Arg.Any<CancellationToken>());
     }
 
     [Fact]

@@ -3,22 +3,17 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using GeoConquest.Core.Enums;
 using GeoConquest.Web.Tests.Fakes;
-using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace GeoConquest.Web.Tests;
 
 public sealed class GamesTests(GeoConquestWebFactory factory) : IClassFixture<GeoConquestWebFactory>
 {
-    private const string ChosenCountryCode = "T01";
-
-    private sealed record Commander(FormPostingClient Client, string Email, string DisplayName);
-
     [Fact]
     public async Task Create_ChosenCountry_StartsAGameAndShowsItsBoard()
     {
-        var owner = await RegisterAsync();
+        var owner = await factory.RegisterAsync();
 
-        var created = await owner.Client.SubmitFormAsync("/games/new", new Dictionary<string, string> { ["SelectedCountryCode"] = ChosenCountryCode });
+        var created = await owner.Client.SubmitFormAsync("/games/new", new Dictionary<string, string> { ["SelectedCountryCode"] = GameTestSupport.ChosenCountryCode });
 
         Assert.Equal(HttpStatusCode.Redirect, created.StatusCode);
         var board = await owner.Client.GetAsync(created.Headers.Location!.OriginalString);
@@ -29,7 +24,7 @@ public sealed class GamesTests(GeoConquestWebFactory factory) : IClassFixture<Ge
     [Fact]
     public async Task Create_NoCountryChosen_ShowsAValidationMessage()
     {
-        var owner = await RegisterAsync();
+        var owner = await factory.RegisterAsync();
 
         var response = await owner.Client.SubmitFormAsync("/games/new", new Dictionary<string, string>());
 
@@ -40,7 +35,7 @@ public sealed class GamesTests(GeoConquestWebFactory factory) : IClassFixture<Ge
     [Fact]
     public async Task MyCampaigns_NotSignedIn_RedirectsToLogin()
     {
-        var response = await NewAnonymousClient().GetAsync("/games");
+        var response = await factory.NewAnonymousClient().GetAsync("/games");
 
         Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
         Assert.Contains("/Account/Login", response.Headers.Location!.OriginalString);
@@ -49,8 +44,8 @@ public sealed class GamesTests(GeoConquestWebFactory factory) : IClassFixture<Ge
     [Fact]
     public async Task Skip_ByTheOwner_LetsNpcsPlayAndReturnsTheNextHumanTurn()
     {
-        var owner = await RegisterAsync();
-        var gameId = await CreateGameAsync(owner);
+        var owner = await factory.RegisterAsync();
+        var gameId = await GameTestSupport.CreateGameAsync(owner);
 
         var response = await owner.Client.PostJsonAsync("/games/new", $"/api/games/{gameId}/skip");
 
@@ -67,8 +62,8 @@ public sealed class GamesTests(GeoConquestWebFactory factory) : IClassFixture<Ge
     [Fact]
     public async Task Skip_ByAnotherUser_IsForbidden()
     {
-        var gameId = await CreateGameAsync(await RegisterAsync());
-        var visitor = await RegisterAsync();
+        var gameId = await GameTestSupport.CreateGameAsync(await factory.RegisterAsync());
+        var visitor = await factory.RegisterAsync();
 
         var response = await visitor.Client.PostJsonAsync("/games/new", $"/api/games/{gameId}/skip");
 
@@ -78,9 +73,9 @@ public sealed class GamesTests(GeoConquestWebFactory factory) : IClassFixture<Ge
     [Fact]
     public async Task Skip_NotSignedIn_IsUnauthorized()
     {
-        var gameId = await CreateGameAsync(await RegisterAsync());
+        var gameId = await GameTestSupport.CreateGameAsync(await factory.RegisterAsync());
 
-        var response = await NewAnonymousClient().PostJsonAsync("/Account/Login", $"/api/games/{gameId}/skip");
+        var response = await factory.NewAnonymousClient().PostJsonAsync("/Account/Login", $"/api/games/{gameId}/skip");
 
         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
@@ -88,10 +83,10 @@ public sealed class GamesTests(GeoConquestWebFactory factory) : IClassFixture<Ge
     [Fact]
     public async Task Board_ForASpectator_IsReadOnlyAndHidesAccountDetails()
     {
-        var owner = await RegisterAsync();
-        var gameId = await CreateGameAsync(owner);
+        var owner = await factory.RegisterAsync();
+        var gameId = await GameTestSupport.CreateGameAsync(owner);
 
-        var response = await NewAnonymousClient().GetAsync($"/games/{gameId}");
+        var response = await factory.NewAnonymousClient().GetAsync($"/games/{gameId}");
 
         var page = await response.Content.ReadAsStringAsync();
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -105,8 +100,8 @@ public sealed class GamesTests(GeoConquestWebFactory factory) : IClassFixture<Ge
     [InlineData(0, "Move at least one soldier")]
     public async Task Transfer_BreakingARule_IsRejectedWithTheReason(int soldiers, string expectedMessage)
     {
-        var owner = await RegisterAsync();
-        var gameId = await CreateGameAsync(owner);
+        var owner = await factory.RegisterAsync();
+        var gameId = await GameTestSupport.CreateGameAsync(owner);
         var ownCountryCode = await FirstOwnCountryCodeAsync(owner, gameId);
 
         var response = await owner.Client.PostJsonAsync("/games/new", $"/api/games/{gameId}/transfer",
@@ -119,10 +114,10 @@ public sealed class GamesTests(GeoConquestWebFactory factory) : IClassFixture<Ge
     [Fact]
     public async Task LiveGames_GameInProgress_ListsOwnerDisplayNameButNotEmail()
     {
-        var owner = await RegisterAsync();
-        await CreateGameAsync(owner);
+        var owner = await factory.RegisterAsync();
+        await GameTestSupport.CreateGameAsync(owner);
 
-        var response = await NewAnonymousClient().GetAsync("/live");
+        var response = await factory.NewAnonymousClient().GetAsync("/live");
 
         var page = await response.Content.ReadAsStringAsync();
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -133,38 +128,15 @@ public sealed class GamesTests(GeoConquestWebFactory factory) : IClassFixture<Ge
     [Fact]
     public async Task LiveGames_FinishedGame_IsNotListed()
     {
-        var owner = await RegisterAsync();
-        var gameId = await CreateGameAsync(owner);
+        var owner = await factory.RegisterAsync();
+        var gameId = await GameTestSupport.CreateGameAsync(owner);
         var game = (await factory.Games.GetByIdAsync(gameId, CancellationToken.None))!;
         game.Finish(GameStatus.Lost, winnerPlayerId: null);
         await factory.Games.UpdateAsync(game, CancellationToken.None);
 
-        var response = await NewAnonymousClient().GetAsync("/live");
+        var response = await factory.NewAnonymousClient().GetAsync("/live");
 
         Assert.DoesNotContain(owner.DisplayName, await response.Content.ReadAsStringAsync());
-    }
-
-    private async Task<Commander> RegisterAsync()
-    {
-        var client = NewAnonymousClient();
-        var email = $"{Guid.NewGuid():N}@example.org";
-        var displayName = $"Cmdr{Guid.NewGuid():N}"[..14];
-
-        await client.SubmitFormAsync("/Account/Register", new Dictionary<string, string>
-        {
-            ["DisplayName"] = displayName,
-            ["Email"] = email,
-            ["Password"] = "Conquest1",
-            ["ConfirmPassword"] = "Conquest1",
-        });
-
-        return new Commander(client, email, displayName);
-    }
-
-    private static async Task<string> CreateGameAsync(Commander owner)
-    {
-        var created = await owner.Client.SubmitFormAsync("/games/new", new Dictionary<string, string> { ["SelectedCountryCode"] = ChosenCountryCode });
-        return created.Headers.Location!.OriginalString.Split('/').Last();
     }
 
     private static async Task<string> FirstOwnCountryCodeAsync(Commander owner, string gameId)
@@ -174,7 +146,4 @@ public sealed class GamesTests(GeoConquestWebFactory factory) : IClassFixture<Ge
             .First(territory => territory.GetProperty("ownerPlayerId").GetString() == "human")
             .GetProperty("countryCode").GetString()!;
     }
-
-    private FormPostingClient NewAnonymousClient() =>
-        new(factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false }));
 }

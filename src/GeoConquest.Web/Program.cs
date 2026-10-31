@@ -1,6 +1,7 @@
 using GeoConquest.Infrastructure;
 using GeoConquest.Infrastructure.Identity;
 using GeoConquest.Web.Extensions;
+using GeoConquest.Web.Hubs;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddGeoConquestIdentity().AddMongoIdentityStores();
 builder.Services.AddGeoConquestAuthorization();
 builder.Services.AddCoreServices();
+builder.Services.AddGeoConquestRealtime();
 
 var app = builder.Build();
 
@@ -29,6 +31,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHealthChecks("/health");
+app.MapHub<GameHub>(RealtimeServiceCollectionExtensions.GameHubPath);
 
 app.MapControllerRoute(
     name: "default",

@@ -8,12 +8,9 @@ namespace GeoConquest.Core.Services;
 public sealed class GameApplicationService(
     IGameEngine gameEngine,
     INpcTurnRunner npcTurnRunner,
-    IGameRepository gameRepository,
-    IGameEventRepository gameEventRepository,
+    IGameProgressRecorder progressRecorder,
     ICountryRepository countryRepository) : IGameApplicationService
 {
-    private const int MaxAppendAttempts = 3;
-
     public async Task<Game> CreateGameAsync(
         string ownerUserId, string ownerDisplayName, string humanCountryCode, CancellationToken cancellationToken)
     {
@@ -23,8 +20,7 @@ public sealed class GameApplicationService(
         var events = new List<GameEvent>(creation.Events);
         PlayNpcTurnsUntilHumanTurn(creation.Game, events);
 
-        await gameRepository.AddAsync(creation.Game, cancellationToken);
-        await AppendEventsAsync(events, cancellationToken);
+        await progressRecorder.RecordNewGameAsync(creation.Game, events, cancellationToken);
         return creation.Game;
     }
 
@@ -58,10 +54,7 @@ public sealed class GameApplicationService(
         var events = new List<GameEvent>(humanAction(game.HumanPlayer.Id));
         PlayNpcTurnsUntilHumanTurn(game, events);
 
-        // The game goes first: it is the source of truth and its version check rejects a stale copy. The events are
-        // only the log, and appending them is safe to repeat, so a failure here never leaves the game half-saved.
-        await gameRepository.UpdateAsync(game, cancellationToken);
-        await AppendEventsAsync(events, cancellationToken);
+        await progressRecorder.RecordProgressAsync(game, events, cancellationToken);
         return events;
     }
 
@@ -70,22 +63,6 @@ public sealed class GameApplicationService(
         while (game.Status == GameStatus.InProgress && !game.CurrentPlayer.IsHuman)
         {
             events.AddRange(npcTurnRunner.PlayStep(game));
-        }
-    }
-
-    private async Task AppendEventsAsync(IReadOnlyCollection<GameEvent> events, CancellationToken cancellationToken)
-    {
-        for (var attempt = 1; ; attempt++)
-        {
-            try
-            {
-                await gameEventRepository.AppendAsync(events, cancellationToken);
-                return;
-            }
-            catch (Exception) when (attempt < MaxAppendAttempts && !cancellationToken.IsCancellationRequested)
-            {
-                // Appending is idempotent by sequence, so repeating a partly written batch cannot duplicate events.
-            }
         }
     }
 }
