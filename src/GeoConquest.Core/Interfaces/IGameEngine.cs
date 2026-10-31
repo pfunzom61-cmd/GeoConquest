@@ -34,4 +34,10 @@ public interface IGameEngine
 
     /// <summary>Ends the turn after an attack has been resolved (conquest or failure).</summary>
     IReadOnlyList<GameEvent> EndTurn(Game game, string playerId);
+
+    /// <summary>
+    /// Logs why an NPC is about to act, as a one-line justification. Changes no game state; it only takes the next
+    /// place in the event log so the explanation sits right before the move it explains.
+    /// </summary>
+    GameEvent RecordNpcDecision(Game game, string playerId, string justification);
 }

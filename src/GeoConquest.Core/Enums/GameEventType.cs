@@ -14,6 +14,7 @@ public enum GameEventType
     CountryConquered,
     PlayerEliminated,
     TurnSkipped,
+    NpcDecision,
     GameWon,
     GameLost,
 }
