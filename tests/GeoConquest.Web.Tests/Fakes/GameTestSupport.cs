@@ -51,7 +51,8 @@ public static class GameTestSupport
         using var timeout = new CancellationTokenSource(Patience);
         while (true)
         {
-            var state = await (await viewer.Client.GetAsync($"/api/games/{gameId}")).Content.ReadFromJsonAsync<JsonElement>(timeout.Token);
+            var sync = await (await viewer.Client.GetAsync($"/api/games/{gameId}/sync?afterSequence=0")).Content.ReadFromJsonAsync<JsonElement>(timeout.Token);
+            var state = sync.GetProperty("state");
             if (isReached(state))
             {
                 return state;

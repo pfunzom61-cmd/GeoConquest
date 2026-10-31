@@ -142,8 +142,8 @@ public sealed class GamesTests(GeoConquestWebFactory factory) : IClassFixture<Ge
 
     private static async Task<string> FirstOwnCountryCodeAsync(Commander owner, string gameId)
     {
-        var state = await (await owner.Client.GetAsync($"/api/games/{gameId}")).Content.ReadFromJsonAsync<JsonElement>();
-        return state.GetProperty("territories").EnumerateArray()
+        var sync = await (await owner.Client.GetAsync($"/api/games/{gameId}/sync?afterSequence=0")).Content.ReadFromJsonAsync<JsonElement>();
+        return sync.GetProperty("state").GetProperty("territories").EnumerateArray()
             .First(territory => territory.GetProperty("ownerPlayerId").GetString() == "human")
             .GetProperty("countryCode").GetString()!;
     }

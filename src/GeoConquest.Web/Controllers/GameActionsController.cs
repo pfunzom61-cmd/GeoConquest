@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace GeoConquest.Web.Controllers;
 
 /// <summary>
-/// The JSON endpoints the board posts to. The browser only sends intents; the engine decides what is allowed and
+/// The JSON endpoints the board talks to. The browser only sends intents; the engine decides what is allowed and
 /// rolls the dice. Every action first checks the caller owns the game (401 if signed out, 403 if someone else's).
 /// </summary>
 [Route("api/games/{gameId}")]
@@ -21,6 +21,9 @@ public sealed class GameActionsController(
     IAuthorizationService authorizationService,
     INpcTurnQueue npcTurnQueue) : Controller
 {
+    /// <summary>The most events one sync returns; a board only shows the latest ones.</summary>
+    private const int MaxSyncEvents = 100;
+
     [HttpPost("allocate")]
     public Task<IActionResult> Allocate(string gameId, [FromBody] AllocateReinforcementsRequest request, CancellationToken cancellationToken) =>
         PerformAsync(gameId, game =>
@@ -52,9 +55,27 @@ public sealed class GameActionsController(
     public Task<IActionResult> Skip(string gameId, CancellationToken cancellationToken) =>
         PerformAsync(gameId, game => gameApplicationService.SkipAsync(game, cancellationToken), cancellationToken);
 
-    /// <summary>Returns the current state, used by the board to catch up after a conflict. Open to spectators like the page itself.</summary>
-    [HttpGet("")]
-    public async Task<IActionResult> State(string gameId, CancellationToken cancellationToken)
+    /// <summary>Sets the pace of the NPC turns. Only the owner may, because it changes what everyone watching sees.</summary>
+    [HttpPost("fast-forward")]
+    public async Task<IActionResult> FastForward(string gameId, [FromBody] FastForwardRequest request, CancellationToken cancellationToken)
+    {
+        var (game, failure) = await LoadOwnedGameAsync(gameId, cancellationToken);
+        if (failure is not null)
+        {
+            return failure;
+        }
+
+        var saved = await gameApplicationService.SetFastForwardAsync(game!, request.Enabled!.Value, cancellationToken);
+        return Ok(new GameActionResponse(GameStateViewModel.From(saved, viewerIsOwner: true), []));
+    }
+
+    /// <summary>
+    /// Returns the current state and the events after <paramref name="afterSequence"/>. The board uses it to load,
+    /// to catch up after a dropped connection or a conflict, and to poll when live updates are unavailable.
+    /// Open to spectators like the page itself.
+    /// </summary>
+    [HttpGet("sync")]
+    public async Task<IActionResult> Sync(string gameId, [FromQuery] int afterSequence, CancellationToken cancellationToken)
     {
         var game = await gameQueryService.GetGameAsync(gameId, cancellationToken);
         if (game is null)
@@ -68,7 +89,8 @@ public sealed class GameActionsController(
         }
 
         var viewerIsOwner = (await authorizationService.AuthorizeAsync(User, game, GamePolicies.CanPlayGame)).Succeeded;
-        return Ok(GameStateViewModel.From(game, viewerIsOwner));
+        var missedEvents = await gameQueryService.GetEventsAfterAsync(gameId, afterSequence, MaxSyncEvents, cancellationToken);
+        return Ok(new GameActionResponse(GameStateViewModel.From(game, viewerIsOwner), missedEvents.Select(GameEventViewModel.From).ToList()));
     }
 
     private async Task<IActionResult> PerformAsync(
@@ -76,29 +98,41 @@ public sealed class GameActionsController(
         Func<Game, Task<IReadOnlyList<GameEvent>>> action,
         CancellationToken cancellationToken)
     {
+        var (game, failure) = await LoadOwnedGameAsync(gameId, cancellationToken);
+        if (failure is not null)
+        {
+            return failure;
+        }
+
+        var events = await action(game!);
+        return Ok(new GameActionResponse(GameStateViewModel.From(game!, viewerIsOwner: true), events.Select(GameEventViewModel.From).ToList()));
+    }
+
+    /// <summary>Loads the game for an action that only its owner may take, or returns the error response to send instead.</summary>
+    private async Task<(Game? Game, IActionResult? Failure)> LoadOwnedGameAsync(string gameId, CancellationToken cancellationToken)
+    {
         var game = await gameQueryService.GetGameAsync(gameId, cancellationToken);
         if (game is null)
         {
-            return NotFound(new { error = "That game does not exist." });
+            return (null, NotFound(new { error = "That game does not exist." }));
         }
 
         if (User.Identity?.IsAuthenticated != true)
         {
-            return Unauthorized(new { error = "Log in to play this game." });
+            return (null, Unauthorized(new { error = "Log in to play this game." }));
         }
 
         if (!(await authorizationService.AuthorizeAsync(User, game, GamePolicies.CanPlayGame)).Succeeded)
         {
-            return StatusCode(StatusCodes.Status403Forbidden, new { error = "Only the owner of this game can play it." });
+            return (null, StatusCode(StatusCodes.Status403Forbidden, new { error = "Only the owner of this game can play it." }));
         }
 
         if (!ModelState.IsValid)
         {
             var message = ModelState.Values.SelectMany(entry => entry.Errors).First().ErrorMessage;
-            return BadRequest(new { error = string.IsNullOrEmpty(message) ? "That request could not be read." : message });
+            return (null, BadRequest(new { error = string.IsNullOrEmpty(message) ? "That request could not be read." : message }));
         }
 
-        var events = await action(game);
-        return Ok(new GameActionResponse(GameStateViewModel.From(game, viewerIsOwner: true), events.Select(GameEventViewModel.From).ToList()));
+        return (game, null);
     }
 }

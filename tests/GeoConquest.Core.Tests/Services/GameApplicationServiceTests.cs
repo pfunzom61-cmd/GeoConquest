@@ -28,25 +28,12 @@ public sealed class GameApplicationServiceTests
             engine,
             new GameProgressRecorder(_gameRepository, _gameEventRepository, _publisher),
             _npcTurnQueue,
+            _gameRepository,
             Substitute.For<ICountryRepository>());
     }
 
     [Fact]
-    public async Task SkipAsync_ValidTurn_SavesTheGameBeforeAppendingItsEvents()
-    {
-        var game = GameBuilder.Create();
-
-        await _service.SkipAsync(game, CancellationToken.None);
-
-        Received.InOrder(() =>
-        {
-            _gameRepository.UpdateAsync(game, Arg.Any<CancellationToken>());
-            _gameEventRepository.AppendAsync(Arg.Any<IReadOnlyCollection<GameEvent>>(), Arg.Any<CancellationToken>());
-        });
-    }
-
-    [Fact]
-    public async Task SkipAsync_ValidTurn_PublishesTheEventsOnlyAfterTheyAreStored()
+    public async Task SkipAsync_ValidTurn_SavesTheGameThenAppendsItsEventsThenPublishesThem()
     {
         var game = GameBuilder.Create();
 
@@ -54,6 +41,7 @@ public sealed class GameApplicationServiceTests
 
         Received.InOrder(() =>
         {
+            _gameRepository.UpdateAsync(game, Arg.Any<CancellationToken>());
             _gameEventRepository.AppendAsync(Arg.Any<IReadOnlyCollection<GameEvent>>(), Arg.Any<CancellationToken>());
             _publisher.PublishAsync(game, events, Arg.Any<CancellationToken>());
         });
@@ -125,6 +113,22 @@ public sealed class GameApplicationServiceTests
         await Assert.ThrowsAsync<ConcurrencyException>(() => _service.SkipAsync(GameBuilder.Create(), CancellationToken.None));
 
         await _gameEventRepository.DidNotReceive().AppendAsync(Arg.Any<IReadOnlyCollection<GameEvent>>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task SetFastForwardAsync_NpcRunnerSavedFirst_ReloadsTheGameAndAppliesTheSetting()
+    {
+        var reloaded = GameBuilder.Create();
+        _gameRepository.GetByIdAsync("game-1", Arg.Any<CancellationToken>()).Returns(reloaded);
+        _gameRepository
+            .UpdateAsync(Arg.Any<Game>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromException(new ConcurrencyException("changed")), Task.CompletedTask);
+
+        var result = await _service.SetFastForwardAsync(GameBuilder.Create(), enabled: true, CancellationToken.None);
+
+        Assert.Same(reloaded, result);
+        Assert.True(result.IsFastForward);
+        await _publisher.Received(1).PublishAsync(reloaded, Arg.Is<IReadOnlyList<GameEvent>>(events => events.Count == 0), Arg.Any<CancellationToken>());
     }
 
     [Fact]

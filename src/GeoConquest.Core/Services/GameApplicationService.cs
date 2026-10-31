@@ -1,3 +1,4 @@
+using GeoConquest.Core.Exceptions;
 using GeoConquest.Core.Interfaces;
 using GeoConquest.Core.Models;
 
@@ -8,8 +9,11 @@ public sealed class GameApplicationService(
     IGameEngine gameEngine,
     IGameProgressRecorder progressRecorder,
     INpcTurnQueue npcTurnQueue,
+    IGameRepository gameRepository,
     ICountryRepository countryRepository) : IGameApplicationService
 {
+    private const int MaxFastForwardAttempts = 3;
+
     public async Task<Game> CreateGameAsync(
         string ownerUserId, string ownerDisplayName, string humanCountryCode, CancellationToken cancellationToken)
     {
@@ -51,6 +55,25 @@ public sealed class GameApplicationService(
 
     public Task<IReadOnlyList<GameEvent>> EndTurnAsync(Game game, CancellationToken cancellationToken) =>
         ApplyAsync(game, humanId => gameEngine.EndTurn(game, humanId), cancellationToken);
+
+    public async Task<Game> SetFastForwardAsync(Game game, bool enabled, CancellationToken cancellationToken)
+    {
+        for (var attempt = 1; ; attempt++)
+        {
+            game.SetFastForward(enabled);
+
+            try
+            {
+                await progressRecorder.RecordProgressAsync(game, [], cancellationToken);
+                return game;
+            }
+            catch (ConcurrencyException) when (attempt < MaxFastForwardAttempts)
+            {
+                game = await gameRepository.GetByIdAsync(game.Id, cancellationToken)
+                    ?? throw new GameRuleException("That game no longer exists.");
+            }
+        }
+    }
 
     private async Task<IReadOnlyList<GameEvent>> ApplyAsync(
         Game game, Func<string, IReadOnlyList<GameEvent>> humanAction, CancellationToken cancellationToken)
