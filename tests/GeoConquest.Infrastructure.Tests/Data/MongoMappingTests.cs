@@ -63,6 +63,26 @@ public sealed class MongoMappingTests
         Assert.Equal(CreatedAt, loaded.CreatedAt);
     }
 
+    // Null values are left out of stored documents, so each row is shaped like a real document with elements missing.
+    [Theory]
+    [MemberData(nameof(DocumentsWithOmittedNulls))]
+    public void Document_SavedWithNullFieldsOmitted_LoadsBackUnchanged(object original)
+    {
+        var document = original.ToBsonDocument(original.GetType());
+
+        var loaded = BsonSerializer.Deserialize(document, original.GetType());
+
+        Assert.Equal(document, loaded.ToBsonDocument(original.GetType()));
+    }
+
+    public static TheoryData<object> DocumentsWithOmittedNulls() =>
+    [
+        new GameEvent("game-1", 1, GameEventType.GameCreated, null, "Bob takes command of South Africa.", null, CreatedAt),
+        new GameEvent("game-1", 2, GameEventType.TurnStarted, "human", "Bob's turn.", null, CreatedAt),
+        new GameEvent("game-1", 3, GameEventType.DiceRolled, "human", "ZA rolled", new GameEventPayload { AttackerDice = [6], DefenderLosses = 1 }, CreatedAt),
+        CreateNewGame(),
+    ];
+
     [Fact]
     public void ApplicationUser_SavedAndLoaded_KeepsGuidIdAndDisplayName()
     {
@@ -74,7 +94,7 @@ public sealed class MongoMappingTests
         Assert.Equal("Bob", loaded.DisplayName);
     }
 
-    private static Game CreateGameMidAttack()
+    private static Game CreateNewGame()
     {
         var players = new[]
         {
@@ -86,7 +106,13 @@ public sealed class MongoMappingTests
             new Territory("ZA", "South Africa", 2, "human", 5),
             new Territory("FR", "France", 3, "npc-FR", 4),
         };
-        var game = new Game("game-1", "user-1", "Bob", players, territories, ["human", "npc-FR"], CreatedAt);
+
+        return new Game("game-1", "user-1", "Bob", players, territories, ["human", "npc-FR"], CreatedAt);
+    }
+
+    private static Game CreateGameMidAttack()
+    {
+        var game = CreateNewGame();
 
         game.GetPlayer("npc-FR").Eliminate();
         game.BeginBattle("ZA", "FR");
