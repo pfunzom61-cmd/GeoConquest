@@ -5,8 +5,11 @@ public sealed class CommentaryOptions
 {
     public const string SectionName = "Commentary";
 
-    /// <summary>Requests allowed to the language model per minute, across all games: the provider's limit is per account.</summary>
-    public int MaxRequestsPerMinute { get; set; } = 25;
+    /// <summary>
+    /// Requests allowed to the language model per minute, across all games: the provider's limit is per account.
+    /// Set from the 8,000 tokens a minute budget: 10 requests of at most about 750 tokens each is 7,500.
+    /// </summary>
+    public int MaxRequestsPerMinute { get; set; } = 10;
 
     /// <summary>How long a round's commentary may take, counted from the moment its roll is saved.</summary>
     public int TimeBudgetMilliseconds { get; set; } = 2500;

@@ -16,11 +16,12 @@ public sealed class GroqOptions
     public string BaseUrl { get; set; } = "https://api.groq.com/openai/v1";
 
     /// <summary>
-    /// Small on purpose: 25 requests a minute of about 170 prompt tokens plus this many stays within the 8,000 tokens
-    /// a minute Groq publishes for this model. Groq's docs do not say whether a reasoning model's thinking counts
-    /// towards it, so raise this if the log warns about empty answers.
+    /// Covers the model's hidden thinking as well as its answer of about 60 tokens: at 150, thinking used up the limit
+    /// on 4 of 15 live calls and the answer came back empty. With a prompt of about 350 tokens, a request costs at most
+    /// about 750, which is what <c>Commentary:MaxRequestsPerMinute</c> is set from. If this is raised, lower that to
+    /// 8,000 / (350 + this).
     /// </summary>
-    public int MaxCompletionTokens { get; set; } = 150;
+    public int MaxCompletionTokens { get; set; } = 400;
 
     public double Temperature { get; set; } = 0.7;
 

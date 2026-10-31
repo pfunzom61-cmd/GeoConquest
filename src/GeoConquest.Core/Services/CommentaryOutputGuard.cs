@@ -5,8 +5,8 @@ namespace GeoConquest.Core.Services;
 
 /// <summary>
 /// Decides whether text from the language model may be shown. A model's output is untrusted: it can be empty, cut off,
-/// far too long, about something else, or unsuitable for a family audience. Anything that cannot be repaired is rejected,
-/// and the caller then uses a template instead.
+/// far too long, about something else, carrying numbers it may have got wrong, or unsuitable for a family audience.
+/// Anything that cannot be repaired is rejected, and the caller then uses a template instead.
 /// </summary>
 public static partial class CommentaryOutputGuard
 {
@@ -27,7 +27,7 @@ public static partial class CommentaryOutputGuard
         var isAboutThisBattle = text.Contains(context.AttackerCountryName, StringComparison.OrdinalIgnoreCase)
             || text.Contains(context.DefenderCountryName, StringComparison.OrdinalIgnoreCase);
 
-        return isAboutThisBattle && !UnsuitableWord().IsMatch(text) ? text : null;
+        return isAboutThisBattle && !UnsuitableWord().IsMatch(text) && !NumberOrNumberWord().IsMatch(text) ? text : null;
     }
 
     /// <summary>
@@ -57,4 +57,8 @@ public static partial class CommentaryOutputGuard
         @"\b(kill\w*|blood\w*|slaughter\w*|massacre\w*|murder\w*|corpse\w*|gore|gory|genocide|rape\w*|nazi\w*|terroris\w*|behead\w*|torture\w*|fuck\w*|shit\w*|bitch\w*|bastard\w*|damn\w*|hell|ass|asshole\w*)\b",
         RegexOptions.IgnoreCase)]
     private static partial Regex UnsuitableWord();
+
+    // The model confuses die values, dice counts and round numbers, so any number it writes is treated as unreliable.
+    [GeneratedRegex(@"\d|\b(zero|one|two|three|four|five|six|seven|eight|nine|ten)\b", RegexOptions.IgnoreCase)]
+    private static partial Regex NumberOrNumberWord();
 }

@@ -9,18 +9,36 @@ namespace GeoConquest.Core.Tests.Services;
 public sealed class CommentaryPromptBuilderTests
 {
     [Fact]
-    public void Build_BattleFacts_IncludesCountriesSoldiersDiceAndRound()
+    public void Build_BattleFacts_StatesWhoRolledWhatWhoLostASoldierAndWhoIsAhead()
     {
         var prompt = CommentaryPromptBuilder.Build(BattleContexts.BrazilAttacksChile);
 
-        Assert.Contains("Attacking country: Brazil", prompt);
-        Assert.Contains("Defending country: Chile", prompt);
-        Assert.Contains("Attacking soldiers: 8 before, 7 after", prompt);
-        Assert.Contains("Defending soldiers: 3 before, 2 after", prompt);
-        Assert.Contains("Attacker dice: 6, 2", prompt);
-        Assert.Contains("Defender dice: 5, 3", prompt);
-        Assert.Contains("Attack round: 3", prompt);
-        Assert.Contains("Momentum so far: attacker ahead", prompt);
+        Assert.Contains("Brazil is attacking Chile.", prompt);
+        Assert.Contains("Brazil's die showed 6 against Chile's die showing 5.", prompt);
+        Assert.Contains("Brazil's die showed 2 against Chile's die showing 3.", prompt);
+        Assert.Contains("In this roll, Brazil lost a soldier and Chile lost a soldier.", prompt);
+        Assert.Contains("Overall in this attack, Brazil is ahead because it has lost fewer soldiers than Chile.", prompt);
+        Assert.Contains("The attack goes on.", prompt);
+    }
+
+    [Fact]
+    public void Build_RoundNumbers_AreLeftOut()
+    {
+        var prompt = CommentaryPromptBuilder.Build(BattleContexts.BrazilAttacksChile with { BattleRoundNumber = 37, GameRoundNumber = 91 });
+
+        Assert.DoesNotContain("37", prompt);
+        Assert.DoesNotContain("91", prompt);
+    }
+
+    [Fact]
+    public void Build_LargeRoll_ListsOnlyTheCappedDicePairs()
+    {
+        var dice = Enumerable.Repeat(4, 50).ToList();
+
+        var prompt = CommentaryPromptBuilder.Build(BattleContexts.BrazilAttacksChile with { AttackerDice = dice, DefenderDice = dice });
+
+        Assert.Equal(3, prompt.Split('\n').Count(line => line.Contains("die showed", StringComparison.Ordinal)));
+        Assert.Contains("More dice were rolled as well.", prompt);
     }
 
     [Fact]

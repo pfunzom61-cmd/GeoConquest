@@ -47,11 +47,11 @@ public sealed class GroqCommentaryServiceTests
 
         var body = JsonDocument.Parse(handler.LastBody!).RootElement;
         Assert.Equal("openai/gpt-oss-20b", body.GetProperty("model").GetString());
-        Assert.Equal(150, body.GetProperty("max_completion_tokens").GetInt32());
+        Assert.Equal(400, body.GetProperty("max_completion_tokens").GetInt32());
         Assert.Equal("low", body.GetProperty("reasoning_effort").GetString());
         Assert.False(body.GetProperty("include_reasoning").GetBoolean());
         Assert.False(body.TryGetProperty("max_tokens", out _));
-        Assert.Contains("Attacking country: Brazil", body.GetProperty("messages")[0].GetProperty("content").GetString());
+        Assert.Contains("Brazil is attacking Chile.", body.GetProperty("messages")[0].GetProperty("content").GetString());
     }
 
     public static TheoryData<HttpResponseMessage, TimeSpan?> FailedAnswers()

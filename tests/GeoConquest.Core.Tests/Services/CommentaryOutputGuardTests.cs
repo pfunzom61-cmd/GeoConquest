@@ -23,10 +23,29 @@ public sealed class CommentaryOutputGuardTests
     }
 
     [Theory]
-    [InlineData("Brazil rolls a six! Chile answers with a five. Then a third sentence follows.", "Brazil rolls a six! Chile answers with a five.")]
-    [InlineData("Brazil rolls a six over Chile. And then the model ran out of tok", "Brazil rolls a six over Chile.")]
-    [InlineData("Brazil rolls a six over Chile. " + LongSentence, "Brazil rolls a six over Chile.")]
-    [InlineData("\"**Brazil** rolls a six!\n\nChile   wobbles.\"", "Brazil rolls a six! Chile wobbles.")]
+    [InlineData("Brazil rolls a 4 against Chile.")]
+    [InlineData("Brazil rolls four dice against Chile.")]
+    [InlineData("Brazil gives zero ground to Chile.")]
+    [InlineData("Ten cheers for Brazil against Chile.")]
+    public void Clean_DigitOrNumberWord_IsRejected(string rawText)
+    {
+        Assert.Null(CommentaryOutputGuard.Clean(rawText, BattleContexts.BrazilAttacksChile));
+    }
+
+    [Fact]
+    public void Clean_NumberWordInsideALongerWord_IsKept()
+    {
+        const string line = "Sierra Leone rolls high and someone in Liechtenstein cheers.";
+        var context = BattleContexts.BrazilAttacksChile with { AttackerCountryName = "Sierra Leone", DefenderCountryName = "Liechtenstein" };
+
+        Assert.Equal(line, CommentaryOutputGuard.Clean(line, context));
+    }
+
+    [Theory]
+    [InlineData("Brazil rolls high! Chile answers well. Then a third sentence follows.", "Brazil rolls high! Chile answers well.")]
+    [InlineData("Brazil rolls high over Chile. And then the model ran out of tok", "Brazil rolls high over Chile.")]
+    [InlineData("Brazil rolls high over Chile. " + LongSentence, "Brazil rolls high over Chile.")]
+    [InlineData("\"**Brazil** rolls high!\n\nChile   wobbles.\"", "Brazil rolls high! Chile wobbles.")]
     public void Clean_UsableOutput_BecomesATidyLineOfWholeSentencesWithinTheLimits(string rawText, string expected)
     {
         Assert.Equal(expected, CommentaryOutputGuard.Clean(rawText, BattleContexts.BrazilAttacksChile));

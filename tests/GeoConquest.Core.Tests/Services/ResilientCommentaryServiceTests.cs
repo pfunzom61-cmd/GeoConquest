@@ -11,7 +11,7 @@ namespace GeoConquest.Core.Tests.Services;
 
 public sealed class ResilientCommentaryServiceTests
 {
-    private const string ModelLine = "Brazil rolls a six and Chile wobbles!";
+    private const string ModelLine = "Brazil rolls high and Chile wobbles!";
 
     private static readonly TimeSpan FullBudget = TimeSpan.FromSeconds(5);
 
