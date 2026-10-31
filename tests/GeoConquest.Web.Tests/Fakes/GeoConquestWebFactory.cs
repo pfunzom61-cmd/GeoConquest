@@ -41,6 +41,9 @@ public sealed class GeoConquestWebFactory : WebApplicationFactory<Program>
             services.RemoveAll<ICountryRepository>();
             services.AddSingleton<ICountryRepository>(new InMemoryCountryRepository());
 
+            services.RemoveAll<INpcStrategy>();
+            services.AddSingleton<INpcStrategy, PassiveNpcStrategy>();
+
             services.RemoveAll<IXmlRepository>();
             services.AddSingleton<IXmlRepository>(new InMemoryXmlRepository());
 

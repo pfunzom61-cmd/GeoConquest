@@ -61,6 +61,7 @@ public sealed class GamesTests(GeoConquestWebFactory factory) : IClassFixture<Ge
         Assert.Equal("human", state.GetProperty("currentPlayerId").GetString());
         Assert.Equal("Reinforce", state.GetProperty("phase").GetString());
         Assert.Contains(result.GetProperty("newEvents").EnumerateArray(), gameEvent => gameEvent.GetProperty("type").GetString() == "TurnSkipped");
+        Assert.Contains(result.GetProperty("newEvents").EnumerateArray(), gameEvent => gameEvent.GetProperty("type").GetString() == "NpcDecision");
     }
 
     [Fact]

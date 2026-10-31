@@ -17,7 +17,8 @@ public static class CoreServiceCollectionExtensions
         services.AddSingleton<IReinforcementService, ReinforcementService>();
         services.AddSingleton<IGameSetupService, GameSetupService>();
         services.AddSingleton<IGameEngine, GameEngine>();
-        services.AddSingleton<INpcTurnRunner, SkippingNpcTurnRunner>();
+        services.AddSingleton<INpcStrategy, StrategicNpcStrategy>();
+        services.AddSingleton<INpcTurnRunner, NpcTurnExecutor>();
 
         services.AddScoped<IGameApplicationService, GameApplicationService>();
         services.AddScoped<IGameQueryService, GameQueryService>();
