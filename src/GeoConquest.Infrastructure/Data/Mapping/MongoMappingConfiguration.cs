@@ -191,9 +191,10 @@ public static class MongoMappingConfiguration
             map.MapMember(gameEvent => gameEvent.GameId);
             map.MapMember(gameEvent => gameEvent.Sequence);
             map.MapMember(gameEvent => gameEvent.Type);
-            map.MapMember(gameEvent => gameEvent.ActorPlayerId);
+            // Null values are not stored, so these two constructor arguments must be allowed to be absent on load.
+            map.MapMember(gameEvent => gameEvent.ActorPlayerId).SetDefaultValue((object?)null);
             map.MapMember(gameEvent => gameEvent.Message);
-            map.MapMember(gameEvent => gameEvent.Payload);
+            map.MapMember(gameEvent => gameEvent.Payload).SetDefaultValue((object?)null);
             map.MapMember(gameEvent => gameEvent.CreatedAt).SetSerializer(DateSerializer);
             map.MapConstructor(
                 typeof(GameEvent).GetConstructors().Single(),
