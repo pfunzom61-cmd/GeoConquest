@@ -69,7 +69,7 @@ public sealed class GameApplicationService(
     {
         while (game.Status == GameStatus.InProgress && !game.CurrentPlayer.IsHuman)
         {
-            events.AddRange(npcTurnRunner.PlayTurn(game));
+            events.AddRange(npcTurnRunner.PlayStep(game));
         }
     }
 

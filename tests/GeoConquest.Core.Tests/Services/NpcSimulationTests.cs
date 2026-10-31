@@ -14,7 +14,7 @@ public sealed class NpcSimulationTests
     [Theory]
     [InlineData(1)]
     [InlineData(2)]
-    public void PlayTurn_TenNpcsWithSeededDice_FinishesTheGameWithEveryDecisionJustified(int seed)
+    public void PlayStep_TenNpcsWithSeededDice_FinishesTheGameWithEveryDecisionJustified(int seed)
     {
         var engine = new GameEngine(
             Substitute.For<IGameSetupService>(),
@@ -27,7 +27,7 @@ public sealed class NpcSimulationTests
 
         while (game.Status == GameStatus.InProgress && game.RoundNumber <= MaxRounds)
         {
-            events.AddRange(executor.PlayTurn(game));
+            events.AddRange(executor.PlayStep(game));
             Assert.All(game.Territories, territory => Assert.True(territory.Soldiers >= 1));
         }
 

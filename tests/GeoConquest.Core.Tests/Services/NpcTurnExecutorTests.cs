@@ -33,17 +33,30 @@ public sealed class NpcTurnExecutorTests
         return game;
     }
 
+    /// <summary>Plays steps until the NPC's turn is over (the next player is up) or the game ends, as the background runner does.</summary>
+    private static List<GameEvent> PlayTurn(NpcTurnExecutor executor, Game game)
+    {
+        var npcId = game.CurrentPlayer.Id;
+        var events = new List<GameEvent>();
+        while (game.Status == GameStatus.InProgress && game.CurrentPlayer.Id == npcId)
+        {
+            events.AddRange(executor.PlayStep(game));
+        }
+
+        return events;
+    }
+
     private static List<GameEventType> Types(IEnumerable<GameEvent> events) => events.Select(@event => @event.Type).ToList();
 
     [Fact]
-    public void PlayTurn_ReinforcementsOwed_LogsTheDecisionThenPlacesThem()
+    public void PlayStep_ReinforcementsOwed_LogsTheDecisionThenPlacesThem()
     {
         var game = StartNpcTurn(GameBuilder.Create(), reinforcements: 2);
         _strategy.DecideReinforcements(game, game.CurrentPlayer)
             .Returns(new ReinforcementDecision(new Dictionary<string, int> { ["C1"] = 2 }, "Placing 2 reinforcements: 2 in Country 1."));
         _strategy.DecideAttack(game, game.CurrentPlayer).Returns(HoldDecision);
 
-        var events = CreateExecutor().PlayTurn(game);
+        var events = PlayTurn(CreateExecutor(), game);
 
         Assert.Equal(
             [GameEventType.NpcDecision, GameEventType.Reinforced, GameEventType.NpcDecision, GameEventType.TurnSkipped, GameEventType.TurnStarted],
@@ -52,12 +65,45 @@ public sealed class NpcTurnExecutorTests
     }
 
     [Fact]
-    public void PlayTurn_StrategyHolds_LogsTheReasonAndSkipsTheTurn()
+    public void PlayStep_ReinforcementsOwed_PlacesThemInOneStepAndLeavesTheAttackForTheNext()
+    {
+        var game = StartNpcTurn(GameBuilder.Create(), reinforcements: 2);
+        _strategy.DecideReinforcements(game, game.CurrentPlayer)
+            .Returns(new ReinforcementDecision(new Dictionary<string, int> { ["C1"] = 2 }, "Placing 2 reinforcements: 2 in Country 1."));
+
+        var events = CreateExecutor().PlayStep(game);
+
+        Assert.Equal([GameEventType.NpcDecision, GameEventType.Reinforced], Types(events));
+        Assert.Equal(TurnPhase.Action, game.Phase);
+        Assert.Equal("P1", game.CurrentPlayer.Id);
+    }
+
+    [Fact]
+    public void PlayStep_ANewExecutorForEveryStep_PlaysTheSameTurnAsOneExecutor()
+    {
+        var game = StartNpcTurn(GameBuilder.Create(), reinforcements: 2);
+        _strategy.DecideReinforcements(game, game.CurrentPlayer)
+            .Returns(new ReinforcementDecision(new Dictionary<string, int> { ["C1"] = 2 }, "Placing 2 reinforcements: 2 in Country 1."));
+        _strategy.DecideAttack(game, game.CurrentPlayer).Returns(HoldDecision);
+        var events = new List<GameEvent>();
+
+        while (game.CurrentPlayer.Id == "P1")
+        {
+            events.AddRange(CreateExecutor().PlayStep(game));
+        }
+
+        Assert.Equal(
+            [GameEventType.NpcDecision, GameEventType.Reinforced, GameEventType.NpcDecision, GameEventType.TurnSkipped, GameEventType.TurnStarted],
+            Types(events));
+    }
+
+    [Fact]
+    public void PlayStep_StrategyHolds_LogsTheReasonAndSkipsTheTurn()
     {
         var game = StartNpcTurn(GameBuilder.Create());
         _strategy.DecideAttack(game, game.CurrentPlayer).Returns(HoldDecision);
 
-        var events = CreateExecutor().PlayTurn(game);
+        var events = PlayTurn(CreateExecutor(), game);
 
         Assert.Equal([GameEventType.NpcDecision, GameEventType.TurnSkipped, GameEventType.TurnStarted], Types(events));
         Assert.Equal(HoldDecision.Justification, events[0].Message);
@@ -65,14 +111,14 @@ public sealed class NpcTurnExecutorTests
     }
 
     [Fact]
-    public void PlayTurn_OddsCollapseMidAttack_CallsItOffAndEndsTheTurn()
+    public void PlayStep_OddsCollapseMidAttack_CallsItOffAndEndsTheTurn()
     {
         var game = StartNpcTurn(GameBuilder.Create(3, 5, 5));
         _strategy.DecideAttack(game, game.CurrentPlayer).Returns(AttackC1OnC2);
         _strategy.DecideContinueAttack(game, game.CurrentPlayer).Returns(new ContinueAttackDecision(false, "Calling off the attack: 8% win chance."));
         int[][] oneRoundAttackerLosesOneSoldier = [[1, 3, 3, 3], [6, 3, 3, 3]];
 
-        var events = CreateExecutor(oneRoundAttackerLosesOneSoldier).PlayTurn(game);
+        var events = PlayTurn(CreateExecutor(oneRoundAttackerLosesOneSoldier), game);
 
         Assert.Equal(
             [GameEventType.NpcDecision, GameEventType.AttackStarted, GameEventType.DiceRolled, GameEventType.NpcDecision, GameEventType.AttackStopped, GameEventType.TurnStarted],
@@ -81,7 +127,7 @@ public sealed class NpcTurnExecutorTests
     }
 
     [Fact]
-    public void PlayTurn_Conquest_BalancesTheCountriesThenEndsTheTurn()
+    public void PlayStep_Conquest_BalancesTheCountriesThenEndsTheTurn()
     {
         var game = StartNpcTurn(GameBuilder.Create(3, 5, 1, 3));
         _strategy.DecideAttack(game, game.CurrentPlayer).Returns(AttackC1OnC2);
@@ -89,7 +135,7 @@ public sealed class NpcTurnExecutorTests
             .Returns(new TransferDecision("C1", "C2", 1, "Moving 1 from Country 1 to Country 2 to balance them (5 vs 2 becomes 4 vs 3)."));
         int[][] attackerWinsTheOnlyDuel = [[6], [1]];
 
-        var events = CreateExecutor(attackerWinsTheOnlyDuel).PlayTurn(game);
+        var events = PlayTurn(CreateExecutor(attackerWinsTheOnlyDuel), game);
 
         Assert.Equal(
             [
@@ -101,13 +147,13 @@ public sealed class NpcTurnExecutorTests
     }
 
     [Fact]
-    public void PlayTurn_AttackFails_EndsTheTurnWithoutBalancing()
+    public void PlayStep_AttackFails_EndsTheTurnWithoutBalancing()
     {
         var game = StartNpcTurn(GameBuilder.Create(3, 2, 5));
         _strategy.DecideAttack(game, game.CurrentPlayer).Returns(AttackC1OnC2);
         int[][] attackerLosesTheOnlyDuel = [[1], [6]];
 
-        var events = CreateExecutor(attackerLosesTheOnlyDuel).PlayTurn(game);
+        var events = PlayTurn(CreateExecutor(attackerLosesTheOnlyDuel), game);
 
         Assert.Contains(GameEventType.AttackFailed, Types(events));
         Assert.Equal(GameEventType.TurnStarted, events[^1].Type);
@@ -115,14 +161,14 @@ public sealed class NpcTurnExecutorTests
     }
 
     [Fact]
-    public void PlayTurn_ConquestWinsTheGame_StopsWithoutEndingTheTurn()
+    public void PlayStep_ConquestWinsTheGame_StopsWithoutEndingTheTurn()
     {
         var game = StartNpcTurn(GameBuilder.Create(3, 5, 1));
         game.GetTerritory("C0").ChangeOwner("P1", 3); // the NPC already holds everything except Country 2
         _strategy.DecideAttack(game, game.CurrentPlayer).Returns(AttackC1OnC2);
         int[][] attackerWinsTheOnlyDuel = [[6], [1]];
 
-        var events = CreateExecutor(attackerWinsTheOnlyDuel).PlayTurn(game);
+        var events = PlayTurn(CreateExecutor(attackerWinsTheOnlyDuel), game);
 
         Assert.Equal(GameStatus.Lost, game.Status);
         Assert.Equal(GameEventType.GameLost, events[^1].Type);
