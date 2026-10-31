@@ -164,6 +164,7 @@ public static class MongoMappingConfiguration
             map.MapMember(game => game.Phase);
             map.MapMember(game => game.PendingReinforcements);
             map.MapMember(game => game.ActiveBattle);
+            map.MapMember(game => game.IsFastForward);
             map.MapMember(game => game.WinnerPlayerId);
             map.MapMember(game => game.LastEventSequence);
             map.MapMember(game => game.Version);

@@ -56,4 +56,12 @@ public sealed class MongoGameRepository(MongoContext context) : IGameRepository
             .SortByDescending(game => game.UpdatedAt)
             .Limit(IGameRepository.MaxInProgressGames)
             .ToListAsync(cancellationToken);
+
+    public async Task<IReadOnlyList<string>> ListGameIdsAwaitingNpcTurnAsync(CancellationToken cancellationToken)
+    {
+        // The current player is worked out from the turn order and index, not stored, so it is filtered here.
+        // This runs once at startup and the status index keeps the query to unfinished games.
+        var inProgress = await context.Games.Find(game => game.Status == GameStatus.InProgress).ToListAsync(cancellationToken);
+        return inProgress.Where(game => game.AwaitsNpcTurn).Select(game => game.Id).ToList();
+    }
 }

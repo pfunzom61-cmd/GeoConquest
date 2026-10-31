@@ -78,6 +78,12 @@ public sealed class Game
 
     public BattleState? ActiveBattle { get; private set; }
 
+    /// <summary>
+    /// Whether the owner has asked for NPC turns to play at the short pace. It only changes the delay between steps and
+    /// is switched off again when the turn reaches the human (assessment assumption 10).
+    /// </summary>
+    public bool IsFastForward { get; private set; }
+
     public string? WinnerPlayerId { get; private set; }
 
     /// <summary>Sequence number of the last event logged for this game.</summary>
@@ -98,6 +104,9 @@ public sealed class Game
     /// <summary>The owner's player. Every game has exactly one human; the others are NPCs.</summary>
     public Player HumanPlayer => _players.Single(player => player.IsHuman);
 
+    /// <summary>True while the game is in progress and an NPC, not the human, is the one to act.</summary>
+    public bool AwaitsNpcTurn => Status == GameStatus.InProgress && !CurrentPlayer.IsHuman;
+
     public Player GetPlayer(string playerId) =>
         _players.FirstOrDefault(player => player.Id == playerId)
         ?? throw new GameRuleException("That player is not part of this game.");
@@ -111,6 +120,7 @@ public sealed class Game
 
     /// <summary>
     /// Starts the current player's turn. With reinforcements owed the phase is Reinforce, otherwise Action.
+    /// When the human's turn begins, fast-forward is switched off ("until your next turn").
     /// </summary>
     public void StartTurn(int reinforcements)
     {
@@ -119,6 +129,22 @@ public sealed class Game
         PendingReinforcements = reinforcements;
         ActiveBattle = null;
         Phase = reinforcements > 0 ? TurnPhase.Reinforce : TurnPhase.Action;
+
+        if (CurrentPlayer.IsHuman)
+        {
+            IsFastForward = false;
+        }
+    }
+
+    /// <exception cref="GameRuleException">The game is already over.</exception>
+    public void SetFastForward(bool enabled)
+    {
+        if (Status != GameStatus.InProgress)
+        {
+            throw new GameRuleException("The game is over, so there is nothing left to speed up.");
+        }
+
+        IsFastForward = enabled;
     }
 
     /// <summary>Called once all reinforcements are placed.</summary>

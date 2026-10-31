@@ -137,6 +137,7 @@ public sealed class GamesTests(GeoConquestWebFactory factory) : IClassFixture<Ge
         var gameId = await CreateGameAsync(owner);
         var game = (await factory.Games.GetByIdAsync(gameId, CancellationToken.None))!;
         game.Finish(GameStatus.Lost, winnerPlayerId: null);
+        await factory.Games.UpdateAsync(game, CancellationToken.None);
 
         var response = await NewAnonymousClient().GetAsync("/live");
 

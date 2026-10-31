@@ -8,6 +8,32 @@ namespace GeoConquest.Core.Tests.Models;
 public sealed class GameTests
 {
     [Fact]
+    public void StartTurn_TurnReachesTheHuman_SwitchesFastForwardOff()
+    {
+        var game = GameBuilder.Create(5, 5, 5);
+        game.AdvanceToNextLivingPlayer();
+        game.SetFastForward(true);
+        game.StartTurn(0);
+        Assert.True(game.IsFastForward);
+
+        game.AdvanceToNextLivingPlayer();
+        game.AdvanceToNextLivingPlayer();
+        game.StartTurn(0);
+
+        Assert.True(game.CurrentPlayer.IsHuman);
+        Assert.False(game.IsFastForward);
+    }
+
+    [Fact]
+    public void SetFastForward_GameOver_IsRejected()
+    {
+        var game = GameBuilder.Create(5, 5);
+        game.Finish(GameStatus.Lost, winnerPlayerId: null);
+
+        Assert.Throws<GameRuleException>(() => game.SetFastForward(true));
+    }
+
+    [Fact]
     public void AdvanceToNextLivingPlayer_WrappingTurnOrder_StartsNextRound()
     {
         var game = GameBuilder.Create(5, 5, 5);
