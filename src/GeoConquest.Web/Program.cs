@@ -10,6 +10,8 @@ builder.Services.AddControllersWithViews(options => options.Filters.Add(new Auto
 builder.Services.AddGeoConquestSecurity(builder.Configuration);
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddGeoConquestIdentity().AddMongoIdentityStores();
+builder.Services.AddGeoConquestAuthorization();
+builder.Services.AddCoreServices();
 
 var app = builder.Build();
 
