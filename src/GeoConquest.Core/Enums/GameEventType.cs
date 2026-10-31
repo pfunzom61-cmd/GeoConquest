@@ -15,6 +15,7 @@ public enum GameEventType
     PlayerEliminated,
     TurnSkipped,
     NpcDecision,
+    Commentary,
     GameWon,
     GameLost,
 }

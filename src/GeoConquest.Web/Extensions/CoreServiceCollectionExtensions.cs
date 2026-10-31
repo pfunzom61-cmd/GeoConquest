@@ -20,6 +20,8 @@ public static class CoreServiceCollectionExtensions
         services.AddSingleton<INpcStrategy, StrategicNpcStrategy>();
         services.AddSingleton<INpcTurnRunner, NpcTurnExecutor>();
 
+        services.AddSingleton<BattleCommentaryScheduler>();
+        services.AddSingleton<ICommentaryProcessor, BattleCommentaryProcessor>();
         services.AddSingleton<IGameProgressRecorder, GameProgressRecorder>();
 
         services.AddScoped<IGameApplicationService, GameApplicationService>();

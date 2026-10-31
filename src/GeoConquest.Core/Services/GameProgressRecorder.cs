@@ -7,7 +7,8 @@ namespace GeoConquest.Core.Services;
 public sealed class GameProgressRecorder(
     IGameRepository gameRepository,
     IGameEventRepository gameEventRepository,
-    IGameUpdatePublisher publisher) : IGameProgressRecorder
+    IGameUpdatePublisher publisher,
+    BattleCommentaryScheduler commentaryScheduler) : IGameProgressRecorder
 {
     private const int MaxAppendAttempts = 3;
 
@@ -30,6 +31,19 @@ public sealed class GameProgressRecorder(
         finally
         {
             await publisher.PublishAsync(game, events, CancellationToken.None);
+            commentaryScheduler.ScheduleFor(game, events);
+        }
+    }
+
+    public async Task RecordCommentaryAsync(GameEvent commentary)
+    {
+        try
+        {
+            await AppendEventsAsync([commentary]);
+        }
+        finally
+        {
+            await publisher.PublishEventsAsync(commentary.GameId, [commentary], CancellationToken.None);
         }
     }
 

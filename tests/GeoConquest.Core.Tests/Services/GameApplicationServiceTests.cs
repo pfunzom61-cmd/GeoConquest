@@ -26,7 +26,11 @@ public sealed class GameApplicationServiceTests
 
         _service = new GameApplicationService(
             engine,
-            new GameProgressRecorder(_gameRepository, _gameEventRepository, _publisher),
+            new GameProgressRecorder(
+                _gameRepository,
+                _gameEventRepository,
+                _publisher,
+                new BattleCommentaryScheduler(Substitute.For<ICommentaryQueue>(), new CommentaryOptions(), TimeProvider.System)),
             _npcTurnQueue,
             _gameRepository,
             Substitute.For<ICountryRepository>());

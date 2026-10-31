@@ -29,7 +29,11 @@ public sealed class NpcTurnProcessorTests
         _processor = new NpcTurnProcessor(
             new NpcTurnExecutor(engine, new PassiveNpcStrategy()),
             _gameRepository,
-            new GameProgressRecorder(_gameRepository, _gameEventRepository, _publisher),
+            new GameProgressRecorder(
+                _gameRepository,
+                _gameEventRepository,
+                _publisher,
+                new BattleCommentaryScheduler(Substitute.For<ICommentaryQueue>(), new CommentaryOptions(), _timeProvider)),
             Pacing,
             _timeProvider);
     }

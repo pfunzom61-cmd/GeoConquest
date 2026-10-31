@@ -31,4 +31,17 @@ public sealed class SignalRGameUpdatePublisher(IHubContext<GameHub> hubContext, 
             logger.LogWarning(exception, "Could not broadcast an update for game {GameId}.", game.Id);
         }
     }
+
+    public async Task PublishEventsAsync(string gameId, IReadOnlyList<GameEvent> events, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await hubContext.Clients.Group(GameHub.GroupName(gameId))
+                .SendAsync(GameHubMessages.EventsAppended, events.Select(GameEventViewModel.From).ToList(), cancellationToken);
+        }
+        catch (Exception exception)
+        {
+            logger.LogWarning(exception, "Could not broadcast events for game {GameId}.", gameId);
+        }
+    }
 }

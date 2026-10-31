@@ -473,7 +473,7 @@ public sealed class GameEngineTests
     // ---- Event log ----
 
     [Fact]
-    public void Actions_AcrossAWholeTurn_ProduceStrictlyIncreasingEventSequenceNumbers()
+    public void Actions_AcrossAWholeTurn_NumberEventsInOrderLeavingOneSlotForTheRollsCommentary()
     {
         var setupService = Substitute.For<IGameSetupService>();
         setupService.CreateGame(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<IReadOnlyList<Country>>())
@@ -488,7 +488,30 @@ public sealed class GameEngineTests
             .Concat(engine.EndTurn(game, "P0"))
             .ToList();
 
-        Assert.Equal(Enumerable.Range(1, events.Count), events.Select(@event => @event.Sequence));
+        var reservedSlot = events.Single(@event => @event.Type == GameEventType.DiceRolled).ReservedCommentarySequence;
+        Assert.Equal(
+            Enumerable.Range(1, events.Count + 1).Where(sequence => sequence != reservedSlot),
+            events.Select(@event => @event.Sequence));
+    }
+
+    [Fact]
+    public void RollAttack_AnyRound_RecordsTheFactsCommentaryIsWrittenFrom()
+    {
+        var game = GameBuilder.Create(3, 1, 5);
+        var engine = CreateEngine([6, 1], [1, 6]);
+        engine.StartAttack(game, "P0", "C0", "C2");
+
+        var roll = engine.RollAttack(game, "P0").Single();
+        var context = BattleContext.FromRoll(game, roll);
+
+        Assert.Equal(("Country 0", "Country 2"), (context.AttackerCountryName, context.DefenderCountryName));
+        Assert.Equal((3, 2), (context.AttackerSoldiersBefore, context.AttackerSoldiersAfter));
+        Assert.Equal((5, 4), (context.DefenderSoldiersBefore, context.DefenderSoldiersAfter));
+        Assert.Equal([6, 1], context.AttackerDice);
+        Assert.Equal([1, 6], context.DefenderDice);
+        Assert.Equal((1, 1), (context.BattleRoundNumber, context.GameRoundNumber));
+        Assert.Equal(BattleOutcome.Continuing, context.Outcome);
+        Assert.Equal(BattleMomentum.Even, context.Momentum);
     }
 
     [Fact]

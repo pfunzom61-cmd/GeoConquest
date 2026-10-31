@@ -92,6 +92,8 @@ public sealed class MongoMappingTests
         new GameEvent("game-1", 1, GameEventType.GameCreated, null, "Bob takes command of South Africa.", null, CreatedAt),
         new GameEvent("game-1", 2, GameEventType.TurnStarted, "human", "Bob's turn.", null, CreatedAt),
         new GameEvent("game-1", 3, GameEventType.DiceRolled, "human", "ZA rolled", new GameEventPayload { AttackerDice = [6], DefenderLosses = 1 }, CreatedAt),
+        new GameEvent("game-1", 4, GameEventType.DiceRolled, "human", "ZA rolled", new GameEventPayload { DefenderSoldiersAfter = 0, BattleRoundNumber = 2, Outcome = BattleOutcome.Conquered }, CreatedAt),
+        new GameEvent("game-1", 5, GameEventType.Commentary, "human", "South Africa storms ahead!", new GameEventPayload { CommentarySource = CommentarySource.Ai }, CreatedAt),
         CreateNewGame(),
     ];
 

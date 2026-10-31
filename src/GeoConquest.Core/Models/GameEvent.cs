@@ -26,4 +26,11 @@ public sealed class GameEvent(
     public GameEventPayload? Payload { get; } = payload;
 
     public DateTimeOffset CreatedAt { get; } = createdAt;
+
+    /// <summary>
+    /// For a <see cref="GameEventType.DiceRolled"/> event: the log position the engine reserved for that round's
+    /// commentary. Commentary is written after the roll is saved, and reserving its place means writing it needs no
+    /// second save of the game, so it can never conflict with the player's next move.
+    /// </summary>
+    public int ReservedCommentarySequence => Sequence + 1;
 }
