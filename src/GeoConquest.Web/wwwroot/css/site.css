@@ -1,1 +1,33 @@
-/* Theme styles arrive in M7. */
+/* Theme styles arrive in M7. Only what the milestone 3 pages need to be usable is here. */
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+th,
+td {
+    border: 1px solid currentColor;
+    padding: 0.25rem 0.5rem;
+    text-align: left;
+}
+
+fieldset {
+    margin-bottom: 1rem;
+}
+
+button:disabled {
+    cursor: not-allowed;
+}
+
+.error {
+    font-weight: bold;
+}

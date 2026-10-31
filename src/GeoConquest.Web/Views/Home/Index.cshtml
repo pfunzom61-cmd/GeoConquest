@@ -3,4 +3,18 @@
 }
 
 <h1>GeoConquest</h1>
-<p>Under construction.</p>
+<p>Conquer nine rival countries before they conquer you. Pick your country, play your turns, and watch the NPCs answer.</p>
+
+<ul>
+    <li><a asp-controller="LiveGames" asp-action="Index">Watch a live game</a> (no account needed)</li>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <li><a asp-controller="Games" asp-action="Index">Resume a campaign</a></li>
+        <li><a asp-controller="Games" asp-action="New">Start a new campaign</a></li>
+    }
+    else
+    {
+        <li><a asp-controller="Account" asp-action="Register">Create an account</a> to play</li>
+        <li><a asp-controller="Account" asp-action="Login">Log in</a></li>
+    }
+</ul>

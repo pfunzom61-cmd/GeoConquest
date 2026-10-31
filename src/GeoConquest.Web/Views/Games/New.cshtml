@@ -1,0 +1,49 @@
+@model NewCampaignViewModel
+@{
+    ViewData["Title"] = "New Campaign";
+}
+
+<h1>New Campaign</h1>
+<p>Choose the country you will command. Nine other countries are picked at random and played by NPCs.
+   Soldiers at the start depend on population.</p>
+
+<form method="post" asp-action="Create" id="new-campaign-form">
+    <div asp-validation-summary="All" role="alert"></div>
+
+    <label for="country-filter">Search countries</label>
+    <input id="country-filter" type="search" autocomplete="off" aria-controls="country-picker" />
+    <p id="country-filter-status" role="status"></p>
+
+    <table id="country-picker">
+        <caption>Countries</caption>
+        <thead>
+            <tr>
+                <th scope="col">Choose</th>
+                <th scope="col">Country</th>
+                <th scope="col">Population</th>
+                <th scope="col">Starting soldiers</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var country in Model.Countries)
+            {
+                var inputId = $"country-{country.IsoCode}";
+                <tr data-name="@country.Name.ToLowerInvariant()">
+                    <td>
+                        <input type="radio" id="@inputId" name="SelectedCountryCode" value="@country.IsoCode"
+                               checked="@(Model.SelectedCountryCode == country.IsoCode)" />
+                    </td>
+                    <th scope="row"><label for="@inputId">@country.Name</label></th>
+                    <td>@country.Population.ToString("N0")</td>
+                    <td>@country.SoldierValue</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button type="submit">Start campaign</button>
+</form>
+
+@section Scripts {
+    <script type="module" src="~/js/country-picker.js" asp-append-version="true"></script>
+}
