@@ -25,5 +25,7 @@
 <script type="application/json" id="board-data">@Json.Serialize(Model)</script>
 
 @section Scripts {
+    @* Pinned client library, served from this site. board.js falls back to polling if it is missing. *@
+    <script src="~/lib/signalr/signalr.min.js" asp-append-version="true"></script>
     <script type="module" src="~/js/board.js" asp-append-version="true"></script>
 }
