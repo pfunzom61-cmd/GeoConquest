@@ -19,6 +19,7 @@ public sealed class MongoContext
     private const string GamesCollectionName = "games";
     private const string GameEventsCollectionName = "gameEvents";
     private const string CountriesCollectionName = "countries";
+    private const string DataProtectionKeysCollectionName = "dataProtectionKeys";
 
     public MongoContext(IMongoClient client, IOptions<MongoDbOptions> options)
     {
@@ -37,6 +38,8 @@ public sealed class MongoContext
     public IMongoCollection<Country> Countries => Database.GetCollection<Country>(CountriesCollectionName);
 
     public IMongoCollection<ApplicationUser> Users => Database.GetCollection<ApplicationUser>(UsersCollectionName);
+
+    public IMongoCollection<BsonDocument> DataProtectionKeys => Database.GetCollection<BsonDocument>(DataProtectionKeysCollectionName);
 
     /// <summary>
     /// Creates the indexes the application relies on. Safe to run on every start: existing indexes are left alone.

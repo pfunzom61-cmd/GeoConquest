@@ -1,5 +1,6 @@
 using GeoConquest.Infrastructure.Data;
 using GeoConquest.Infrastructure.Identity;
+using Microsoft.AspNetCore.DataProtection.Repositories;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -28,6 +29,9 @@ public sealed class GeoConquestWebFactory : WebApplicationFactory<Program>
         builder.ConfigureTestServices(services =>
         {
             services.Remove(services.Single(service => service.ImplementationType == typeof(DatabaseInitializer)));
+
+            services.RemoveAll<IXmlRepository>();
+            services.AddSingleton<IXmlRepository>(new InMemoryXmlRepository());
 
             services.RemoveAll<IUserStore<ApplicationUser>>();
             services.AddSingleton<IUserStore<ApplicationUser>>(new InMemoryUserStore());
