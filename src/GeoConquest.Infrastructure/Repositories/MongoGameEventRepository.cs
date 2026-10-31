@@ -17,7 +17,16 @@ public sealed class MongoGameEventRepository(MongoContext context) : IGameEventR
             return;
         }
 
-        await context.GameEvents.InsertManyAsync(events, cancellationToken: cancellationToken);
+        try
+        {
+            // Unordered, so one already-stored event does not stop the rest of the batch from being written.
+            await context.GameEvents.InsertManyAsync(events, new InsertManyOptions { IsOrdered = false }, cancellationToken);
+        }
+        catch (MongoBulkWriteException<GameEvent> exception) when (
+            exception.WriteErrors.All(error => error.Category == ServerErrorCategory.DuplicateKey))
+        {
+            // Every rejected event was already stored under the same (gameId, sequence): a retry of an earlier append.
+        }
     }
 
     public async Task<IReadOnlyList<GameEvent>> GetAfterSequenceAsync(string gameId, int afterSequence, CancellationToken cancellationToken) =>

@@ -5,6 +5,10 @@ namespace GeoConquest.Core.Interfaces;
 /// <summary>Stores the append-only log of what happened in each game.</summary>
 public interface IGameEventRepository
 {
+    /// <summary>
+    /// Stores the events. Idempotent by (game, sequence): an event whose sequence is already stored is ignored,
+    /// so a failed append can simply be retried after the game itself has been saved.
+    /// </summary>
     Task AppendAsync(IReadOnlyCollection<GameEvent> events, CancellationToken cancellationToken);
 
     /// <summary>Returns the game's events with a sequence greater than <paramref name="afterSequence"/>, oldest first.</summary>
