@@ -26,16 +26,9 @@ public sealed class CommentaryOutputGuardTests
     [InlineData("Brazil rolls a six! Chile answers with a five. Then a third sentence follows.", "Brazil rolls a six! Chile answers with a five.")]
     [InlineData("Brazil rolls a six over Chile. And then the model ran out of tok", "Brazil rolls a six over Chile.")]
     [InlineData("Brazil rolls a six over Chile. " + LongSentence, "Brazil rolls a six over Chile.")]
-    public void Clean_TooMuchOrCutOffOutput_KeepsOnlyWholeSentencesWithinTheLimits(string rawText, string expected)
+    [InlineData("\"**Brazil** rolls a six!\n\nChile   wobbles.\"", "Brazil rolls a six! Chile wobbles.")]
+    public void Clean_UsableOutput_BecomesATidyLineOfWholeSentencesWithinTheLimits(string rawText, string expected)
     {
         Assert.Equal(expected, CommentaryOutputGuard.Clean(rawText, BattleContexts.BrazilAttacksChile));
-    }
-
-    [Fact]
-    public void Clean_QuotedMarkdownOverSeveralLines_ReturnsATidySingleLine()
-    {
-        var cleaned = CommentaryOutputGuard.Clean("\"**Brazil** rolls a six!\n\nChile   wobbles.\"", BattleContexts.BrazilAttacksChile);
-
-        Assert.Equal("Brazil rolls a six! Chile wobbles.", cleaned);
     }
 }
