@@ -22,7 +22,7 @@ public sealed class GamesController(
     IAntiforgery antiforgery,
     UserManager<ApplicationUser> userManager) : Controller
 {
-    private const int RecentEventCount = 30;
+    private const int RecentEventCount = 100;
 
     [HttpGet("")]
     [Authorize]

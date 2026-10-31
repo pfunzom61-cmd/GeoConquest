@@ -1,7 +1,7 @@
 // Draws the game board and posts the owner's intents. The server decides everything: this script never rolls dice or
 // checks rules, it only shows the state and events the server returns. All text goes in through textContent.
 
-const MAX_EVENTS = 30;
+const MAX_EVENTS = 100;
 
 const pageData = JSON.parse(document.getElementById("board-data").textContent);
 const requestToken = document.querySelector('meta[name="request-verification-token"]')?.content ?? "";

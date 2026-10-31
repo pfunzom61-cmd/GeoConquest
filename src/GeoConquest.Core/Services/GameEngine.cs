@@ -223,6 +223,19 @@ public sealed class GameEngine(
         return events;
     }
 
+    public GameEvent RecordNpcDecision(Game game, string playerId, string justification)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(justification);
+
+        var player = RequireTurn(game, playerId, TurnPhase.Reinforce, TurnPhase.Action, TurnPhase.Attacking, TurnPhase.PostAttack);
+        if (player.IsHuman)
+        {
+            throw new GameRuleException("Only NPC decisions are recorded with a justification.");
+        }
+
+        return Log(game, GameEventType.NpcDecision, player.Id, justification, null);
+    }
+
     /// <summary>Handles what a conquest can cause: the loser being eliminated, and the game being won or lost.</summary>
     private void ResolveConquestConsequences(Game game, Player conqueror, Player defeatedOwner, List<GameEvent> events)
     {

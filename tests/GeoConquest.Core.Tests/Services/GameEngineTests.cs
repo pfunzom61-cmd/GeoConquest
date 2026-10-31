@@ -490,4 +490,19 @@ public sealed class GameEngineTests
 
         Assert.Equal(Enumerable.Range(1, events.Count), events.Select(@event => @event.Sequence));
     }
+
+    [Fact]
+    public void RecordNpcDecision_NpcsTurn_LogsTheJustificationWithoutChangingTheGame()
+    {
+        var game = GameBuilder.Create();
+        game.AdvanceToNextLivingPlayer();
+        var engine = CreateEngine();
+
+        var decision = engine.RecordNpcDecision(game, "P1", "Attacking Country 2 from Country 1 (5 vs 2): 93% win chance, +2 soldiers.");
+
+        Assert.Equal(GameEventType.NpcDecision, decision.Type);
+        Assert.Equal("P1", decision.ActorPlayerId);
+        Assert.Equal(game.LastEventSequence, decision.Sequence);
+        Assert.Equal(TurnPhase.Action, game.Phase);
+    }
 }

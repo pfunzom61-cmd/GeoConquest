@@ -24,7 +24,7 @@ public sealed class GameApplicationServiceTests
 
         _service = new GameApplicationService(
             engine,
-            new SkippingNpcTurnRunner(engine),
+            new NpcTurnExecutor(engine, new PassiveNpcStrategy()),
             _gameRepository,
             _gameEventRepository,
             Substitute.For<ICountryRepository>());
@@ -54,19 +54,6 @@ public sealed class GameApplicationServiceTests
         Assert.True(game.CurrentPlayer.IsHuman);
         Assert.Equal(2, game.RoundNumber);
         Assert.Equal(4, events.Count(gameEvent => gameEvent.Type == GameEventType.TurnSkipped));
-    }
-
-    [Fact]
-    public async Task SkipAsync_NpcOwesReinforcements_PlacesThemOnItsFirstCountryBeforeSkipping()
-    {
-        var game = GameBuilder.Create();
-        await _service.SkipAsync(game, CancellationToken.None);
-        await _service.AllocateReinforcementsAsync(game, new Dictionary<string, int> { ["C0"] = 2 }, CancellationToken.None);
-
-        await _service.SkipAsync(game, CancellationToken.None);
-
-        Assert.Equal(7, game.GetTerritory("C1").Soldiers);
-        Assert.Equal(3, game.RoundNumber);
     }
 
     [Fact]
