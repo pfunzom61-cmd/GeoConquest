@@ -54,6 +54,13 @@ public sealed class MongoContext
                 new CreateIndexOptions { Name = "ownerUserId_status" }),
             cancellationToken: cancellationToken);
 
+        // Serves the public Live Games list: in-progress games, newest activity first.
+        await Games.Indexes.CreateOneAsync(
+            new CreateIndexModel<Game>(
+                gameIndexes.Ascending(game => game.Status).Descending(game => game.UpdatedAt),
+                new CreateIndexOptions { Name = "status_updatedAt" }),
+            cancellationToken: cancellationToken);
+
         var eventIndexes = Builders<GameEvent>.IndexKeys;
         await GameEvents.Indexes.CreateOneAsync(
             new CreateIndexModel<GameEvent>(

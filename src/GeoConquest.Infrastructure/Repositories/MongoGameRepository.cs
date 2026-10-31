@@ -49,4 +49,11 @@ public sealed class MongoGameRepository(MongoContext context) : IGameRepository
             .SortByDescending(game => game.UpdatedAt)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<IReadOnlyList<Game>> ListInProgressAsync(CancellationToken cancellationToken) =>
+        await context.Games
+            .Find(game => game.Status == GameStatus.InProgress)
+            .SortByDescending(game => game.UpdatedAt)
+            .Limit(IGameRepository.MaxInProgressGames)
+            .ToListAsync(cancellationToken);
 }
