@@ -1,4 +1,5 @@
 using System.Net;
+using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 
 namespace GeoConquest.Web.Tests.Fakes;
@@ -20,6 +21,20 @@ public sealed partial class FormPostingClient(HttpClient client)
 
         var body = new Dictionary<string, string>(fields) { ["__RequestVerificationToken"] = token };
         return await client.PostAsync(actionUrl, new FormUrlEncodedContent(body));
+    }
+
+    /// <summary>
+    /// Posts JSON the way the board script does, with the anti-forgery token in a header. The token comes from the
+    /// form on <paramref name="tokenPageUrl"/>, which also sets the matching cookie for this client.
+    /// </summary>
+    public async Task<HttpResponseMessage> PostJsonAsync(string tokenPageUrl, string url, object? body = null)
+    {
+        var page = await client.GetStringAsync(tokenPageUrl);
+        var token = WebUtility.HtmlDecode(AntiforgeryTokenField().Match(page).Groups[1].Value);
+
+        using var request = new HttpRequestMessage(HttpMethod.Post, url) { Content = JsonContent.Create(body ?? new { }) };
+        request.Headers.Add("RequestVerificationToken", token);
+        return await client.SendAsync(request);
     }
 
     /// <summary>Posts without a token, which is what a forged cross-site request looks like.</summary>

@@ -1,0 +1,29 @@
+@model BoardPageViewModel
+@{
+    ViewData["Title"] = $"{Model.State.OwnerDisplayName}'s campaign";
+    var requestToken = ViewData["RequestToken"] as string;
+}
+
+@section Head {
+    @if (requestToken is not null)
+    {
+        <meta name="request-verification-token" content="@requestToken" />
+    }
+}
+
+<h1>@Model.State.OwnerDisplayName's campaign</h1>
+
+@if (!Model.State.ViewerIsOwner)
+{
+    <p class="spectating"><strong>Spectating — read only.</strong> Only the owner can play this game.</p>
+}
+
+<div id="board">
+    <noscript>The board needs JavaScript to show live state and take actions.</noscript>
+</div>
+
+<script type="application/json" id="board-data">@Json.Serialize(Model)</script>
+
+@section Scripts {
+    <script type="module" src="~/js/board.js" asp-append-version="true"></script>
+}

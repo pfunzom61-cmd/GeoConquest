@@ -5,13 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - GeoConquest</title>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    @await RenderSectionAsync("Head", required: false)
 </head>
 <body>
     <header>
         <a asp-controller="Home" asp-action="Index">GeoConquest</a>
-        <nav aria-label="Account">
+        <nav aria-label="Main">
+            <a asp-controller="LiveGames" asp-action="Index">Live games</a>
             @if (User.Identity?.IsAuthenticated == true)
             {
+                <a asp-controller="Games" asp-action="Index">My campaigns</a>
+                <a asp-controller="Games" asp-action="New">New campaign</a>
                 <a asp-controller="Account" asp-action="Profile">Profile</a>
                 <form method="post" asp-controller="Account" asp-action="Logout">
                     <button type="submit">Log out</button>

@@ -1,5 +1,7 @@
+using GeoConquest.Core.Interfaces;
 using GeoConquest.Infrastructure.Data;
 using GeoConquest.Infrastructure.Identity;
+using Microsoft.AspNetCore.DataProtection.Repositories;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -17,6 +19,9 @@ namespace GeoConquest.Web.Tests.Fakes;
 /// </summary>
 public sealed class GeoConquestWebFactory : WebApplicationFactory<Program>
 {
+    /// <summary>The games the app under test reads and writes, so a test can arrange or inspect them directly.</summary>
+    public InMemoryGameRepository Games { get; } = new();
+
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseEnvironment("Testing");
@@ -28,6 +33,16 @@ public sealed class GeoConquestWebFactory : WebApplicationFactory<Program>
         builder.ConfigureTestServices(services =>
         {
             services.Remove(services.Single(service => service.ImplementationType == typeof(DatabaseInitializer)));
+
+            services.RemoveAll<IGameRepository>();
+            services.AddSingleton<IGameRepository>(Games);
+            services.RemoveAll<IGameEventRepository>();
+            services.AddSingleton<IGameEventRepository>(new InMemoryGameEventRepository());
+            services.RemoveAll<ICountryRepository>();
+            services.AddSingleton<ICountryRepository>(new InMemoryCountryRepository());
+
+            services.RemoveAll<IXmlRepository>();
+            services.AddSingleton<IXmlRepository>(new InMemoryXmlRepository());
 
             services.RemoveAll<IUserStore<ApplicationUser>>();
             services.AddSingleton<IUserStore<ApplicationUser>>(new InMemoryUserStore());

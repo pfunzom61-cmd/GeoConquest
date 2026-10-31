@@ -19,6 +19,7 @@ public sealed class MongoContext
     private const string GamesCollectionName = "games";
     private const string GameEventsCollectionName = "gameEvents";
     private const string CountriesCollectionName = "countries";
+    private const string DataProtectionKeysCollectionName = "dataProtectionKeys";
 
     public MongoContext(IMongoClient client, IOptions<MongoDbOptions> options)
     {
@@ -38,6 +39,8 @@ public sealed class MongoContext
 
     public IMongoCollection<ApplicationUser> Users => Database.GetCollection<ApplicationUser>(UsersCollectionName);
 
+    public IMongoCollection<BsonDocument> DataProtectionKeys => Database.GetCollection<BsonDocument>(DataProtectionKeysCollectionName);
+
     /// <summary>
     /// Creates the indexes the application relies on. Safe to run on every start: existing indexes are left alone.
     /// Countries need none because the ISO code is their <c>_id</c>, which MongoDB keeps unique.
@@ -49,6 +52,13 @@ public sealed class MongoContext
             new CreateIndexModel<Game>(
                 gameIndexes.Ascending(game => game.OwnerUserId).Ascending(game => game.Status),
                 new CreateIndexOptions { Name = "ownerUserId_status" }),
+            cancellationToken: cancellationToken);
+
+        // Serves the public Live Games list: in-progress games, newest activity first.
+        await Games.Indexes.CreateOneAsync(
+            new CreateIndexModel<Game>(
+                gameIndexes.Ascending(game => game.Status).Descending(game => game.UpdatedAt),
+                new CreateIndexOptions { Name = "status_updatedAt" }),
             cancellationToken: cancellationToken);
 
         var eventIndexes = Builders<GameEvent>.IndexKeys;

@@ -6,6 +6,9 @@ namespace GeoConquest.Core.Interfaces;
 /// <summary>Stores games. Each game is saved as one document, guarded by its <see cref="Game.Version"/>.</summary>
 public interface IGameRepository
 {
+    /// <summary>The most games <see cref="ListInProgressAsync"/> returns, so a public page can never pull the whole collection.</summary>
+    const int MaxInProgressGames = 50;
+
     Task<Game?> GetByIdAsync(string gameId, CancellationToken cancellationToken);
 
     Task AddAsync(Game game, CancellationToken cancellationToken);
@@ -19,4 +22,7 @@ public interface IGameRepository
 
     /// <summary>Returns the owner's games, newest activity first, optionally only those with the given status.</summary>
     Task<IReadOnlyList<Game>> ListByOwnerAsync(string ownerUserId, GameStatus? status, CancellationToken cancellationToken);
+
+    /// <summary>Returns games still being played, most recently active first, at most <see cref="MaxInProgressGames"/> of them.</summary>
+    Task<IReadOnlyList<Game>> ListInProgressAsync(CancellationToken cancellationToken);
 }

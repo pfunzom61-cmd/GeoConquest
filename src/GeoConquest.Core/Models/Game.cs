@@ -95,6 +95,9 @@ public sealed class Game
 
     public Player CurrentPlayer => GetPlayer(_turnOrder[CurrentTurnIndex]);
 
+    /// <summary>The owner's player. Every game has exactly one human; the others are NPCs.</summary>
+    public Player HumanPlayer => _players.Single(player => player.IsHuman);
+
     public Player GetPlayer(string playerId) =>
         _players.FirstOrDefault(player => player.Id == playerId)
         ?? throw new GameRuleException("That player is not part of this game.");

@@ -4,6 +4,9 @@ using GeoConquest.Infrastructure.Data;
 using GeoConquest.Infrastructure.Data.Mapping;
 using GeoConquest.Infrastructure.Repositories;
 using GeoConquest.Infrastructure.Seed;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.AspNetCore.DataProtection.Repositories;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -35,6 +38,11 @@ public static class DependencyInjection
             return new MongoClient(settings);
         });
         services.AddSingleton<MongoContext>();
+
+        // The application name keeps the keys valid across hosts and redeploys.
+        services.AddDataProtection().SetApplicationName("GeoConquest");
+        services.AddSingleton<IXmlRepository, MongoDataProtectionKeyRepository>();
+        services.AddSingleton<IConfigureOptions<KeyManagementOptions>, MongoDataProtectionConfiguration>();
 
         services.AddSingleton<ICountryRepository, MongoCountryRepository>();
         services.AddSingleton<IGameRepository, MongoGameRepository>();

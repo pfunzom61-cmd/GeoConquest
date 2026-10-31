@@ -1,0 +1,51 @@
+@model LiveGamesViewModel
+@{
+    ViewData["Title"] = "Live Games";
+}
+
+<h1>Live Games</h1>
+<p>Games in progress right now. Pick one to watch; you do not need an account.</p>
+
+<form method="get" asp-controller="LiveGames" asp-action="Index" role="search">
+    <label for="search">Search by player or country</label>
+    <input id="search" name="search" type="search" value="@Model.Search" />
+    <button type="submit">Search</button>
+</form>
+
+@if (Model.Games.Count == 0)
+{
+    <p>No live games found.</p>
+}
+else
+{
+    <table>
+        <caption>Games in progress</caption>
+        <thead>
+            <tr>
+                <th scope="col">Commander</th>
+                <th scope="col">Country</th>
+                <th scope="col">Round</th>
+                <th scope="col">Now playing</th>
+                <th scope="col">Last active</th>
+                <th scope="col"><span class="visually-hidden">Watch</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var game in Model.Games)
+            {
+                <tr>
+                    <th scope="row">@game.OwnerDisplayName</th>
+                    <td>@game.CountryName</td>
+                    <td>@game.Round</td>
+                    <td>@game.CurrentPlayerName</td>
+                    <td>@game.LastActive.ToString("yyyy-MM-dd HH:mm") UTC</td>
+                    <td>
+                        <a asp-controller="Games" asp-action="Play" asp-route-id="@game.GameId">
+                            Watch<span class="visually-hidden"> @game.OwnerDisplayName's game</span>
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
