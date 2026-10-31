@@ -30,6 +30,10 @@ public sealed class GeoConquestWebFactory : WebApplicationFactory<Program>
         // Every test shares one client address, so ordinary tests must not use up the limit between them.
         builder.UseSetting("RateLimiting:Auth:PermitLimit", "1000");
 
+        // NPC turns still run in the background, just without the pause that lets people watch them.
+        builder.UseSetting("NpcPacing:NormalDelayMilliseconds", "0");
+        builder.UseSetting("NpcPacing:FastForwardDelayMilliseconds", "0");
+
         builder.ConfigureTestServices(services =>
         {
             services.Remove(services.Single(service => service.ImplementationType == typeof(DatabaseInitializer)));

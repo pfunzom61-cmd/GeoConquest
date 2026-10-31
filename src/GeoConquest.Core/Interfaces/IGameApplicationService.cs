@@ -3,14 +3,15 @@ using GeoConquest.Core.Models;
 namespace GeoConquest.Core.Interfaces;
 
 /// <summary>
-/// Runs one use case per call: apply the human's action through the engine, let the NPCs play until it is the human's
-/// turn again, save the game, then append the events. Callers load the game and check the user may play it first.
+/// Runs one use case per call: apply the human's action through the engine, then save the game, append the events and
+/// tell the viewers. If an NPC is next, the game is queued for the background runner, which plays the NPC turns one
+/// step at a time (see <see cref="INpcTurnProcessor"/>). Callers load the game and check the user may play it first.
 /// </summary>
 /// <exception cref="Exceptions.GameRuleException">The action breaks a rule; nothing is saved.</exception>
 /// <exception cref="Exceptions.ConcurrencyException">The game was changed elsewhere since it was loaded; nothing is saved.</exception>
 public interface IGameApplicationService
 {
-    /// <summary>Creates and stores a game for the owner, with NPCs playing until the owner's first turn.</summary>
+    /// <summary>Creates and stores a game for the owner. NPCs ahead of the owner in the turn order play in the background.</summary>
     Task<Game> CreateGameAsync(string ownerUserId, string ownerDisplayName, string humanCountryCode, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<GameEvent>> AllocateReinforcementsAsync(Game game, IReadOnlyDictionary<string, int> allocations, CancellationToken cancellationToken);

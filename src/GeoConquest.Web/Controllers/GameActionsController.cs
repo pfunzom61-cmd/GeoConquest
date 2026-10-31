@@ -18,7 +18,8 @@ namespace GeoConquest.Web.Controllers;
 public sealed class GameActionsController(
     IGameQueryService gameQueryService,
     IGameApplicationService gameApplicationService,
-    IAuthorizationService authorizationService) : Controller
+    IAuthorizationService authorizationService,
+    INpcTurnQueue npcTurnQueue) : Controller
 {
     [HttpPost("allocate")]
     public Task<IActionResult> Allocate(string gameId, [FromBody] AllocateReinforcementsRequest request, CancellationToken cancellationToken) =>
@@ -59,6 +60,11 @@ public sealed class GameActionsController(
         if (game is null)
         {
             return NotFound(new { error = "That game does not exist." });
+        }
+
+        if (game.AwaitsNpcTurn)
+        {
+            npcTurnQueue.Enqueue(game.Id); // self-heal, as when the board page is opened
         }
 
         var viewerIsOwner = (await authorizationService.AuthorizeAsync(User, game, GamePolicies.CanPlayGame)).Succeeded;

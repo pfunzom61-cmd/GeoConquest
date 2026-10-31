@@ -20,6 +20,7 @@ public sealed class GamesController(
     ISoldierAllocator soldierAllocator,
     IAuthorizationService authorizationService,
     IAntiforgery antiforgery,
+    INpcTurnQueue npcTurnQueue,
     UserManager<ApplicationUser> userManager) : Controller
 {
     private const int RecentEventCount = 100;
@@ -73,6 +74,13 @@ public sealed class GamesController(
         if (game is null)
         {
             return NotFound();
+        }
+
+        // Self-heal: opening a game whose NPC turns stalled (for example after repeated failures) gets it moving again.
+        // The queue ignores a game that is already waiting or being played.
+        if (game.AwaitsNpcTurn)
+        {
+            npcTurnQueue.Enqueue(game.Id);
         }
 
         var viewerIsOwner = (await authorizationService.AuthorizeAsync(User, game, GamePolicies.CanPlayGame)).Succeeded;

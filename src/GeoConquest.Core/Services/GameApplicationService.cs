@@ -1,4 +1,3 @@
-using GeoConquest.Core.Enums;
 using GeoConquest.Core.Interfaces;
 using GeoConquest.Core.Models;
 
@@ -7,8 +6,8 @@ namespace GeoConquest.Core.Services;
 /// <inheritdoc />
 public sealed class GameApplicationService(
     IGameEngine gameEngine,
-    INpcTurnRunner npcTurnRunner,
     IGameProgressRecorder progressRecorder,
+    INpcTurnQueue npcTurnQueue,
     ICountryRepository countryRepository) : IGameApplicationService
 {
     public async Task<Game> CreateGameAsync(
@@ -17,10 +16,15 @@ public sealed class GameApplicationService(
         var catalogue = await countryRepository.GetAllAsync(cancellationToken);
         var creation = gameEngine.CreateGame(ownerUserId, ownerDisplayName, humanCountryCode, catalogue);
 
-        var events = new List<GameEvent>(creation.Events);
-        PlayNpcTurnsUntilHumanTurn(creation.Game, events);
+        try
+        {
+            await progressRecorder.RecordNewGameAsync(creation.Game, creation.Events, cancellationToken);
+        }
+        finally
+        {
+            QueueNpcTurns(creation.Game);
+        }
 
-        await progressRecorder.RecordNewGameAsync(creation.Game, events, cancellationToken);
         return creation.Game;
     }
 
@@ -51,18 +55,27 @@ public sealed class GameApplicationService(
     private async Task<IReadOnlyList<GameEvent>> ApplyAsync(
         Game game, Func<string, IReadOnlyList<GameEvent>> humanAction, CancellationToken cancellationToken)
     {
-        var events = new List<GameEvent>(humanAction(game.HumanPlayer.Id));
-        PlayNpcTurnsUntilHumanTurn(game, events);
+        var events = humanAction(game.HumanPlayer.Id);
 
-        await progressRecorder.RecordProgressAsync(game, events, cancellationToken);
+        try
+        {
+            await progressRecorder.RecordProgressAsync(game, events, cancellationToken);
+        }
+        finally
+        {
+            // Even if writing the log failed after the game was saved, the NPCs must still get their turn. If the game
+            // was not saved at all, the runner finds it still on the human's turn and does nothing.
+            QueueNpcTurns(game);
+        }
+
         return events;
     }
 
-    private void PlayNpcTurnsUntilHumanTurn(Game game, List<GameEvent> events)
+    private void QueueNpcTurns(Game game)
     {
-        while (game.Status == GameStatus.InProgress && !game.CurrentPlayer.IsHuman)
+        if (game.AwaitsNpcTurn)
         {
-            events.AddRange(npcTurnRunner.PlayStep(game));
+            npcTurnQueue.Enqueue(game.Id);
         }
     }
 }

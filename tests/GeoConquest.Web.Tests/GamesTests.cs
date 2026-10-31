@@ -42,7 +42,7 @@ public sealed class GamesTests(GeoConquestWebFactory factory) : IClassFixture<Ge
     }
 
     [Fact]
-    public async Task Skip_ByTheOwner_LetsNpcsPlayAndReturnsTheNextHumanTurn()
+    public async Task Skip_ByTheOwner_ReturnsAtOnceAndTheBackgroundRunnerPlaysTheNpcTurns()
     {
         var owner = await factory.RegisterAsync();
         var gameId = await GameTestSupport.CreateGameAsync(owner);
@@ -51,12 +51,13 @@ public sealed class GamesTests(GeoConquestWebFactory factory) : IClassFixture<Ge
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
         var result = await response.Content.ReadFromJsonAsync<JsonElement>();
-        var state = result.GetProperty("state");
-        Assert.Equal(2, state.GetProperty("round").GetInt32());
-        Assert.Equal("human", state.GetProperty("currentPlayerId").GetString());
-        Assert.Equal("Reinforce", state.GetProperty("phase").GetString());
         Assert.Contains(result.GetProperty("newEvents").EnumerateArray(), gameEvent => gameEvent.GetProperty("type").GetString() == "TurnSkipped");
-        Assert.Contains(result.GetProperty("newEvents").EnumerateArray(), gameEvent => gameEvent.GetProperty("type").GetString() == "NpcDecision");
+
+        var state = await GameTestSupport.WaitForStateAsync(owner, gameId, current =>
+            current.GetProperty("round").GetInt32() == 2 && current.GetProperty("currentPlayerId").GetString() == "human");
+        Assert.Equal("Reinforce", state.GetProperty("phase").GetString());
+        var board = await (await owner.Client.GetAsync($"/games/{gameId}")).Content.ReadAsStringAsync();
+        Assert.Contains("NpcDecision", board);
     }
 
     [Fact]

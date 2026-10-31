@@ -13,6 +13,7 @@ public sealed class GameApplicationServiceTests
     private readonly IGameRepository _gameRepository = Substitute.For<IGameRepository>();
     private readonly IGameEventRepository _gameEventRepository = Substitute.For<IGameEventRepository>();
     private readonly IGameUpdatePublisher _publisher = Substitute.For<IGameUpdatePublisher>();
+    private readonly INpcTurnQueue _npcTurnQueue = Substitute.For<INpcTurnQueue>();
     private readonly GameApplicationService _service;
 
     public GameApplicationServiceTests()
@@ -25,8 +26,8 @@ public sealed class GameApplicationServiceTests
 
         _service = new GameApplicationService(
             engine,
-            new NpcTurnExecutor(engine, new PassiveNpcStrategy()),
             new GameProgressRecorder(_gameRepository, _gameEventRepository, _publisher),
+            _npcTurnQueue,
             Substitute.For<ICountryRepository>());
     }
 
@@ -77,15 +78,15 @@ public sealed class GameApplicationServiceTests
     }
 
     [Fact]
-    public async Task SkipAsync_OtherPlayersFollow_NpcsPlayUntilItIsTheHumansTurnAgain()
+    public async Task SkipAsync_NpcsFollow_QueuesTheGameInsteadOfPlayingThem()
     {
         var game = GameBuilder.Create();
 
         var events = await _service.SkipAsync(game, CancellationToken.None);
 
-        Assert.True(game.CurrentPlayer.IsHuman);
-        Assert.Equal(2, game.RoundNumber);
-        Assert.Equal(4, events.Count(gameEvent => gameEvent.Type == GameEventType.TurnSkipped));
+        Assert.False(game.CurrentPlayer.IsHuman);
+        Assert.Equal([GameEventType.TurnSkipped, GameEventType.TurnStarted], events.Select(gameEvent => gameEvent.Type));
+        _npcTurnQueue.Received(1).Enqueue(game.Id);
     }
 
     [Fact]
@@ -99,6 +100,19 @@ public sealed class GameApplicationServiceTests
         await _service.SkipAsync(game, CancellationToken.None);
 
         await _gameEventRepository.Received(2).AppendAsync(Arg.Any<IReadOnlyCollection<GameEvent>>(), Arg.Any<CancellationToken>());
+    }
+
+    [Fact]
+    public async Task SkipAsync_EventsCannotBeStoredAfterTheGameIsSaved_StillQueuesTheNpcTurns()
+    {
+        _gameEventRepository
+            .AppendAsync(Arg.Any<IReadOnlyCollection<GameEvent>>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromException(new IOException("network")));
+        var game = GameBuilder.Create();
+
+        await Assert.ThrowsAsync<IOException>(() => _service.SkipAsync(game, CancellationToken.None));
+
+        _npcTurnQueue.Received(1).Enqueue(game.Id);
     }
 
     [Fact]

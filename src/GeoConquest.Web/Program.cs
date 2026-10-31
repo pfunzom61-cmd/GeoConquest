@@ -14,6 +14,7 @@ builder.Services.AddGeoConquestIdentity().AddMongoIdentityStores();
 builder.Services.AddGeoConquestAuthorization();
 builder.Services.AddCoreServices();
 builder.Services.AddGeoConquestRealtime();
+builder.Services.AddNpcTurnRunner();
 
 var app = builder.Build();
 
