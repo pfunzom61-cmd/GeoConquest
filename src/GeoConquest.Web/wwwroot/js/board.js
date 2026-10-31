@@ -3,9 +3,11 @@
 // While the NPCs play, the server pushes their moves (board-live.js); the board reads the same data whether it
 // arrives by push, by an action's response, or by asking for a sync.
 
+import { hasMissedEvents, mergeEvents, syncCursor } from "./board-events.js";
 import { startLiveUpdates } from "./board-live.js";
 
-const MAX_EVENTS = 100;
+// Long enough for the commentary on the game's last roll to arrive after the game has ended.
+const GAME_OVER_LISTEN_MS = 5000;
 
 const LIVE_STATUS_TEXT = {
     connecting: "Live updates: connecting…",
@@ -26,17 +28,14 @@ let liveStatus = "connecting";
 let syncing = false;
 let syncAgain = false;
 let live = null;
-
-function lastSequence() {
-    return events.length > 0 ? events[events.length - 1].sequence : 0;
-}
+let stopListeningTimer = null;
 
 /** Adds events not seen before. Returns true if any were new. */
 function addEvents(incoming) {
-    const known = lastSequence();
-    const fresh = incoming.filter((gameEvent) => gameEvent.sequence > known);
-    events = [...events, ...fresh].slice(-MAX_EVENTS);
-    return fresh.length > 0;
+    const merged = mergeEvents(events, incoming);
+    const changed = merged !== events;
+    events = merged;
+    return changed;
 }
 
 /** State from the server's answer to this viewer (an action or a sync). Older versions are ignored. */
@@ -71,18 +70,14 @@ function onLiveState(incoming) {
 }
 
 function onLiveEvents(incoming) {
-    const fresh = incoming.filter((gameEvent) => gameEvent.sequence > lastSequence());
-    if (fresh.length === 0) {
-        return;
-    }
-
-    if (fresh[0].sequence > lastSequence() + 1) {
+    if (hasMissedEvents(events, incoming)) {
         sync(); // a message was missed, so ask for everything after what we have
         return;
     }
 
-    addEvents(fresh);
-    render();
+    if (addEvents(incoming)) {
+        refreshLogs();
+    }
 }
 
 /** Loads the latest state and any events missed. Used on connect, after a dropped connection, on conflicts, and when polling. */
@@ -96,14 +91,16 @@ async function sync() {
     try {
         do {
             syncAgain = false;
-            const response = await fetch(`/api/games/${state.gameId}/sync?afterSequence=${lastSequence()}`);
+            const response = await fetch(`/api/games/${state.gameId}/sync?afterSequence=${syncCursor(events, Date.now())}`);
             if (response.ok) {
                 const result = await response.json();
                 const stateChanged = applyOwnState(result.state);
                 const eventsChanged = addEvents(result.newEvents);
-                if (stateChanged || eventsChanged) {
+                if (stateChanged) {
                     render();
                     afterStateChange();
+                } else if (eventsChanged) {
+                    refreshLogs();
                 }
             }
         } while (syncAgain);
@@ -112,10 +109,10 @@ async function sync() {
     }
 }
 
-/** Once the game is over nothing more will happen, so stop listening. */
+/** Once the game is over only the last roll's commentary can still arrive, so stop listening shortly afterwards. */
 function afterStateChange() {
     if (state.status !== "InProgress") {
-        live?.stop();
+        stopListeningTimer ??= setTimeout(() => live?.stop(), GAME_OVER_LISTEN_MS);
     }
 }
 
@@ -238,7 +235,7 @@ function buildFastForwardControl() {
 /** The latest attack, round by round, drawn from the events so a spectator sees exactly what the owner sees. */
 function buildBattleLog() {
     const startIndex = events.map((gameEvent) => gameEvent.type).lastIndexOf("AttackStarted");
-    const section = el("section", { "aria-label": "Latest battle" }, el("h2", { textContent: "Latest battle" }));
+    const section = el("section", { id: "battle-log", "aria-label": "Latest battle" }, el("h2", { textContent: "Latest battle" }));
 
     if (startIndex < 0) {
         section.append(el("p", { textContent: "No attack has been made yet." }));
@@ -248,10 +245,17 @@ function buildBattleLog() {
     section.append(el("p", { textContent: events[startIndex].message }));
     const rounds = events.slice(startIndex + 1)
         .filter((gameEvent) => gameEvent.type === "DiceRolled")
-        .map((gameEvent, index) => el("li", {
-            textContent: `Round ${index + 1}: attacker rolled ${gameEvent.attackerDice.join(", ")}; defender rolled ${gameEvent.defenderDice.join(", ")}. ` +
-                `Attacker loses ${gameEvent.attackerLosses}, defender loses ${gameEvent.defenderLosses}.`,
-        }));
+        .map((gameEvent, index) => {
+            const round = el("li", {
+                textContent: `Round ${index + 1}: attacker rolled ${gameEvent.attackerDice.join(", ")}; defender rolled ${gameEvent.defenderDice.join(", ")}. ` +
+                    `Attacker loses ${gameEvent.attackerLosses}, defender loses ${gameEvent.defenderLosses}.`,
+            });
+            const commentary = events.find((candidate) => candidate.type === "Commentary" && candidate.sequence === gameEvent.sequence + 1);
+            if (commentary) {
+                round.append(el("p", { textContent: describeCommentary(commentary) }));
+            }
+            return round;
+        });
     section.append(el("ol", {}, ...rounds));
     return section;
 }
@@ -364,7 +368,16 @@ function buildActionPanel() {
     return panel;
 }
 
+/** Model text is untrusted, so it only ever reaches the page as textContent. The label says who wrote the line. */
+function describeCommentary(gameEvent) {
+    return `${gameEvent.commentarySource === "Ai" ? "AI commentary" : "Template commentary"}: ${gameEvent.message}`;
+}
+
 function describeEvent(gameEvent) {
+    if (gameEvent.type === "Commentary") {
+        return `#${gameEvent.sequence} ${describeCommentary(gameEvent)}`;
+    }
+
     // An NPC's reasoning is shown with its name so it reads as their explanation, not as a game result.
     const npcName = gameEvent.type === "NpcDecision" ? playerName(gameEvent.actorPlayerId) : "";
     return npcName ? `#${gameEvent.sequence} ${npcName} (NPC) explains: ${gameEvent.message}` : `#${gameEvent.sequence} ${gameEvent.message}`;
@@ -373,9 +386,15 @@ function describeEvent(gameEvent) {
 function buildEventLog() {
     const entries = [...events].reverse().map((gameEvent) => el("li", { textContent: describeEvent(gameEvent) }));
 
-    return el("section", { "aria-label": "Event log" },
+    return el("section", { id: "event-log", "aria-label": "Event log" },
         el("h2", { textContent: "Event log (latest first)" }),
         el("ul", {}, ...entries));
+}
+
+/** Redraws only the logs. New events can arrive at any moment, and must not wipe a form the owner is filling in. */
+function refreshLogs() {
+    document.getElementById("battle-log")?.replaceWith(buildBattleLog());
+    document.getElementById("event-log")?.replaceWith(buildEventLog());
 }
 
 function render() {

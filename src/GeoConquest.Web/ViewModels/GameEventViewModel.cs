@@ -16,7 +16,9 @@ public sealed record GameEventViewModel(
     IReadOnlyList<int>? AttackerDice,
     IReadOnlyList<int>? DefenderDice,
     int? AttackerLosses,
-    int? DefenderLosses)
+    int? DefenderLosses,
+    string? CommentarySource,
+    DateTimeOffset CreatedAt)
 {
     public static GameEventViewModel From(GameEvent gameEvent) =>
         new(
@@ -29,5 +31,7 @@ public sealed record GameEventViewModel(
             gameEvent.Payload?.AttackerDice,
             gameEvent.Payload?.DefenderDice,
             gameEvent.Payload?.AttackerLosses,
-            gameEvent.Payload?.DefenderLosses);
+            gameEvent.Payload?.DefenderLosses,
+            gameEvent.Payload?.CommentarySource?.ToString(),
+            gameEvent.CreatedAt);
 }
