@@ -149,6 +149,29 @@ public sealed partial class AccountTests : IClassFixture<GeoConquestWebFactory>
         Assert.Equal(HttpStatusCode.TooManyRequests, response.StatusCode);
     }
 
+    [Fact]
+    public async Task Login_ThrottleIsPerForwardedClientAddress_NotPerProxy()
+    {
+        using var factory = _factory.WithWebHostBuilder(builder =>
+            builder.UseSetting("RateLimiting:Auth:PermitLimit", "1"));
+        var firstVisitor = NewClientBehindProxy(factory, "203.0.113.10");
+        var secondVisitor = NewClientBehindProxy(factory, "203.0.113.20");
+
+        await LoginAsync(firstVisitor, UniqueEmail(), "WrongPass1");
+        var firstVisitorAgain = await LoginAsync(firstVisitor, UniqueEmail(), "WrongPass1");
+        var secondVisitorFirstTry = await LoginAsync(secondVisitor, UniqueEmail(), "WrongPass1");
+
+        Assert.Equal(HttpStatusCode.TooManyRequests, firstVisitorAgain.StatusCode);
+        Assert.NotEqual(HttpStatusCode.TooManyRequests, secondVisitorFirstTry.StatusCode);
+    }
+
+    private static FormPostingClient NewClientBehindProxy(WebApplicationFactory<Program> factory, string clientAddress)
+    {
+        var client = factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+        client.DefaultRequestHeaders.Add("X-Forwarded-For", clientAddress);
+        return new FormPostingClient(client);
+    }
+
     private FormPostingClient NewClient() =>
         new(_factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false }));
 

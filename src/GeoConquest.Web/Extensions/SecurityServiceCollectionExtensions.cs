@@ -36,8 +36,12 @@ public static class SecurityServiceCollectionExtensions
 
         // The host terminates TLS at its proxy. Without this every visitor appears to share the proxy's address,
         // so one person could use up everyone's rate limit, and requests would not be recognised as HTTPS.
+        // ForwardLimit is how many proxy hops to trust, counted from the end of X-Forwarded-For. 1 is safe against
+        // spoofed headers; raise it (ForwardedHeaders__ForwardLimit) only if the host puts a second proxy in front.
+        var forwardLimit = configuration.GetValue("ForwardedHeaders:ForwardLimit", 1);
         services.Configure<ForwardedHeadersOptions>(options =>
         {
+            options.ForwardLimit = forwardLimit;
             options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
             options.KnownIPNetworks.Clear();
             options.KnownProxies.Clear();
