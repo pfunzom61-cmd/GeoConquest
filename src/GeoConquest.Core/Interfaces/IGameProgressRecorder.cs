@@ -18,4 +18,10 @@ public interface IGameProgressRecorder
     /// </summary>
     /// <exception cref="Exceptions.ConcurrencyException">The game was changed elsewhere; nothing was stored or published.</exception>
     Task RecordProgressAsync(Game game, IReadOnlyList<GameEvent> events, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Appends a round's commentary in the log position reserved for it and publishes it. The game is not saved, so
+    /// this cannot conflict with whatever move is being made at the same moment.
+    /// </summary>
+    Task RecordCommentaryAsync(GameEvent commentary);
 }

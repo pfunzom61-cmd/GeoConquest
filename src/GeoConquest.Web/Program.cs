@@ -15,6 +15,7 @@ builder.Services.AddGeoConquestAuthorization();
 builder.Services.AddCoreServices();
 builder.Services.AddGeoConquestRealtime();
 builder.Services.AddNpcTurnRunner();
+builder.Services.AddBattleCommentaryRunner();
 
 var app = builder.Build();
 
