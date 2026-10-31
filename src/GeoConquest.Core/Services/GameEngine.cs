@@ -131,6 +131,9 @@ public sealed class GameEngine(
         var defendingTerritory = game.GetTerritory(battle.DefenderCountryCode);
         var defendingPlayer = game.GetPlayer(defendingTerritory.OwnerPlayerId);
 
+        var attackerSoldiersBefore = attackingTerritory.Soldiers;
+        var defenderSoldiersBefore = defendingTerritory.Soldiers;
+
         var round = battleService.RollRound(game);
 
         var events = new List<GameEvent>
@@ -150,8 +153,19 @@ public sealed class GameEngine(
                     DefenderDice = round.DefenderDice,
                     AttackerLosses = round.AttackerLosses,
                     DefenderLosses = round.DefenderLosses,
+                    AttackerSoldiersBefore = attackerSoldiersBefore,
+                    AttackerSoldiersAfter = attackingTerritory.Soldiers,
+                    DefenderSoldiersBefore = defenderSoldiersBefore,
+                    DefenderSoldiersAfter = defenderSoldiersBefore - round.DefenderLosses,
+                    BattleRoundNumber = battle.Rounds.Count,
+                    GameRoundNumber = game.RoundNumber,
+                    BattleAttackerLosses = battle.Rounds.Sum(fought => fought.AttackerLosses),
+                    BattleDefenderLosses = battle.Rounds.Sum(fought => fought.DefenderLosses),
+                    Outcome = round.Outcome,
                 }),
         };
+
+        game.NextEventSequence(); // the slot GameEvent.ReservedCommentarySequence points at, saved with this roll
 
         switch (round.Outcome)
         {

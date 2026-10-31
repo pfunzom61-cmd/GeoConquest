@@ -184,6 +184,16 @@ public static class MongoMappingConfiguration
             map.MapMember(payload => payload.DefenderDice);
             map.MapMember(payload => payload.AttackerLosses);
             map.MapMember(payload => payload.DefenderLosses);
+            map.MapMember(payload => payload.AttackerSoldiersBefore);
+            map.MapMember(payload => payload.AttackerSoldiersAfter);
+            map.MapMember(payload => payload.DefenderSoldiersBefore);
+            map.MapMember(payload => payload.DefenderSoldiersAfter);
+            map.MapMember(payload => payload.BattleRoundNumber);
+            map.MapMember(payload => payload.GameRoundNumber);
+            map.MapMember(payload => payload.BattleAttackerLosses);
+            map.MapMember(payload => payload.BattleDefenderLosses);
+            map.MapMember(payload => payload.Outcome);
+            map.MapMember(payload => payload.CommentarySource);
         });
 
     private static void MapGameEvent() =>
