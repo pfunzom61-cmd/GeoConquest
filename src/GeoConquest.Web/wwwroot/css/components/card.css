@@ -176,3 +176,72 @@
         transform: rotate(-4deg) scale(0.94);
     }
 }
+
+/* The same card, used as a list entry, an action on the landing page, or a player's file. */
+.gc-card__action {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gc-space-2);
+    margin: 0;
+    padding: 0 var(--gc-space-3) var(--gc-space-3);
+}
+
+.gc-card__text {
+    margin: 0;
+}
+
+.gc-card--action .gc-card__name {
+    font-size: var(--gc-text-card);
+}
+
+.gc-card--action .gc-card__body {
+    flex: 1;
+}
+
+.gc-card--file {
+    max-inline-size: 40rem;
+}
+
+.gc-card--file .gc-card__name {
+    font-family: var(--gc-font-display);
+    font-size: var(--gc-text-section);
+}
+
+.gc-counter--small {
+    min-inline-size: 0;
+    font-size: var(--gc-text-card);
+}
+
+.gc-file__details {
+    margin: 0;
+}
+
+.gc-file__details dt,
+.gc-file__stat dt {
+    font-size: var(--gc-text-small);
+}
+
+.gc-file__details dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+    font-weight: 600;
+}
+
+.gc-file__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+    gap: var(--gc-space-3);
+    margin: 0;
+    padding: var(--gc-space-4) var(--gc-space-3) 0;
+}
+
+.gc-file__stat dd {
+    margin: 0;
+    text-align: start;
+}
+
+.gc-file__note {
+    margin: 0;
+    padding: var(--gc-space-3);
+    font-size: var(--gc-text-small);
+}

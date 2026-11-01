@@ -145,3 +145,17 @@
     align-items: center;
     min-block-size: 1.5rem;
 }
+
+/* A responsive grid of dossier cards: lists of campaigns and games, and the landing page's actions. */
+.gc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(16rem, 100%), 1fr));
+    gap: var(--gc-space-3) var(--gc-space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.gc-grid--actions {
+    grid-template-columns: repeat(auto-fit, minmax(min(15rem, 100%), 1fr));
+}

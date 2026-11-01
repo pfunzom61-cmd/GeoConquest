@@ -38,8 +38,9 @@
     font-size: var(--gc-text-small);
 }
 
-/* The error is marked by a bar as well as by colour. */
-.gc-error {
+/* The error is marked by a bar as well as by colour. MVC's own summary class gets the same look. */
+.gc-error,
+.validation-summary-errors {
     margin-block: 0 var(--gc-space-3);
     padding: var(--gc-space-2) var(--gc-space-3);
     font-weight: 600;
@@ -60,4 +61,13 @@
     margin-block-end: var(--gc-space-2);
     font-weight: 700;
     font-size: var(--gc-text-card);
+}
+
+.validation-summary-errors ul {
+    margin: 0;
+    padding-inline-start: var(--gc-space-4);
+}
+
+.validation-summary-valid {
+    display: none;
 }

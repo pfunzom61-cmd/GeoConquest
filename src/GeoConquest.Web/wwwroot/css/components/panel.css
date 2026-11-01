@@ -1,0 +1,15 @@
+/* A slip of paper on the table: forms, orders, summaries, empty states and error pages. */
+
+.gc-panel {
+    --gc-focus: var(--gc-ink);
+
+    padding: var(--gc-space-4);
+    color: var(--gc-ink);
+    background-color: var(--gc-paper);
+    border-block-start: 6px solid var(--gc-ink);
+}
+
+.gc-panel__title {
+    margin-block-end: var(--gc-space-3);
+    font-size: var(--gc-text-section);
+}

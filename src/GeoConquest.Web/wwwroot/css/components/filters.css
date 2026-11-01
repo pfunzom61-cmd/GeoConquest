@@ -1,0 +1,30 @@
+/* The search and filter bar above a list: the same selects as the board, on the table. */
+
+.gc-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--gc-space-3) var(--gc-space-4);
+    margin-block-end: var(--gc-space-5);
+}
+
+.gc-filters__field {
+    display: grid;
+    gap: var(--gc-space-1);
+    min-inline-size: 10rem;
+}
+
+.gc-filters__field--wide {
+    flex: 1 1 16rem;
+}
+
+.gc-filters__label {
+    font-size: var(--gc-text-small);
+    font-weight: 600;
+}
+
+/* These fields sit on the dark table, so the focus ring is paper. */
+.gc-filters .gc-input,
+.gc-filters .gc-select {
+    --gc-focus: var(--gc-paper);
+}
