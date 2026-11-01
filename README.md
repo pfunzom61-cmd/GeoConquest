@@ -59,7 +59,35 @@ _To be completed._
 
 ## Deployment
 
-_To be completed._
+The app runs as one Docker container built from the [Dockerfile](Dockerfile), which publishes `src/GeoConquest.Web`.
+It listens on the `PORT` environment variable (Render sets it; the default is 8080).
+
+**Environment variables** (names only; put the values in the host's dashboard, never in the repository):
+
+| Variable | Needed | Purpose |
+|---|---|---|
+| `MongoDb__ConnectionString` | required | MongoDB Atlas connection string. The app refuses to start without it. |
+| `MongoDb__DatabaseName` | optional | Database name. Defaults to `geoconquest`. |
+| `ASPNETCORE_ENVIRONMENT` | optional | Set to `Production` on the host. |
+| `Groq__ApiKey` | optional | Turns on AI commentary. Without it every line comes from the template. |
+| `Groq__Model` | optional | Groq model name. Defaults to `openai/gpt-oss-20b`. |
+
+`PORT` is set by the host and is not something to configure. `ForwardedHeaders__ForwardLimit` is only needed if two
+different visitors share one login rate-limit bucket (raise it from 1 to 2).
+
+**Render settings.** Web Service, runtime Docker, free instance type, health check path `/health`, auto-deploy from the
+deployment branch. In Atlas, Network Access must allow the host's addresses; the free tier has no fixed addresses, so it
+needs `0.0.0.0/0`.
+
+**Single instance only.** Live updates use SignalR groups held in memory and the NPC turn runner lives inside the web
+process, so a second instance would split viewers and could play the same NPC turn twice. Do not scale out without
+adding a SignalR backplane.
+
+**Spin-down.** On Render's free tier the service sleeps after 15 minutes without traffic and takes about a minute to wake.
+NPCs do not play while it sleeps; unfinished games are picked up again when it wakes. An external pinger on
+`/health` (for example UptimeRobot) keeps it awake.
+
+**Health check.** `GET /health` returns 200 when MongoDB answers a ping and 503 when it does not.
 
 ## Credentials
 
