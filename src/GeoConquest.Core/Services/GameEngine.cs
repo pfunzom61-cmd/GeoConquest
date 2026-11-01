@@ -117,8 +117,9 @@ public sealed class GameEngine(
                 game,
                 GameEventType.AttackStarted,
                 player.Id,
-                $"{Wording.PlayerName(player)} attacks {Wording.HeldCountry(defendingTerritory, game.GetPlayer(defendingTerritory.OwnerPlayerId))} " +
-                $"({Wording.Count(defendingTerritory.Soldiers, "soldier")}) from {attackingTerritory.CountryName} ({Wording.Count(attackingTerritory.Soldiers, "soldier")}).",
+                $"{Wording.PlayerName(player)} attacks {defendingTerritory.CountryName} ({Wording.Count(defendingTerritory.Soldiers, "soldier")}), " +
+                $"held by {Wording.PlayerName(game.GetPlayer(defendingTerritory.OwnerPlayerId))}, " +
+                $"from {attackingTerritory.CountryName} ({Wording.Count(attackingTerritory.Soldiers, "soldier")}).",
                 new GameEventPayload { FromCountryCode = attackerCountryCode, ToCountryCode = defenderCountryCode }),
         ];
     }

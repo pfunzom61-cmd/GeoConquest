@@ -62,6 +62,21 @@ public sealed class StrategicNpcStrategyTests
         Assert.Equal(new Dictionary<string, int> { ["C4"] = 4 }, decision.Allocations);
     }
 
+    [Fact]
+    public void DecideReinforcements_ThreatenedCountryIsAlsoTheStrongestBase_JustifiesItOnce()
+    {
+        // Country 1 needs 1 soldier to be safe from the stack of 9 and is also the strongest base, so it gets 1 + 3.
+        var game = GameBuilder.Create(9, 6, 2, 2, 2);
+        Own(game, "C4", "P1");
+        game.StartTurn(4);
+
+        var decision = _strategy.DecideReinforcements(game, game.GetPlayer("P1"));
+
+        Assert.Equal(4, decision.Allocations["C1"]);
+        Assert.Contains("4 in Country 1", decision.Justification);
+        Assert.Single(System.Text.RegularExpressions.Regex.Matches(decision.Justification, "in Country 1"));
+    }
+
     [Theory]
     [InlineData(1)]
     [InlineData(5)]

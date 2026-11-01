@@ -27,6 +27,8 @@ public sealed class CommentaryOutputGuardTests
     [InlineData("Brazil rolls four dice against Chile.")]
     [InlineData("Brazil gives zero ground to Chile.")]
     [InlineData("Ten cheers for Brazil against Chile.")]
+    [InlineData("Brazil rolls sixes and a pair of fives against Chile.")] // plural number words
+    [InlineData("Brazil wins twice against Chile.")] // counting words
     public void Clean_DigitOrNumberWord_IsRejected(string rawText)
     {
         Assert.Null(CommentaryOutputGuard.Clean(rawText, BattleContexts.BrazilAttacksChile));
