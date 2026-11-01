@@ -48,7 +48,8 @@
     --gc-text-card: 1.25rem;
     --gc-text-section: 2rem;
     --gc-text-counter: 2.75rem;
-    --gc-text-title: clamp(2.5rem, 9vw, 4rem);
+    --gc-text-title: clamp(1.875rem, 6vw, 2.75rem);
+    --gc-text-hero: clamp(2.5rem, 9vw, 4.5rem);
     --gc-leading-body: 1.5;
     --gc-leading-heading: 1.1;
     --gc-measure: 68ch;

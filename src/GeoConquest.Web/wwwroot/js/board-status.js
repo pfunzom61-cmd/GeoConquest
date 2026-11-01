@@ -3,7 +3,6 @@
 
 import { setText } from "./dom.js";
 import { countryCount, phaseLabel, resultTitle, turnTitle } from "./board-text.js";
-import { prefersReducedMotion, replay } from "./motion.js";
 
 // Written out, not just coloured, so the connection state is clear to everyone.
 const LIVE_STATUS_TEXT = {
@@ -32,22 +31,27 @@ export function patchBanner(state) {
     banner.querySelector('[data-bind="fast-forward-note"]').hidden = !state.isFastForward;
 }
 
-export function patchPlayers(state, animate) {
+/** Players still in the game stay in the main list; eliminated ones move under the collapsed "Eliminated" line. */
+export function patchPlayers(state) {
+    const active = document.querySelector("[data-players-active]");
+    const out = document.querySelector("[data-players-eliminated]");
+
     for (const item of document.querySelectorAll("[data-player]")) {
         const player = state.players.find((candidate) => candidate.id === item.dataset.player);
-        const stamp = item.querySelector("[data-stamp]");
 
         setText(item, "player-count", countryCount(player.countryCount));
         item.querySelector('[data-bind="player-now"]').hidden = state.status !== "InProgress" || player.id !== state.currentPlayerId;
         item.dataset.eliminated = String(player.isEliminated);
 
-        if (stamp.hidden === player.isEliminated) {
-            stamp.hidden = !player.isEliminated;
-            if (player.isEliminated && animate && !prefersReducedMotion()) {
-                replay(stamp, "gc-stamp--slam");
-            }
+        const wantedList = player.isEliminated ? out : active;
+        if (item.parentElement !== wantedList) {
+            wantedList.append(item);
         }
     }
+
+    const eliminated = state.players.filter((player) => player.isEliminated).length;
+    setText(document, "eliminated-count", String(eliminated));
+    document.querySelector("[data-players-out]").hidden = eliminated === 0;
 }
 
 /** When the game ends the orders go and the summary appears. The server also leaves the orders out of a finished game's page. */

@@ -1,19 +1,23 @@
+@* Players still in the game are listed; eliminated ones are gathered under one collapsed line, and the big stamp stays on the cards. *@
 @model GameStateViewModel
+@{
+    var eliminated = Model.Players.Count(player => player.IsEliminated);
+}
 <details class="gc-panel gc-board__players gc-players" open>
     <summary class="gc-players__summary"><h2 class="gc-heading gc-panel__title">Players</h2></summary>
-    <ul class="gc-players__list" data-players>
-        @foreach (var player in Model.Players)
+    <ul class="gc-players__list" data-players-active>
+        @foreach (var player in Model.Players.Where(player => !player.IsEliminated))
         {
-            <li class="gc-players__item" data-player="@player.Id" data-color="@player.ColorKey" data-eliminated="@(player.IsEliminated ? "true" : "false")">
-                <span class="gc-player-badge" aria-hidden="true">
-                    <span class="gc-player-badge__initials">@player.Initials</span>
-                    <span class="gc-player-badge__pattern"></span>
-                </span>
-                <span class="gc-players__name">@player.Label(Model.ViewerIsOwner)</span>
-                <span class="gc-players__count" data-bind="player-count">@BoardText.CountryCount(player.CountryCount)</span>
-                <span class="gc-players__now" data-bind="player-now" hidden="@(player.Id != Model.CurrentPlayerId || Model.Status != "InProgress")">Playing now</span>
-                <p class="gc-stamp gc-stamp--small" data-stamp hidden="@(!player.IsEliminated)">Eliminated</p>
-            </li>
+            <partial name="_PlayerRow" model="@((player, Model))" />
         }
     </ul>
+    <details class="gc-players__out" data-players-out hidden="@(eliminated == 0)">
+        <summary class="gc-players__summary gc-players__out-summary">Eliminated (<span data-bind="eliminated-count">@eliminated</span>)</summary>
+        <ul class="gc-players__list" data-players-eliminated>
+            @foreach (var player in Model.Players.Where(player => player.IsEliminated))
+            {
+                <partial name="_PlayerRow" model="@((player, Model))" />
+            }
+        </ul>
+    </details>
 </details>

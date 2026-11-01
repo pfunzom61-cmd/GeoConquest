@@ -120,6 +120,14 @@
     border-block-end: 1px dashed var(--gc-ink);
 }
 
+.gc-players__out {
+    margin-block-start: var(--gc-space-3);
+}
+
+.gc-players__out-summary {
+    font-weight: 700;
+}
+
 .gc-players__item[data-eliminated="true"] .gc-players__name {
     text-decoration: line-through;
 }
@@ -147,7 +155,7 @@
 .gc-gameover__result {
     margin-block-end: var(--gc-space-3);
     font-family: var(--gc-font-display);
-    font-size: var(--gc-text-title);
+    font-size: var(--gc-text-hero);
     line-height: 1;
 }
 

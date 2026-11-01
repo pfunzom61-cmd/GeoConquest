@@ -82,11 +82,6 @@
     opacity: 0.92;
 }
 
-.gc-stamp--small {
-    font-size: var(--gc-text-small);
-    border-width: 2px;
-}
-
 .gc-stamp--slam {
     animation: gc-stamp-slam var(--gc-time-slow) var(--gc-ease) backwards;
 }

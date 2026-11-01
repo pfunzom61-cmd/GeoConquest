@@ -90,7 +90,7 @@ function refreshEvents(animate) {
 function renderNow(animate = true) {
     cards.patch(state, animate);
     patchBanner(state);
-    patchPlayers(state, animate);
+    patchPlayers(state);
     board.dataset.turn = state.canAct ? "owner" : "other";
 
     if (patchGameOver(state)) {

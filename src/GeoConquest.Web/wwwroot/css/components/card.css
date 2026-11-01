@@ -6,7 +6,6 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    min-block-size: 12rem;
     margin-block-start: 1.4rem; /* room for the folder tab */
     color: var(--gc-ink);
     background-color: var(--gc-paper);
@@ -33,7 +32,6 @@
 }
 
 .gc-card__body {
-    flex: 1;
     display: flex;
     flex-direction: column;
     gap: var(--gc-space-2);
@@ -47,10 +45,14 @@
 }
 
 .gc-card__name {
+    flex: 1;
+    min-inline-size: 0;
     margin: 0;
-    font-size: var(--gc-text-card);
-    line-height: 1.15;
-    overflow-wrap: anywhere;
+    font-size: 1.0625rem;
+    line-height: 1.2;
+    /* Break at real syllables (the page is lang="en"), and only split a word as a last resort. */
+    hyphens: auto;
+    overflow-wrap: break-word;
 }
 
 .gc-card__owner {
@@ -65,11 +67,12 @@
 
 /* Reserved so a stamp never lands on text and nothing moves when one appears. */
 .gc-card__stamp-zone {
-    min-block-size: 3.75rem;
-    padding: var(--gc-space-3) 0 0 var(--gc-space-3);
+    min-block-size: 3rem;
+    padding: var(--gc-space-2) 0 0 var(--gc-space-3);
 }
 
 .gc-card__foot {
+    margin-block-start: auto;
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
