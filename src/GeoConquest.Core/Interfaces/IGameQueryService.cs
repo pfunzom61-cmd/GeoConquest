@@ -15,8 +15,12 @@ public interface IGameQueryService
     Task<IReadOnlyList<Game>> ListCampaignsAsync(
         string ownerUserId, string? search, GameStatus? status, CampaignSort sort, CancellationToken cancellationToken);
 
-    /// <summary>Returns games in progress, most recently active first (at most <see cref="IGameRepository.MaxInProgressGames"/>), filtered by the same search rule.</summary>
-    Task<IReadOnlyList<Game>> ListLiveGamesAsync(string? search, CancellationToken cancellationToken);
+    /// <summary>
+    /// Returns the public games with the given status, filtered by the same search rule. Only the
+    /// <see cref="IGameRepository.MaxPublicGames"/> most recently updated games are considered, so search and sort apply to those.
+    /// </summary>
+    Task<IReadOnlyList<Game>> ListLiveGamesAsync(
+        string? search, LiveGameStatusFilter statusFilter, LiveGameSort sort, CancellationToken cancellationToken);
 
     /// <summary>Returns the game's most recent events in the order they happened (oldest first).</summary>
     Task<IReadOnlyList<GameEvent>> GetRecentEventsAsync(string gameId, int count, CancellationToken cancellationToken);

@@ -50,12 +50,21 @@ public sealed class MongoGameRepository(MongoContext context) : IGameRepository
             .ToListAsync(cancellationToken);
     }
 
-    public async Task<IReadOnlyList<Game>> ListInProgressAsync(CancellationToken cancellationToken) =>
-        await context.Games
-            .Find(game => game.Status == GameStatus.InProgress)
+    public async Task<IReadOnlyList<Game>> ListPublicAsync(LiveGameStatusFilter statusFilter, CancellationToken cancellationToken)
+    {
+        var filter = statusFilter switch
+        {
+            LiveGameStatusFilter.All => Builders<Game>.Filter.Empty,
+            LiveGameStatusFilter.Finished => Builders<Game>.Filter.Ne(game => game.Status, GameStatus.InProgress),
+            _ => Builders<Game>.Filter.Eq(game => game.Status, GameStatus.InProgress),
+        };
+
+        return await context.Games
+            .Find(filter)
             .SortByDescending(game => game.UpdatedAt)
-            .Limit(IGameRepository.MaxInProgressGames)
+            .Limit(IGameRepository.MaxPublicGames)
             .ToListAsync(cancellationToken);
+    }
 
     public async Task<IReadOnlyList<string>> ListGameIdsAwaitingNpcTurnAsync(CancellationToken cancellationToken)
     {
