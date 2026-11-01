@@ -64,7 +64,29 @@ Every rubric row, with the files and tests that are the evidence. Paths start at
 | 11 | Authentication and authorization | ASP.NET Core Identity on MongoDB: `src/GeoConquest.Web/Extensions/IdentityServiceCollectionExtensions.cs`, `src/GeoConquest.Infrastructure/Identity/`. Only the owner may act on a game: `src/GeoConquest.Web/Authorization/GameOwnerHandler.cs`, `src/GeoConquest.Web/Authorization/GamePolicies.cs`. | `tests/GeoConquest.Web.Tests/AccountTests.cs` (register, login, lockout), `tests/GeoConquest.Web.Tests/GamesTests.cs` (another user gets 403, signed out gets 401) |
 | 12 | Sophistication | Exact attack win probability: `src/GeoConquest.Core/Services/BattleOddsCalculator.cs`. NPC decisions with reasons: `src/GeoConquest.Core/Services/StrategicNpcStrategy.cs`. NPCs play in the background and resume after a restart: `src/GeoConquest.Core/Services/NpcTurnProcessor.cs`, `src/GeoConquest.Web/BackgroundServices/`. Live updates: `src/GeoConquest.Web/Hubs/GameHub.cs`. | `tests/GeoConquest.Core.Tests/Services/BattleOddsCalculatorTests.cs`, `tests/GeoConquest.Core.Tests/Services/NpcSimulationTests.cs`, `tests/GeoConquest.Core.Tests/Services/NpcTurnProcessorTests.cs`, `tests/GeoConquest.Web.Tests/LiveUpdatesTests.cs` |
 | 13 | AI application | Prompt, guard, fallback, limits: `src/GeoConquest.Core/Services/CommentaryPromptBuilder.cs`, `CommentaryOutputGuard.cs`, `ResilientCommentaryService.cs`, `TemplateCommentaryService.cs`, `CommentaryRateLimiter.cs` (same folder). Groq client: `src/GeoConquest.Infrastructure/AI/GroqCommentaryService.cs`. NPC reasons use computed win chances: `src/GeoConquest.Core/Services/StrategicNpcStrategy.cs`. See [AI usage](#ai-usage). | `tests/GeoConquest.Core.Tests/Services/CommentaryOutputGuardTests.cs`, `CommentaryPromptBuilderTests.cs`, `ResilientCommentaryServiceTests.cs` (same folder), `tests/GeoConquest.Infrastructure.Tests/AI/GroqCommentaryServiceTests.cs` |
-| 14 | Overall effort | Commit history; CI in `.github/workflows/ci.yml`; 298 automated tests; this README with diagrams and screenshots in `docs/screenshots/`; live spectating (bonus feature, see below). | `dotnet test` |
+| 14 | Overall effort | Commit history; CI in `.github/workflows/ci.yml`; 300 automated tests; this README with diagrams and screenshots in `docs/screenshots/`; live spectating (bonus feature, see below). | `dotnet test` |
+
+## Brief compliance
+
+Each rule of the brief, grouped by topic, with where it is implemented and which tests prove it. Paths start at
+`src/GeoConquest.Core/` unless stated. Parts that exist only in the browser (how the board looks, the dice and stamp
+animations, how live updates feel) have no automated tests and are checked by hand; they are marked "by hand".
+
+| Brief topic | Rules | Implemented in | Tests |
+|---|---|---|---|
+| Setup | 10 countries; choose yours from the world list; 9 random others; soldiers by population tier; start with the full value; random first player; several games per user | `Services/GameSetupService.cs`, `Services/SoldierAllocator.cs`, `Services/SecureShuffler.cs`; picker in `src/GeoConquest.Web/Views/Games/New.cshtml` (search by hand); seed in `src/GeoConquest.Infrastructure/Seed/` | `GameSetupServiceTests`, `SoldierAllocatorTests` (every tier boundary), `CountrySeedMapperTests`, `GamesTests` (create, two campaigns listed) |
+| Turns | One attack or skip; skipping passes the turn; transfers between own countries only outside an attack; every country keeps 1 soldier | `Services/GameEngine.cs` (`Skip`, `Transfer`, `StartAttack`), `Models/Game.cs`, `Models/Territory.cs` | `GameEngineTests` (one per rule), `TerritoryTests`, `GamesTests.Transfer_BreakingARule_IsRejectedWithTheReason` |
+| Fast-forward | Speeds up NPC moves until your next turn; every move is still shown | `Models/Game.cs` (`SetFastForward`, `StartTurn`), `Services/NpcTurnProcessor.cs`, `NpcPacing`; button in `src/GeoConquest.Web/Views/Games/_OrdersPanel.cshtml` (pace on screen by hand) | `NpcTurnProcessorTests.PlayUntilHumanTurnAsync_FastForward_ChangesOnlyTheWaitBetweenSteps`, `GameTests`, `GameSyncTests.FastForward_OnlyTheOwnerMayChangeThePace` |
+| Attacks and dice | Choose a target; 2+ soldiers to attack or continue; roll until conquered, down to 1 soldier, or stopped; dice = fewer of (attacker minus 1) and defender; pairs in roll order; higher die wins, tie loses nothing; failed attacker keeps its country | `Services/BattleService.cs`, `Services/GameEngine.cs` (`RollAttack`, `StopAttack`), `Services/SecureDiceRoller.cs` | `BattleServiceTests` (the brief's three dice examples and its worked example), `GameEngineTests`, `SecureDiceRollerTests` |
+| Conquest | Gain Max(2, value / 2); choose how many soldiers to move in; attack from it next turn | `Services/BattleService.cs`, `Services/GameEngine.cs` | `BattleServiceTests.RollRound_ConqueringCountry_RewardIsHalfItsSoldierValueWithMinimumTwo` (India 9 gives 4, Vatican 1 gives 2), `GameEngineTests.StartAttack_FromCountryConqueredThisTurn_ThrowsButSucceedsNextTurn` |
+| Receiving soldiers | Round 1 ends when everyone has played; from round 2, 2 soldiers per country at the start of a turn (minimum 2), placed freely | `Services/ReinforcementService.cs`, `Models/Game.cs` | `ReinforcementServiceTests` (1, 3 and 5 countries), `GameEngineTests`, `GameTests` |
+| Elimination and winning | Out when you hold no country; no more soldiers, turns skipped; owning all 10 wins | `Services/GameEngine.cs` (`RollAttack`), `Models/Game.cs` | `GameEngineTests` (eliminated, won, lost), `GameTests.AdvanceToNextLivingPlayer_*` |
+| Visibility and battles | All countries and soldier counts always visible; any country can attack any; each attack, dice, loss and outcome shown live; AI commentary | `src/GeoConquest.Web/ViewModels/GameStateViewModel.cs`, `src/GeoConquest.Web/Hubs/GameHub.cs`, `src/GeoConquest.Web/wwwroot/js/board-*.js` (look and feel by hand); commentary in `Services/ResilientCommentaryService.cs`, `src/GeoConquest.Infrastructure/AI/GroqCommentaryService.cs` | `GameSyncTests.Sync_AnonymousSpectator_SeesAllTenCountriesWithTheirSoldierCounts`, `GameEngineTests.RollAttack_AnyRound_RecordsTheFactsCommentaryIsWrittenFrom`, `LiveUpdatesTests`, `GroqCommentaryServiceTests`, `ResilientCommentaryServiceTests`, `CommentaryPromptBuilderTests`, `CommentaryOutputGuardTests` |
+| NPC behaviour | Plays to win; decides whether, whom and when to stop; allocates reinforcements; may transfer; every decision shown with a justification, also in fast-forward | `Services/StrategicNpcStrategy.cs`, `Services/NpcTurnExecutor.cs`, `Services/BattleOddsCalculator.cs` | `StrategicNpcStrategyTests`, `NpcTurnExecutorTests`, `NpcSimulationTests` (a whole game, every decision justified), `BattleOddsCalculatorTests` |
+| Access control | Anyone with the link can watch; only the signed-in owner can play; anyone can sign up and start a game | `src/GeoConquest.Web/Authorization/`, `src/GeoConquest.Web/Controllers/GameActionsController.cs`, `src/GeoConquest.Web/Controllers/AccountController.cs` | `GamesTests` (spectator, signed out gets 401, another user gets 403), `AccountTests`, `LiveUpdatesTests.Hub_ClientInvokesAServerMethod_IsRefused` |
+| Technical | Web application; NoSQL database; deployed | ASP.NET Core MVC, MongoDB Atlas, Render (see [Deployment](#deployment)) | `MongoMappingTests`, `HealthEndpointTests`; every Web test starts the real application |
+| Bonus | One extra feature | Bonus feature #10, real-time viewing from the shared game link (see below) | `LiveUpdatesTests`, `GameSyncTests` |
+| Submission | Zipped source, database access for the three markers, deployed link, application login, this read-me | Quick start above and the hand-in message | n/a |
 
 ## Architecture
 
@@ -230,8 +252,8 @@ the result.
 
 ## Testing and CI
 
-298 automated tests, all passing: 224 in `tests/GeoConquest.Core.Tests` (rules, battles, odds, NPC play, commentary),
-28 in `tests/GeoConquest.Infrastructure.Tests` (database mapping, seed data, Groq client against a fake), and 46 in
+300 automated tests, all passing: 224 in `tests/GeoConquest.Core.Tests` (rules, battles, odds, NPC play, commentary),
+28 in `tests/GeoConquest.Infrastructure.Tests` (database mapping, seed data, Groq client against a fake), and 48 in
 `tests/GeoConquest.Web.Tests` (sign-in, owner against spectator, validation, live updates, error pages, using in-memory
 fakes).
 
@@ -280,6 +302,7 @@ any of them to spectate.
   start.
 - **Commentary limits.** The free Groq tier allows only a few requests per minute, so busy NPC turns mostly show template
   commentary. Each line is labelled with its source.
+- **No automated browser tests.** How the board looks and animates, and how live updates feel, are checked by hand.
 - **Lists are not paged.** Live games considers only the 50 most recently updated games for the chosen status, so its
   search and round sort apply to those 50.
 - **Fresh clone needs your own database.** The app has no built-in demo data; the demo account above was created on the
