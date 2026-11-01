@@ -1,0 +1,40 @@
+/* How to play: short sections on paper, kept to a readable line length. */
+
+.gc-prose {
+    display: grid;
+    gap: var(--gc-space-4);
+    max-inline-size: var(--gc-measure);
+}
+
+.gc-prose .gc-subheading {
+    margin-block-end: var(--gc-space-2);
+}
+
+.gc-prose__tiers {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+    gap: var(--gc-space-1) var(--gc-space-4);
+    margin: 0 0 var(--gc-space-3);
+}
+
+.gc-prose__tiers div {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--gc-space-2);
+    border-block-end: 1px dashed var(--gc-ink);
+}
+
+.gc-prose__tiers dd {
+    margin: 0;
+    font-family: var(--gc-font-mono);
+    font-weight: 700;
+}
+
+.gc-prose__list {
+    margin: 0;
+    padding-inline-start: var(--gc-space-5);
+}
+
+.gc-prose__list li {
+    margin-block-end: var(--gc-space-2);
+}

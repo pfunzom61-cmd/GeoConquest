@@ -1,3 +1,5 @@
+using GeoConquest.Core.Enums;
+using GeoConquest.Core.Interfaces;
 using GeoConquest.Infrastructure.Identity;
 using GeoConquest.Web.Extensions;
 using GeoConquest.Web.ViewModels;
@@ -11,7 +13,8 @@ namespace GeoConquest.Web.Controllers;
 /// <summary>Registration, sign-in and sign-out. Identity does the work; this controller only translates results for the views.</summary>
 public sealed class AccountController(
     UserManager<ApplicationUser> userManager,
-    SignInManager<ApplicationUser> signInManager) : Controller
+    SignInManager<ApplicationUser> signInManager,
+    IGameQueryService gameQueryService) : Controller
 {
     // The same message for an unknown email and a wrong password, so the form cannot be used to discover accounts.
     private const string InvalidSignInMessage = "That email and password do not match.";
@@ -82,7 +85,7 @@ public sealed class AccountController(
 
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> Profile()
+    public async Task<IActionResult> Profile(CancellationToken cancellationToken)
     {
         var user = await userManager.GetUserAsync(User);
         if (user is null)
@@ -90,13 +93,14 @@ public sealed class AccountController(
             return Challenge();
         }
 
-        return View(new ProfileViewModel(user.DisplayName, user.Email ?? string.Empty));
+        var campaigns = await gameQueryService.ListCampaignsAsync(userManager.GetUserId(User)!, null, null, CampaignSort.Newest, cancellationToken);
+        return View(ProfileViewModel.From(user.DisplayName, user.Email ?? string.Empty, campaigns));
     }
 
     [HttpGet]
     public IActionResult AccessDenied()
     {
         Response.StatusCode = StatusCodes.Status403Forbidden;
-        return View();
+        return View("StatusPage", StatusPageViewModel.For(StatusCodes.Status403Forbidden));
     }
 }

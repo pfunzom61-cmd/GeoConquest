@@ -1,0 +1,32 @@
+@* A dossier card for a list: the board's card, filled with a campaign or a live game. *@
+@model ListCardViewModel
+<li class="gc-card gc-card--list" data-color="color-0">
+    <span class="gc-card__tab" aria-hidden="true">@Model.Tab</span>
+    <div class="gc-card__stripe" aria-hidden="true"></div>
+    <div class="gc-card__body">
+        <div class="gc-card__title">
+            <span class="gc-flag" aria-hidden="true">
+                <span class="gc-flag__code">@Model.CountryCode</span>
+                <img class="gc-flag__image" src="https://flagcdn.com/w40/@(Model.CountryCode.ToLowerInvariant()).png" width="32" height="24" loading="lazy" alt="" />
+            </span>
+            <h2 class="gc-card__name">@Model.Title</h2>
+        </div>
+        @foreach (var detail in Model.Details)
+        {
+            <p class="gc-card__owner">@detail</p>
+        }
+    </div>
+    <div class="gc-card__stamp-zone">
+        @if (Model.Stamp is not null)
+        {
+            <p class="gc-stamp">@Model.Stamp</p>
+        }
+    </div>
+    <div class="gc-card__foot">
+        <p class="gc-card__label">@Model.FootLabel</p>
+        <span class="gc-counter">@Model.FootValue</span>
+    </div>
+    <p class="gc-card__action">
+        <a class="gc-button" href="@Model.LinkUrl">@Model.LinkText<span class="gc-visually-hidden"> @Model.LinkHiddenText</span></a>
+    </p>
+</li>

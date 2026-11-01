@@ -14,6 +14,10 @@
     <link rel="stylesheet" href="~/css/components/badge.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/components/toast.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/components/dialog.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/panel.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/card.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/filters.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/empty.css" asp-append-version="true" />
     @await RenderSectionAsync("Head", required: false)
 </head>
 <body>
@@ -23,6 +27,7 @@
             <a class="gc-brand" asp-controller="Home" asp-action="Index">GeoConquest</a>
             <nav class="gc-nav" aria-label="Main">
                 <partial name="_NavLink" model="@(new NavLinkViewModel("Live games", "LiveGames", "Index"))" />
+                <partial name="_NavLink" model="@(new NavLinkViewModel("How to play", "Home", "HowToPlay"))" />
                 @if (User.Identity?.IsAuthenticated == true)
                 {
                     <partial name="_NavLink" model="@(new NavLinkViewModel("My campaigns", "Games", "Index"))" />
@@ -48,11 +53,13 @@
             <p>GeoConquest, built for the UCT INF4001 Honours entrance exam.</p>
             <ul class="gc-footer__links">
                 <li><a class="gc-footer__link" asp-controller="LiveGames" asp-action="Index">Live games</a></li>
+                <li><a class="gc-footer__link" asp-controller="Home" asp-action="HowToPlay">How to play and rules</a></li>
             </ul>
         </div>
     </footer>
     <partial name="_Toasts" />
     <partial name="_ConfirmDialog" />
+    <script type="module" src="~/js/flags.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

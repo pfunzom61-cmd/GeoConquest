@@ -13,19 +13,6 @@ const SORTERS = {
     country: (a, b) => a.countryName.localeCompare(b.countryName),
 };
 
-/** Picture-less fallback: a flag that fails to load is hidden, which leaves the country code that sits behind it. */
-function hideBrokenFlags(grid) {
-    for (const image of grid.querySelectorAll(".gc-flag__image")) {
-        image.hidden = image.complete && image.naturalWidth === 0; // already failed before this script ran
-    }
-
-    grid.addEventListener("error", (event) => {
-        if (event.target.matches?.(".gc-flag__image")) {
-            event.target.hidden = true;
-        }
-    }, true);
-}
-
 export function createCards(section, viewerIsOwner) {
     const grid = section.querySelector("[data-card-grid]");
     const sortSelect = section.querySelector("[data-card-sort]");
@@ -33,8 +20,6 @@ export function createCards(section, viewerIsOwner) {
     const cards = [...grid.querySelectorAll("[data-card]")];
     let lastState = null;
     let attackerCode = "";
-
-    hideBrokenFlags(grid);
 
     function ownerOf(state, territory) {
         return state.players.find((player) => player.id === territory.ownerPlayerId);

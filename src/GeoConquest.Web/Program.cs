@@ -26,6 +26,9 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
 }
 
+// An empty 403, 404 or 429 gets a friendly page; JSON answers that carry a body (the API's error messages) are left alone.
+app.UseStatusCodePagesWithReExecute("/status/{0}");
+
 app.UseStaticFiles();
 app.UseRouting();
 app.UseRateLimiter();
