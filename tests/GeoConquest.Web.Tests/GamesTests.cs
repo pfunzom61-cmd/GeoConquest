@@ -22,6 +22,21 @@ public sealed class GamesTests(GeoConquestWebFactory factory) : IClassFixture<Ge
     }
 
     [Fact]
+    public async Task MyCampaigns_OwnerWithTwoGames_ListsBothButNotAnotherUsersGame()
+    {
+        var owner = await factory.RegisterAsync();
+        var firstGameId = await GameTestSupport.CreateGameAsync(owner);
+        var secondGameId = await GameTestSupport.CreateGameAsync(owner);
+        var otherGameId = await GameTestSupport.CreateGameAsync(await factory.RegisterAsync());
+
+        var page = await (await owner.Client.GetAsync("/games")).Content.ReadAsStringAsync();
+
+        Assert.Contains($"/games/{firstGameId}", page);
+        Assert.Contains($"/games/{secondGameId}", page);
+        Assert.DoesNotContain($"/games/{otherGameId}", page);
+    }
+
+    [Fact]
     public async Task Create_NoCountryChosen_ShowsAValidationMessage()
     {
         var owner = await factory.RegisterAsync();
