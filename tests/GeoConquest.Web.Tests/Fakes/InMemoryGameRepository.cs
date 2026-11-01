@@ -55,11 +55,16 @@ public sealed class InMemoryGameRepository : IGameRepository
             .Select(Copy)
             .ToList());
 
-    public Task<IReadOnlyList<Game>> ListInProgressAsync(CancellationToken cancellationToken) =>
+    public Task<IReadOnlyList<Game>> ListPublicAsync(LiveGameStatusFilter statusFilter, CancellationToken cancellationToken) =>
         Task.FromResult<IReadOnlyList<Game>>(_stored.Values
-            .Where(game => game.Status == GameStatus.InProgress)
+            .Where(game => statusFilter switch
+            {
+                LiveGameStatusFilter.All => true,
+                LiveGameStatusFilter.Finished => game.Status != GameStatus.InProgress,
+                _ => game.Status == GameStatus.InProgress,
+            })
             .OrderByDescending(game => game.UpdatedAt)
-            .Take(IGameRepository.MaxInProgressGames)
+            .Take(IGameRepository.MaxPublicGames)
             .Select(Copy)
             .ToList());
 

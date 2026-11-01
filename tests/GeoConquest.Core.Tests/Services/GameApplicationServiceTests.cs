@@ -148,4 +148,22 @@ public sealed class GameApplicationServiceTests
         Assert.Single(matching);
         Assert.Empty(notMatching);
     }
+
+    [Fact]
+    public async Task ListLiveGamesAsync_SortedByRound_ListsTheFurthestAlongGameFirst()
+    {
+        var earlyGame = GameBuilder.Create();
+        var lateGame = GameBuilder.Create();
+        for (var turn = 0; turn < 4; turn++)
+        {
+            lateGame.AdvanceToNextLivingPlayer();
+        }
+
+        _gameRepository.ListPublicAsync(LiveGameStatusFilter.InProgress, Arg.Any<CancellationToken>()).Returns([earlyGame, lateGame]);
+        var queries = new GameQueryService(_gameRepository, _gameEventRepository);
+
+        var games = await queries.ListLiveGamesAsync(null, LiveGameStatusFilter.InProgress, LiveGameSort.Round, CancellationToken.None);
+
+        Assert.Equal([lateGame, earlyGame], games);
+    }
 }

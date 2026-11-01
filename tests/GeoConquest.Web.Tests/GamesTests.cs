@@ -126,18 +126,27 @@ public sealed class GamesTests(GeoConquestWebFactory factory) : IClassFixture<Ge
         Assert.DoesNotContain(owner.Email, page);
     }
 
-    [Fact]
-    public async Task LiveGames_FinishedGame_IsNotListed()
+    [Theory]
+    [InlineData("", true, false)]
+    [InlineData("?status=Finished", false, true)]
+    [InlineData("?status=All", true, true)]
+    [InlineData("?status=banana&sort=99", true, false)]
+    public async Task LiveGames_StatusFilter_ListsOnlyMatchingGames(string query, bool listsRunningGame, bool listsFinishedGame)
     {
-        var owner = await factory.RegisterAsync();
-        var gameId = await GameTestSupport.CreateGameAsync(owner);
-        var game = (await factory.Games.GetByIdAsync(gameId, CancellationToken.None))!;
-        game.Finish(GameStatus.Lost, winnerPlayerId: null);
-        await factory.Games.UpdateAsync(game, CancellationToken.None);
+        var runningOwner = await factory.RegisterAsync();
+        await GameTestSupport.CreateGameAsync(runningOwner);
+        var finishedOwner = await factory.RegisterAsync();
+        var finishedGameId = await GameTestSupport.CreateGameAsync(finishedOwner);
+        var finishedGame = (await factory.Games.GetByIdAsync(finishedGameId, CancellationToken.None))!;
+        finishedGame.Finish(GameStatus.Lost, winnerPlayerId: null);
+        await factory.Games.UpdateAsync(finishedGame, CancellationToken.None);
 
-        var response = await factory.NewAnonymousClient().GetAsync("/live");
+        var response = await factory.NewAnonymousClient().GetAsync($"/live{query}");
 
-        Assert.DoesNotContain(owner.DisplayName, await response.Content.ReadAsStringAsync());
+        var page = await response.Content.ReadAsStringAsync();
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(listsRunningGame, page.Contains(runningOwner.DisplayName));
+        Assert.Equal(listsFinishedGame, page.Contains(finishedOwner.DisplayName));
     }
 
     private static async Task<string> FirstOwnCountryCodeAsync(Commander owner, string gameId)
