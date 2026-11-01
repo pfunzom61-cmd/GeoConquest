@@ -8,5 +8,7 @@
         <button class="gc-chip" type="button" aria-pressed="false" data-filter="commentary">Commentary</button>
     </div>
     <p class="gc-hint" data-bind="log-empty" hidden>Nothing to show for this filter yet.</p>
-    <ul class="gc-log__list" role="log" aria-live="off" aria-label="Events, newest first" tabindex="0" data-log></ul>
+    <div class="gc-log__scroll" role="log" aria-live="off" aria-label="Events, newest first" tabindex="0">
+        <ul class="gc-log__list" data-log></ul>
+    </div>
 </section>

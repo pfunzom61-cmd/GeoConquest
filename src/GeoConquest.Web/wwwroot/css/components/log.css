@@ -34,12 +34,15 @@
     background-color: var(--gc-ink);
 }
 
-.gc-log__list {
+.gc-log__scroll {
     max-inline-size: var(--gc-measure-log);
     max-block-size: 26rem;
+    overflow-y: auto;
+}
+
+.gc-log__list {
     margin: 0;
     padding: 0;
-    overflow-y: auto;
     font-family: var(--gc-font-mono);
     font-size: 1rem;
     line-height: 1.45;
