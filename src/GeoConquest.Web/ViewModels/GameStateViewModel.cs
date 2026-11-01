@@ -1,5 +1,8 @@
+using GeoConquest.Core.Constants;
 using GeoConquest.Core.Enums;
+using GeoConquest.Core.Interfaces;
 using GeoConquest.Core.Models;
+using GeoConquest.Core.Services;
 
 namespace GeoConquest.Web.ViewModels;
 
@@ -26,11 +29,13 @@ public sealed record GameStateViewModel(
     IReadOnlyList<string> AvailableActions,
     IReadOnlyList<PlayerViewModel> Players,
     IReadOnlyList<TerritoryViewModel> Territories,
-    BattleViewModel? Battle)
+    BattleViewModel? Battle,
+    IReadOnlyList<AttackOddsViewModel> AttackOdds)
 {
     /// <param name="game">The game to describe.</param>
     /// <param name="viewerIsOwner">Whether the viewer may play it; spectators get no available actions.</param>
-    public static GameStateViewModel From(Game game, bool viewerIsOwner)
+    /// <param name="oddsEstimator">When given, the owner also gets the estimated win chance of each attack they could make.</param>
+    public static GameStateViewModel From(Game game, bool viewerIsOwner, IAttackOddsEstimator? oddsEstimator = null)
     {
         var playerNames = game.Players.ToDictionary(player => player.Id, player => player.DisplayName);
         var canAct = viewerIsOwner && game.Status == GameStatus.InProgress && game.CurrentPlayer.IsHuman;
@@ -63,7 +68,7 @@ public sealed record GameStateViewModel(
             canAct ? ActionsFor(game.Phase) : [],
             game.Players
                 .Select(player => new PlayerViewModel(
-                    player.Id, player.DisplayName, player.IsHuman, player.IsEliminated, player.ColorKey,
+                    player.Id, player.DisplayName, player.IsHuman, player.IsEliminated, player.ColorKey, player.HomeCountryCode,
                     game.TerritoriesOwnedBy(player.Id).Count))
                 .ToList(),
             game.Territories
@@ -71,7 +76,35 @@ public sealed record GameStateViewModel(
                     territory.CountryCode, territory.CountryName, territory.OwnerPlayerId,
                     playerNames[territory.OwnerPlayerId], territory.Soldiers, territory.SoldierValue))
                 .ToList(),
-            battle);
+            battle,
+            canAct && oddsEstimator is not null ? EstimateOdds(game, oddsEstimator) : []);
+    }
+
+    /// <summary>
+    /// While choosing an attack: every attack the human could start. While one is under way: that attack at the current
+    /// stacks. At any other time there is nothing to estimate.
+    /// </summary>
+    private static IReadOnlyList<AttackOddsViewModel> EstimateOdds(Game game, IAttackOddsEstimator oddsEstimator)
+    {
+        if (game.ActiveBattle is { } battle)
+        {
+            var (attacker, defender) = (game.GetTerritory(battle.AttackerCountryCode), game.GetTerritory(battle.DefenderCountryCode));
+            return [new AttackOddsViewModel(attacker.CountryCode, defender.CountryCode, oddsEstimator.Estimate(attacker.Soldiers, defender.Soldiers))];
+        }
+
+        if (game.Phase != TurnPhase.Action)
+        {
+            return [];
+        }
+
+        var humanId = game.CurrentPlayer.Id;
+        var attackers = game.TerritoriesOwnedBy(humanId).Where(territory => territory.Soldiers >= GameRules.MinimumAttackingSoldiers);
+        var targets = game.Territories.Where(territory => territory.OwnerPlayerId != humanId).ToList();
+
+        return attackers
+            .SelectMany(attacker => targets.Select(target =>
+                new AttackOddsViewModel(attacker.CountryCode, target.CountryCode, oddsEstimator.Estimate(attacker.Soldiers, target.Soldiers))))
+            .ToList();
     }
 
     private static IReadOnlyList<string> ActionsFor(TurnPhase phase) => phase switch
@@ -105,7 +138,7 @@ public sealed record GameStateViewModel(
 
         return game.Phase switch
         {
-            TurnPhase.Reinforce => $"Place your {game.PendingReinforcements} reinforcements before doing anything else.",
+            TurnPhase.Reinforce => $"Place {Wording.Count(game.PendingReinforcements, "reinforcement")} before doing anything else.",
             TurnPhase.Action => "Attack a country, move soldiers between your countries, or skip your turn.",
             TurnPhase.Attacking => "Roll the dice, or stop the attack (stopping ends your turn).",
             _ => "The attack is over. Move soldiers if you like, then end your turn.",

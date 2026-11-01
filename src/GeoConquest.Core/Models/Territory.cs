@@ -53,7 +53,7 @@ public sealed class Territory
 
         if (count > Soldiers)
         {
-            throw new GameRuleException($"{CountryName} only has {Soldiers} soldiers; cannot remove {count}.");
+            throw new GameRuleException($"{CountryName} only has {Soldiers} {(Soldiers == 1 ? "soldier" : "soldiers")}; cannot remove {count}.");
         }
 
         Soldiers -= count;

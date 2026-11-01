@@ -1,0 +1,26 @@
+@* The latest attack. Dice are drawn by board-arena.js from the dice values in the events; the sentence beside them says the same in words. *@
+<section class="gc-arena" aria-labelledby="arena-title" data-arena>
+    <h2 class="gc-heading" id="arena-title">Battle arena</h2>
+    <p class="gc-arena__summary" data-bind="arena-summary">No attack has been made yet. The dice appear here when one starts.</p>
+    <div class="gc-arena__sides" data-arena-sides hidden>
+        <div>
+            <h3 class="gc-arena__side-title" data-bind="attacker-title">Attacker</h3>
+            <ul class="gc-dice" data-dice="attacker"></ul>
+        </div>
+        <div>
+            <h3 class="gc-arena__side-title" data-bind="defender-title">Defender</h3>
+            <ul class="gc-dice" data-dice="defender"></ul>
+        </div>
+    </div>
+    <p data-bind="arena-result"></p>
+    <template data-die-template>
+        <li class="gc-dice__item" data-result="">
+            <span class="gc-die" aria-hidden="true" data-value="1">
+                <span class="gc-die__pip"></span><span class="gc-die__pip"></span><span class="gc-die__pip"></span>
+                <span class="gc-die__pip"></span><span class="gc-die__pip"></span><span class="gc-die__pip"></span>
+                <span class="gc-die__pip"></span><span class="gc-die__pip"></span><span class="gc-die__pip"></span>
+            </span>
+            <span class="gc-dice__result"></span>
+        </li>
+    </template>
+</section>

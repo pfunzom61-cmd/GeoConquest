@@ -13,6 +13,8 @@ namespace GeoConquest.Core.Services;
 /// </summary>
 public sealed class StrategicNpcStrategy(IBattleOddsCalculator oddsCalculator) : INpcStrategy
 {
+    private readonly IAttackOddsEstimator oddsEstimator = new CappedAttackOddsEstimator(oddsCalculator);
+
     /// <summary>One attack the NPC could launch, with the odds and the score used to compare it with the others.</summary>
     private sealed record AttackOption(Territory Attacker, int AttackerSoldiers, Territory Defender, double Probability, double Score);
 
@@ -22,7 +24,7 @@ public sealed class StrategicNpcStrategy(IBattleOddsCalculator oddsCalculator) :
         var strongestEnemyStack = EnemyTerritories(game, npc).Select(territory => territory.Soldiers).DefaultIfEmpty(0).Max();
 
         var allocations = new Dictionary<string, int>();
-        var reasons = new List<string>();
+        var reasons = new Dictionary<string, List<string>>(); // country code -> why soldiers went there, in order
         var defenceBudget = (int)(game.PendingReinforcements * NpcTuning.DefenceShare);
 
         // Most valuable countries first, so the budget goes where a loss would cost the most.
@@ -48,8 +50,8 @@ public sealed class StrategicNpcStrategy(IBattleOddsCalculator oddsCalculator) :
             var oddsAfter = WinProbability(strongestEnemyStack, territory.Soldiers + needed);
             allocations[territory.CountryCode] = needed;
             defenceBudget -= needed;
-            reasons.Add($"{needed} in {territory.CountryName} (the enemy stack of {strongestEnemyStack} would take it " +
-                $"{Percent(oddsBefore)} of the time, now {Percent(oddsAfter)})");
+            reasons[territory.CountryCode] = [$"{Wording.Count(needed, "soldier")} because the enemy stack of {strongestEnemyStack} would take it " +
+                $"{Percent(oddsBefore)} of the time, now {Percent(oddsAfter)}"];
         }
 
         var remaining = game.PendingReinforcements - allocations.Values.Sum();
@@ -57,11 +59,24 @@ public sealed class StrategicNpcStrategy(IBattleOddsCalculator oddsCalculator) :
         {
             var attackBase = ownedTerritories.OrderByDescending(owned => owned.Soldiers).First();
             allocations[attackBase.CountryCode] = allocations.GetValueOrDefault(attackBase.CountryCode) + remaining;
-            reasons.Add($"{remaining} in {attackBase.CountryName}, the strongest base ({attackBase.Soldiers} soldiers)");
+            if (!reasons.TryGetValue(attackBase.CountryCode, out var baseReasons))
+            {
+                reasons[attackBase.CountryCode] = baseReasons = [];
+            }
+
+            baseReasons.Add($"{Wording.Count(remaining, "soldier")} because it is the strongest base ({Wording.Count(attackBase.Soldiers, "soldier")})");
         }
 
+        // One entry per country: "2 in Gibraltar (1 soldier because ...; 1 soldier because ...)", never the same country twice.
+        var placements = allocations.Select(allocation =>
+        {
+            var country = game.GetTerritory(allocation.Key).CountryName;
+            var why = reasons[allocation.Key];
+            return why.Count == 1 ? $"{allocation.Value} in {country} ({why[0]})" : $"{allocation.Value} in {country} ({string.Join("; ", why)})";
+        });
+
         return new ReinforcementDecision(
-            allocations, $"Placing {game.PendingReinforcements} reinforcements: {string.Join("; ", reasons)}.");
+            allocations, $"Placing {Wording.Count(game.PendingReinforcements, "reinforcement")}: {string.Join("; ", placements)}.");
     }
 
     public TransferDecision? DecideTransferBeforeAttack(Game game, Player npc)
@@ -97,7 +112,7 @@ public sealed class StrategicNpcStrategy(IBattleOddsCalculator oddsCalculator) :
             donorTerritory.CountryCode,
             receiverTerritory.CountryCode,
             soldiers,
-            $"Moving {soldiers} from {donorTerritory.CountryName} to {receiverTerritory.CountryName} " +
+            $"Moving {Wording.Count(soldiers, "soldier")} from {donorTerritory.CountryName} to {receiverTerritory.CountryName} " +
             $"({receiverTerritory.Soldiers} to {receiverTerritory.Soldiers + soldiers}) to open an attack on " +
             $"{unlocking.option!.Defender.CountryName} at {Percent(unlocking.option.Probability)} win chance.");
     }
@@ -145,7 +160,7 @@ public sealed class StrategicNpcStrategy(IBattleOddsCalculator oddsCalculator) :
             attackerCountryCode,
             conqueredCountryCode,
             soldiers,
-            $"Moving {soldiers} from {attackingTerritory.CountryName} to {conqueredTerritory.CountryName} to balance them " +
+            $"Moving {Wording.Count(soldiers, "soldier")} from {attackingTerritory.CountryName} to {conqueredTerritory.CountryName} to balance them " +
             $"({attackingTerritory.Soldiers} vs {conqueredTerritory.Soldiers} becomes " +
             $"{attackingTerritory.Soldiers - soldiers} vs {conqueredTerritory.Soldiers + soldiers}).");
     }
@@ -174,17 +189,17 @@ public sealed class StrategicNpcStrategy(IBattleOddsCalculator oddsCalculator) :
     private static AttackDecision Attack(Game game, Player leader, AttackOption option)
     {
         var owner = game.GetPlayer(option.Defender.OwnerPlayerId);
-        var justification = $"Attacking {option.Defender.CountryName} from {option.Attacker.CountryName} " +
+        var justification = $"Attacking {Wording.HeldCountry(option.Defender, owner)} from {option.Attacker.CountryName} " +
             $"({option.AttackerSoldiers} vs {option.Defender.Soldiers}): {Percent(option.Probability)} win chance, " +
             $"+{GameRules.ConquestReward(option.Defender.SoldierValue)} soldiers";
 
         if (game.TerritoriesOwnedBy(owner.Id).Count == 1)
         {
-            justification += $", eliminating {owner.DisplayName}";
+            justification += $", eliminating {Wording.PlayerName(owner)}";
         }
         else if (owner.Id == leader.Id)
         {
-            justification += $", weakening the leader {owner.DisplayName}";
+            justification += $", weakening the leader {Wording.PlayerName(owner)}";
         }
 
         return new AttackDecision(option.Attacker.CountryCode, option.Defender.CountryCode, justification + ".");
@@ -235,22 +250,8 @@ public sealed class StrategicNpcStrategy(IBattleOddsCalculator oddsCalculator) :
             .ThenByDescending(player => game.TerritoriesOwnedBy(player.Id).Sum(territory => territory.Soldiers))
             .First();
 
-    private double WinProbability(int attackerSoldiers, int defenderSoldiers)
-    {
-        var largest = Math.Max(attackerSoldiers, defenderSoldiers);
-        if (largest > NpcTuning.MaxOddsStackSize)
-        {
-            var scale = (double)NpcTuning.MaxOddsStackSize / largest;
-            attackerSoldiers = ScaleDown(attackerSoldiers, scale);
-            defenderSoldiers = ScaleDown(defenderSoldiers, scale);
-        }
-
-        return oddsCalculator.AttackerWinProbability(attackerSoldiers, defenderSoldiers);
-    }
-
-    /// <summary>Shrinks a stack in proportion, never below the 2 soldiers that still allow an attack (a stack of 0 or 1 is left alone).</summary>
-    private static int ScaleDown(int soldiers, double scale) =>
-        soldiers <= 1 ? soldiers : Math.Max(GameRules.MinimumAttackingSoldiers, (int)Math.Round(soldiers * scale));
+    private double WinProbability(int attackerSoldiers, int defenderSoldiers) =>
+        oddsEstimator.Estimate(attackerSoldiers, defenderSoldiers);
 
     private static string Percent(double probability) => $"{(int)Math.Round(probability * 100)}%";
 }

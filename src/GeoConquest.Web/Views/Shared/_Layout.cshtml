@@ -3,35 +3,63 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="GeoConquest: a single-player geopolitics war game. Command one country against nine NPC rivals." />
     <title>@ViewData["Title"] - GeoConquest</title>
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="preload" href="~/fonts/libre-franklin-400.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="~/css/tokens.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/base.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/layout.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/button.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/form.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/badge.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/toast.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/dialog.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/panel.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/card.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/filters.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/empty.css" asp-append-version="true" />
     @await RenderSectionAsync("Head", required: false)
 </head>
 <body>
-    <header>
-        <a asp-controller="Home" asp-action="Index">GeoConquest</a>
-        <nav aria-label="Main">
-            <a asp-controller="LiveGames" asp-action="Index">Live games</a>
-            @if (User.Identity?.IsAuthenticated == true)
-            {
-                <a asp-controller="Games" asp-action="Index">My campaigns</a>
-                <a asp-controller="Games" asp-action="New">New campaign</a>
-                <a asp-controller="Account" asp-action="Profile">Profile</a>
-                <form method="post" asp-controller="Account" asp-action="Logout">
-                    <button type="submit">Log out</button>
-                </form>
-            }
-            else
-            {
-                <a asp-controller="Account" asp-action="Login">Log in</a>
-                <a asp-controller="Account" asp-action="Register">Register</a>
-            }
-        </nav>
+    <a class="gc-skip-link" href="#main">Skip to content</a>
+    <header class="gc-header">
+        <div class="gc-header__inner">
+            <a class="gc-brand" asp-controller="Home" asp-action="Index">GeoConquest</a>
+            <nav class="gc-nav" aria-label="Main">
+                <partial name="_NavLink" model="@(new NavLinkViewModel("Live games", "LiveGames", "Index"))" />
+                <partial name="_NavLink" model="@(new NavLinkViewModel("How to play", "Home", "HowToPlay"))" />
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <partial name="_NavLink" model="@(new NavLinkViewModel("My campaigns", "Games", "Index"))" />
+                    <partial name="_NavLink" model="@(new NavLinkViewModel("New campaign", "Games", "New"))" />
+                    <partial name="_NavLink" model="@(new NavLinkViewModel("Profile", "Account", "Profile"))" />
+                    <form class="gc-nav__form" method="post" asp-controller="Account" asp-action="Logout">
+                        <button class="gc-button gc-button--quiet" type="submit">Log out</button>
+                    </form>
+                }
+                else
+                {
+                    <partial name="_NavLink" model="@(new NavLinkViewModel("Log in", "Account", "Login"))" />
+                    <partial name="_NavLink" model="@(new NavLinkViewModel("Register", "Account", "Register"))" />
+                }
+            </nav>
+        </div>
     </header>
-    <main>
+    <main id="main" tabindex="-1">
         @RenderBody()
     </main>
-    <script type="module" src="~/js/site.js" asp-append-version="true"></script>
+    <footer class="gc-footer">
+        <div class="gc-footer__inner">
+            <p>GeoConquest, built for the UCT INF4001 Honours entrance exam.</p>
+            <ul class="gc-footer__links">
+                <li><a class="gc-footer__link" asp-controller="LiveGames" asp-action="Index">Live games</a></li>
+                <li><a class="gc-footer__link" asp-controller="Home" asp-action="HowToPlay">How to play and rules</a></li>
+            </ul>
+        </div>
+    </footer>
+    <partial name="_Toasts" />
+    <partial name="_ConfirmDialog" />
+    <script type="module" src="~/js/flags.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

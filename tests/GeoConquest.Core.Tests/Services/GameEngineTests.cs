@@ -46,6 +46,32 @@ public sealed class GameEngineTests
         Assert.Equal([GameEventType.GameCreated, GameEventType.TurnStarted], result.Events.Select(@event => @event.Type));
     }
 
+    // ---- Event wording ----
+
+    [Fact]
+    public void StartAttack_PlayerAttacksACountryHeldByAnNpc_NamesThePlayerAndTheCountryApart()
+    {
+        var game = GameBuilder.Create(5, 5, 5, 5);
+        GiveCountry(game, "C1", "P2");
+
+        var attackStarted = CreateEngine().StartAttack(game, "P0", "C0", "C1")[0];
+
+        Assert.Equal("Player 0 attacks Country 1 (5 soldiers), held by Player 2 (NPC), from Country 0 (5 soldiers).", attackStarted.Message);
+    }
+
+    [Theory]
+    [InlineData(1, "1 soldier")]
+    [InlineData(2, "2 soldiers")]
+    public void AllocateReinforcements_AnyCount_UsesTheRightPlural(int soldiers, string expected)
+    {
+        var game = GameBuilder.Create();
+        game.StartTurn(soldiers);
+
+        var reinforced = CreateEngine().AllocateReinforcements(game, "P0", new Dictionary<string, int> { ["C0"] = soldiers })[0];
+
+        Assert.Equal($"Player 0 places {expected} in Country 0.", reinforced.Message);
+    }
+
     // ---- Turn flow and reinforcements ----
 
     [Fact]

@@ -1,0 +1,13 @@
+@model (PlayerViewModel Player, GameStateViewModel State)
+@{
+    var player = Model.Player;
+}
+<li class="gc-players__item" data-player="@player.Id" data-color="@player.ColorKey" data-eliminated="@(player.IsEliminated ? "true" : "false")">
+    <span class="gc-player-badge" aria-hidden="true">
+        <span class="gc-player-badge__initials">@player.Initials</span>
+        <span class="gc-player-badge__pattern"></span>
+    </span>
+    <span class="gc-players__name">@player.Label(Model.State.ViewerIsOwner)</span>
+    <span class="gc-players__count" data-bind="player-count">@BoardText.CountryCount(player.CountryCount)</span>
+    <span class="gc-players__now" data-bind="player-now" hidden="@(player.Id != Model.State.CurrentPlayerId || Model.State.Status != "InProgress")">Playing now</span>
+</li>

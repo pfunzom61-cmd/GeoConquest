@@ -1,0 +1,26 @@
+@model GameStateViewModel
+@{
+    var current = Model.Players.First(player => player.Id == Model.CurrentPlayerId);
+}
+<section class="gc-banner" aria-label="Turn" data-banner>
+    <p class="gc-banner__line gc-banner__turn">
+        <span class="gc-player-badge" aria-hidden="true" data-color="@current.ColorKey" data-bind-badge>
+            <span class="gc-player-badge__initials" data-bind="turn-initials">@current.Initials</span>
+            <span class="gc-player-badge__pattern"></span>
+        </span>
+        <span data-bind="turn-title">@BoardText.TurnTitle(Model)</span>
+    </p>
+    <p class="gc-banner__line gc-banner__step" data-bind="next-step">@Model.NextStep</p>
+    <p class="gc-banner__line gc-banner__meta">
+        <span>Round <span data-bind="round">@Model.Round</span>, <span data-bind="phase">@BoardText.PhaseLabel(Model.Phase)</span></span>
+        <span class="gc-live" data-live="connecting" data-bind="live-status">Live updates: connecting</span>
+        @if (Model.IsFastForward)
+        {
+            <span data-bind="fast-forward-note">Fast-forward is on</span>
+        }
+        else
+        {
+            <span data-bind="fast-forward-note" hidden>Fast-forward is on</span>
+        }
+    </p>
+</section>

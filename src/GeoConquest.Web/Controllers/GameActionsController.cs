@@ -19,7 +19,8 @@ public sealed class GameActionsController(
     IGameQueryService gameQueryService,
     IGameApplicationService gameApplicationService,
     IAuthorizationService authorizationService,
-    INpcTurnQueue npcTurnQueue) : Controller
+    INpcTurnQueue npcTurnQueue,
+    IAttackOddsEstimator oddsEstimator) : Controller
 {
     /// <summary>The most events one sync returns; a board only shows the latest ones.</summary>
     private const int MaxSyncEvents = 100;
@@ -66,7 +67,7 @@ public sealed class GameActionsController(
         }
 
         var saved = await gameApplicationService.SetFastForwardAsync(game!, request.Enabled!.Value, cancellationToken);
-        return Ok(new GameActionResponse(GameStateViewModel.From(saved, viewerIsOwner: true), []));
+        return Ok(new GameActionResponse(GameStateViewModel.From(saved, viewerIsOwner: true, oddsEstimator), []));
     }
 
     /// <summary>
@@ -90,7 +91,7 @@ public sealed class GameActionsController(
 
         var viewerIsOwner = (await authorizationService.AuthorizeAsync(User, game, GamePolicies.CanPlayGame)).Succeeded;
         var missedEvents = await gameQueryService.GetEventsAfterAsync(gameId, afterSequence, MaxSyncEvents, cancellationToken);
-        return Ok(new GameActionResponse(GameStateViewModel.From(game, viewerIsOwner), missedEvents.Select(GameEventViewModel.From).ToList()));
+        return Ok(new GameActionResponse(GameStateViewModel.From(game, viewerIsOwner, oddsEstimator), missedEvents.Select(GameEventViewModel.From).ToList()));
     }
 
     private async Task<IActionResult> PerformAsync(
@@ -105,7 +106,7 @@ public sealed class GameActionsController(
         }
 
         var events = await action(game!);
-        return Ok(new GameActionResponse(GameStateViewModel.From(game!, viewerIsOwner: true), events.Select(GameEventViewModel.From).ToList()));
+        return Ok(new GameActionResponse(GameStateViewModel.From(game!, viewerIsOwner: true, oddsEstimator), events.Select(GameEventViewModel.From).ToList()));
     }
 
     /// <summary>Loads the game for an action that only its owner may take, or returns the error response to send instead.</summary>

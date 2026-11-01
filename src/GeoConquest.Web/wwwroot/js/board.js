@@ -1,41 +1,68 @@
-// Draws the game board and posts the owner's intents. The server decides everything: this script never rolls dice or
-// checks rules, it only shows the state and events the server returns. All text goes in through textContent.
-// While the NPCs play, the server pushes their moves (board-live.js); the board reads the same data whether it
-// arrives by push, by an action's response, or by asking for a sync.
+// Runs the game board. The server decides everything: this script never rolls dice or checks rules, it only shows the
+// state and events the server returns and posts the owner's intents. The page itself is drawn by the server; the
+// modules imported here patch it. While the NPCs play the server pushes their moves (board-live.js), and the board reads
+// the same data whether it arrives by push, by an action's response, or by asking for a sync.
 
 import { hasMissedEvents, mergeEvents, syncCursor } from "./board-events.js";
 import { startLiveUpdates } from "./board-live.js";
+import { createCards } from "./board-cards.js";
+import { createArena } from "./board-arena.js";
+import { createLog } from "./board-log.js";
+import { createOrders } from "./board-orders.js";
+import { patchBanner, patchGameOver, patchLiveStatus, patchPlayers } from "./board-status.js";
+import { startShare } from "./share.js";
+import { showToast } from "./toast.js";
 
 // Long enough for the commentary on the game's last roll to arrive after the game has ended.
 const GAME_OVER_LISTEN_MS = 5000;
+// A roll newer than this is a live one worth tumbling; older ones are history shown at rest.
+const LIVE_ROLL_MAX_AGE_MS = 15000;
 
-const LIVE_STATUS_TEXT = {
-    connecting: "Live updates: connecting…",
-    live: "Live updates: connected",
-    reconnecting: "Live updates: connection lost, reconnecting… (checking for news every few seconds meanwhile)",
-    polling: "Live updates: unavailable, checking for news every few seconds instead",
+// The same verb as the button that was pressed.
+const DONE_TEXT = {
+    allocate: "Reinforcements placed",
+    transfer: "Soldiers moved",
+    attack: "Attack started",
+    roll: "Dice rolled",
+    stop: "Attack stopped",
+    skip: "Turn skipped",
+    "end-turn": "Turn ended",
 };
 
 const pageData = JSON.parse(document.getElementById("board-data").textContent);
 const requestToken = document.querySelector('meta[name="request-verification-token"]')?.content ?? "";
-const root = document.getElementById("board");
+const board = document.querySelector("[data-board]");
 
 let state = pageData.state;
 let events = pageData.recentEvents;
 let busy = false;
 let errorMessage = "";
-let liveStatus = "connecting";
 let syncing = false;
 let syncAgain = false;
 let live = null;
 let stopListeningTimer = null;
+let holdUntil = 0; // the counters wait for tumbling dice until this time, never longer
+let renderTimer = null;
+let wasPlayersTurn = state.canAct;
 
-/** Adds events not seen before. Returns true if any were new. */
+const cards = createCards(document.querySelector("[data-map]"), state.viewerIsOwner);
+const arena = createArena(document.querySelector("[data-arena]"), document.querySelector("[data-ticker]"));
+const log = createLog(document.querySelector("[data-log-section]"));
+let orders = null;
+const ordersPanel = document.querySelector("[data-orders]");
+if (ordersPanel) {
+    orders = createOrders(ordersPanel, { send, onAttackerChange: (code) => cards.setAttacker(code) });
+}
+
+/** Adds events not seen before. Returns true if any were new, and whether one was a roll worth animating. */
 function addEvents(incoming) {
     const merged = mergeEvents(events, incoming);
+    const known = new Set(events.map((gameEvent) => gameEvent.sequence));
+    const liveRoll = incoming.some((gameEvent) => gameEvent.type === "DiceRolled" && !known.has(gameEvent.sequence)
+        && Date.now() - Date.parse(gameEvent.createdAt) < LIVE_ROLL_MAX_AGE_MS);
     const changed = merged !== events;
     events = merged;
-    return changed;
+    return { changed, liveRoll };
 }
 
 /** State from the server's answer to this viewer (an action or a sync). Older versions are ignored. */
@@ -49,10 +76,57 @@ function applyOwnState(incoming) {
     return changed;
 }
 
-/**
- * State pushed to everyone. It is the spectator's view (no actions), so the owner keeps their own role and fetches
- * their actions with a sync when the turn reaches them.
- */
+/** The events side of the page. It updates at once: the arena, the commentary strip and the log. */
+function refreshEvents(animate) {
+    const holdMs = arena.showBattle(events, state, animate);
+    arena.showCommentary(events);
+    log.render(events, state);
+    if (holdMs > 0) {
+        holdUntil = Date.now() + holdMs;
+    }
+}
+
+/** The state side of the page: the cards, banner, players and orders. */
+function renderNow(animate = true) {
+    cards.patch(state, animate);
+    patchBanner(state);
+    patchPlayers(state);
+    board.dataset.turn = state.canAct ? "owner" : "other";
+
+    if (patchGameOver(state)) {
+        orders = null;
+    }
+
+    orders?.patch(state, busy, errorMessage);
+
+    if (state.canAct && !wasPlayersTurn) {
+        showToast(`Your turn. ${state.nextStep}`);
+    }
+
+    wasPlayersTurn = state.canAct;
+}
+
+/** After an order a control may have been hidden, and it took the keyboard with it, so hand the keyboard to the orders panel. */
+function restoreFocus() {
+    if (orders && document.activeElement === document.body) {
+        orders.focus();
+    }
+}
+
+/** Shows the dice before the counters they change, but never makes the counters wait more than the hold. The latest state is always what is drawn. */
+function renderSoon() {
+    const wait = holdUntil - Date.now();
+    if (wait <= 0) {
+        renderNow();
+        return;
+    }
+
+    renderTimer ??= setTimeout(() => {
+        renderTimer = null;
+        renderNow();
+    }, wait);
+}
+
 function onLiveState(incoming) {
     if (incoming.version <= state.version) {
         return;
@@ -64,8 +138,9 @@ function onLiveState(incoming) {
         return;
     }
 
+    // The pushed state is the spectator's view, so the owner keeps their own role and has no odds in it.
     state = { ...incoming, viewerIsOwner: state.viewerIsOwner };
-    render();
+    renderSoon();
     afterStateChange();
 }
 
@@ -75,8 +150,9 @@ function onLiveEvents(incoming) {
         return;
     }
 
-    if (addEvents(incoming)) {
-        refreshLogs();
+    const { changed, liveRoll } = addEvents(incoming);
+    if (changed) {
+        refreshEvents(liveRoll);
     }
 }
 
@@ -94,13 +170,15 @@ async function sync() {
             const response = await fetch(`/api/games/${state.gameId}/sync?afterSequence=${syncCursor(events, Date.now())}`);
             if (response.ok) {
                 const result = await response.json();
+                const { changed, liveRoll } = addEvents(result.newEvents);
                 const stateChanged = applyOwnState(result.state);
-                const eventsChanged = addEvents(result.newEvents);
+                if (changed) {
+                    refreshEvents(liveRoll);
+                }
+
                 if (stateChanged) {
-                    render();
+                    renderSoon();
                     afterStateChange();
-                } else if (eventsChanged) {
-                    refreshLogs();
                 }
             }
         } while (syncAgain);
@@ -120,38 +198,6 @@ function humanPlayerId() {
     return state.players.find((player) => player.isHuman).id;
 }
 
-function playerName(playerId) {
-    return state.players.find((player) => player.id === playerId)?.displayName ?? "";
-}
-
-function el(tag, props = {}, ...children) {
-    const node = document.createElement(tag);
-    for (const [name, value] of Object.entries(props)) {
-        if (name.startsWith("aria-")) {
-            node.setAttribute(name, value);
-        } else {
-            node[name] = value;
-        }
-    }
-
-    node.append(...children);
-    return node;
-}
-
-function labelled(text, control) {
-    return el("div", {}, el("label", { htmlFor: control.id, textContent: text }), " ", control);
-}
-
-function ownedTerritories() {
-    const humanId = humanPlayerId();
-    return state.territories.filter((territory) => territory.ownerPlayerId === humanId);
-}
-
-function territorySelect(id, territories) {
-    return el("select", { id }, ...territories.map((territory) =>
-        el("option", { value: territory.countryCode, textContent: `${territory.countryName} (${territory.soldiers})` })));
-}
-
 async function send(action, body) {
     if (busy) {
         return;
@@ -159,7 +205,7 @@ async function send(action, body) {
 
     busy = true;
     errorMessage = "";
-    render();
+    orders?.patch(state, busy, errorMessage);
 
     try {
         const response = await fetch(`/api/games/${state.gameId}/${action}`, {
@@ -170,252 +216,40 @@ async function send(action, body) {
         const result = await response.json().catch(() => ({}));
 
         if (response.ok) {
+            const { liveRoll } = addEvents(result.newEvents);
+            refreshEvents(liveRoll);
             applyOwnState(result.state);
-            addEvents(result.newEvents);
             afterStateChange();
+            showToast(action === "fast-forward" ? `Fast-forward ${result.state.isFastForward ? "on" : "off"}` : DONE_TEXT[action]);
         } else {
-            errorMessage = result.error ?? "Something went wrong. Please try again.";
+            errorMessage = result.error ?? "The server could not carry that out. Check your orders and try again.";
             if (response.status === 409) {
+                errorMessage = "The game moved on while you were deciding. The board has been refreshed: check it and give your order again.";
                 await sync();
             }
+
+            showToast(errorMessage, "alert");
         }
     } catch {
-        errorMessage = "Could not reach the server. Check your connection and try again.";
+        errorMessage = "The server could not be reached. Check your connection, then give your order again.";
+        showToast(errorMessage, "alert");
     }
 
     busy = false;
-    render();
+    renderSoon();
+    setTimeout(restoreFocus, Math.max(0, holdUntil - Date.now()) + 50);
 }
 
-function actionButton(text, action, onClick) {
-    const allowed = state.availableActions.includes(action);
-    const button = el("button", { type: "button", textContent: text, disabled: busy || !allowed });
-    if (!allowed) {
-        button.title = `Not available now. ${state.nextStep}`;
-    }
-    button.addEventListener("click", onClick);
-    return button;
-}
-
-function buildBanner() {
-    const banner = el("section", { "aria-label": "Turn" },
-        el("h2", { textContent: `Round ${state.round}: ${state.status === "InProgress" ? `${state.currentPlayerName}'s turn` : "Game over"}` }),
-        el("p", { role: "status", textContent: state.nextStep }),
-        el("p", { textContent: `Phase: ${state.phase}` }));
-
-    if (state.isFastForward) {
-        banner.append(el("p", { textContent: "Fast-forward is on: the NPC turns are playing at a quicker pace." }));
-    }
-
-    // Written out, not just coloured, so the connection state is clear to everyone.
-    banner.append(el("p", { id: "live-status", textContent: LIVE_STATUS_TEXT[liveStatus] }));
-    return banner;
-}
-
-function buildFastForwardControl() {
-    const turnPending = state.currentPlayerId === humanPlayerId();
-    const toggle = el("button", {
-        type: "button",
-        textContent: state.isFastForward ? "Turn fast-forward off" : "Fast-forward NPC turns",
-        disabled: busy || state.status !== "InProgress",
-    });
-    if (state.status !== "InProgress") {
-        toggle.title = "The game is over, so there is nothing left to speed up.";
-    }
-
-    toggle.addEventListener("click", () => send("fast-forward", { enabled: !state.isFastForward }));
-
-    return el("fieldset", {}, el("legend", { textContent: "NPC pace" }),
-        toggle,
-        el("p", { textContent: turnPending
-            ? "Applies to the NPC turns after you end your turn. It switches itself off when your turn comes round again."
-            : "It switches itself off when your turn comes round again." }));
-}
-
-/** The latest attack, round by round, drawn from the events so a spectator sees exactly what the owner sees. */
-function buildBattleLog() {
-    const startIndex = events.map((gameEvent) => gameEvent.type).lastIndexOf("AttackStarted");
-    const section = el("section", { id: "battle-log", "aria-label": "Latest battle" }, el("h2", { textContent: "Latest battle" }));
-
-    if (startIndex < 0) {
-        section.append(el("p", { textContent: "No attack has been made yet." }));
-        return section;
-    }
-
-    section.append(el("p", { textContent: events[startIndex].message }));
-    const rounds = events.slice(startIndex + 1)
-        .filter((gameEvent) => gameEvent.type === "DiceRolled")
-        .map((gameEvent, index) => {
-            const round = el("li", {
-                textContent: `Round ${index + 1}: attacker rolled ${gameEvent.attackerDice.join(", ")}; defender rolled ${gameEvent.defenderDice.join(", ")}. ` +
-                    `Attacker loses ${gameEvent.attackerLosses}, defender loses ${gameEvent.defenderLosses}.`,
-            });
-            const commentary = events.find((candidate) => candidate.type === "Commentary" && candidate.sequence === gameEvent.sequence + 1);
-            if (commentary) {
-                round.append(el("p", { textContent: describeCommentary(commentary) }));
-            }
-            return round;
-        });
-    section.append(el("ol", {}, ...rounds));
-    return section;
-}
-
-function buildTerritories() {
-    const rows = state.territories.map((territory) => el("tr", {},
-        el("th", { scope: "row", textContent: territory.countryName }),
-        el("td", { textContent: territory.ownerName }),
-        el("td", { textContent: String(territory.soldiers) }),
-        el("td", { textContent: String(territory.soldierValue) })));
-
-    return el("section", { "aria-label": "Countries" },
-        el("h2", { textContent: "Countries" }),
-        el("table", {},
-            el("thead", {}, el("tr", {},
-                ...["Country", "Owner", "Soldiers", "Value"].map((heading) => el("th", { scope: "col", textContent: heading })))),
-            el("tbody", {}, ...rows)));
-}
-
-function buildReinforceForm() {
-    const inputs = ownedTerritories().map((territory) => {
-        const input = el("input", { id: `place-${territory.countryCode}`, type: "number", min: 0, value: 0 });
-        input.dataset.countryCode = territory.countryCode;
-        return labelled(`${territory.countryName} (${territory.soldiers})`, input);
-    });
-
-    const submit = actionButton(`Place reinforcements (${state.pendingReinforcements} to place)`, "allocate", () => {
-        const allocations = {};
-        for (const input of form.querySelectorAll("input[type=number]")) {
-            if (Number(input.value) > 0) {
-                allocations[input.dataset.countryCode] = Number(input.value);
-            }
-        }
-        send("allocate", { allocations });
-    });
-
-    const form = el("fieldset", {}, el("legend", { textContent: "Reinforcements" }), ...inputs, submit);
-    return form;
-}
-
-function buildTransferForm() {
-    const owned = ownedTerritories();
-    const from = territorySelect("transfer-from", owned);
-    const to = territorySelect("transfer-to", owned);
-    const count = el("input", { id: "transfer-count", type: "number", min: 1, value: 1 });
-
-    const submit = actionButton("Move soldiers", "transfer", () =>
-        send("transfer", { fromCountryCode: from.value, toCountryCode: to.value, soldiers: Number(count.value) }));
-
-    return el("fieldset", {}, el("legend", { textContent: "Move soldiers" }),
-        labelled("From", from), labelled("To", to), labelled("Soldiers", count), submit);
-}
-
-function buildAttackForm() {
-    const owned = ownedTerritories();
-    const attackers = owned.filter((territory) => territory.soldiers >= 2);
-    const targets = state.territories.filter((territory) => !owned.includes(territory));
-    const from = territorySelect("attack-from", attackers);
-    const target = territorySelect("attack-target", targets);
-
-    const submit = actionButton("Start attack", "attack", () =>
-        send("attack", { attackerCountryCode: from.value, defenderCountryCode: target.value }));
-    if (attackers.length === 0 && state.availableActions.includes("attack")) {
-        submit.disabled = true;
-        submit.title = "None of your countries has the 2 soldiers needed to attack.";
-    }
-
-    return el("fieldset", {}, el("legend", { textContent: "Attack" }),
-        labelled("Attack from", from), labelled("Target", target), submit);
-}
-
-function buildBattleControls() {
-    const battle = state.battle;
-    const summary = battle
-        ? `${battle.attackerName} is attacking ${battle.defenderName} (${battle.roundsFought} rounds fought).`
-        : "No attack in progress.";
-
-    const stop = actionButton("Stop attack and end turn", "stop", () => {
-        if (confirm("Stopping the attack ends your turn. Continue?")) {
-            send("stop");
-        }
-    });
-
-    return el("fieldset", {}, el("legend", { textContent: "Battle" }),
-        el("p", { textContent: summary }), actionButton("Roll dice", "roll", () => send("roll")), " ", stop);
-}
-
-function buildTurnControls() {
-    const skip = actionButton("Skip turn", "skip", () => {
-        if (confirm("Skip your turn without attacking?")) {
-            send("skip");
-        }
-    });
-
-    return el("fieldset", {}, el("legend", { textContent: "End of turn" }),
-        skip, " ", actionButton("End turn", "endTurn", () => send("end-turn")));
-}
-
-function buildActionPanel() {
-    if (!state.viewerIsOwner) {
-        return el("p", { textContent: "Spectating: you can watch every move but not play." });
-    }
-
-    const panel = el("section", { "aria-label": "Your actions" }, el("h2", { textContent: "Your actions" }));
-    if (errorMessage) {
-        panel.append(el("p", { role: "alert", className: "error", textContent: errorMessage }));
-    }
-
-    panel.append(buildReinforceForm(), buildTransferForm(), buildAttackForm(), buildBattleControls(), buildTurnControls(), buildFastForwardControl());
-    return panel;
-}
-
-/** Model text is untrusted, so it only ever reaches the page as textContent. The label says who wrote the line. */
-function describeCommentary(gameEvent) {
-    return `${gameEvent.commentarySource === "Ai" ? "AI commentary" : "Template commentary"}: ${gameEvent.message}`;
-}
-
-function describeEvent(gameEvent) {
-    if (gameEvent.type === "Commentary") {
-        return `#${gameEvent.sequence} ${describeCommentary(gameEvent)}`;
-    }
-
-    // An NPC's reasoning is shown with its name so it reads as their explanation, not as a game result.
-    const npcName = gameEvent.type === "NpcDecision" ? playerName(gameEvent.actorPlayerId) : "";
-    return npcName ? `#${gameEvent.sequence} ${npcName} (NPC) explains: ${gameEvent.message}` : `#${gameEvent.sequence} ${gameEvent.message}`;
-}
-
-function buildEventLog() {
-    const entries = [...events].reverse().map((gameEvent) => el("li", { textContent: describeEvent(gameEvent) }));
-
-    return el("section", { id: "event-log", "aria-label": "Event log" },
-        el("h2", { textContent: "Event log (latest first)" }),
-        el("ul", {}, ...entries));
-}
-
-/** Redraws only the logs. New events can arrive at any moment, and must not wipe a form the owner is filling in. */
-function refreshLogs() {
-    document.getElementById("battle-log")?.replaceWith(buildBattleLog());
-    document.getElementById("event-log")?.replaceWith(buildEventLog());
-}
-
-function render() {
-    // Keep the keyboard where it was: a re-render replaces the controls, so remember which one had focus.
-    const focusedId = document.activeElement?.id;
-    root.replaceChildren(buildBanner(), buildTerritories(), buildActionPanel(), buildBattleLog(), buildEventLog());
-    if (focusedId) {
-        document.getElementById(focusedId)?.focus();
-    }
-}
-
-render();
+startShare(document.querySelector("[data-share]"));
+refreshEvents(false);
+renderNow(false);
+cards.endDeal();
 
 if (state.status === "InProgress") {
     live = startLiveUpdates(state.gameId, {
         onEvents: onLiveEvents,
         onState: onLiveState,
-        onStatus: (status) => {
-            liveStatus = status;
-            render();
-        },
+        onStatus: patchLiveStatus,
         sync,
     });
 }

@@ -59,6 +59,8 @@ public static partial class CommentaryOutputGuard
     private static partial Regex UnsuitableWord();
 
     // The model confuses die values, dice counts and round numbers, so any number it writes is treated as unreliable.
-    [GeneratedRegex(@"\d|\b(zero|one|two|three|four|five|six|seven|eight|nine|ten)\b", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(
+        @"\d|\b(zero|one|two|three|four|five|six|seven|eight|nine|ten|ones|twos|threes|fours|fives|sixes|pair|pairs|twice|double|doubles|triple|triples)\b",
+        RegexOptions.IgnoreCase)]
     private static partial Regex NumberOrNumberWord();
 }

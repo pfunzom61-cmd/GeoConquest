@@ -39,7 +39,7 @@ public sealed class GameEngine(
             game,
             GameEventType.Reinforced,
             player.Id,
-            $"{player.DisplayName} places {allocation.Value} soldiers in {game.GetTerritory(allocation.Key).CountryName}.",
+            $"{Wording.PlayerName(player)} places {Wording.Count(allocation.Value, "soldier")} in {game.GetTerritory(allocation.Key).CountryName}.",
             new GameEventPayload { ToCountryCode = allocation.Key, Soldiers = allocation.Value })).ToList();
     }
 
@@ -80,7 +80,7 @@ public sealed class GameEngine(
                 game,
                 GameEventType.Transferred,
                 player.Id,
-                $"{player.DisplayName} moves {soldiers} soldiers from {source.CountryName} to {destination.CountryName}.",
+                $"{Wording.PlayerName(player)} moves {Wording.Count(soldiers, "soldier")} from {source.CountryName} to {destination.CountryName}.",
                 new GameEventPayload { FromCountryCode = fromCountryCode, ToCountryCode = toCountryCode, Soldiers = soldiers }),
         ];
     }
@@ -117,8 +117,9 @@ public sealed class GameEngine(
                 game,
                 GameEventType.AttackStarted,
                 player.Id,
-                $"{player.DisplayName} attacks {defendingTerritory.CountryName} ({defendingTerritory.Soldiers} soldiers) " +
-                $"from {attackingTerritory.CountryName} ({attackingTerritory.Soldiers} soldiers).",
+                $"{Wording.PlayerName(player)} attacks {defendingTerritory.CountryName} ({Wording.Count(defendingTerritory.Soldiers, "soldier")}), " +
+                $"held by {Wording.PlayerName(game.GetPlayer(defendingTerritory.OwnerPlayerId))}, " +
+                $"from {attackingTerritory.CountryName} ({Wording.Count(attackingTerritory.Soldiers, "soldier")}).",
                 new GameEventPayload { FromCountryCode = attackerCountryCode, ToCountryCode = defenderCountryCode }),
         ];
     }
@@ -175,7 +176,7 @@ public sealed class GameEngine(
                     game,
                     GameEventType.AttackFailed,
                     player.Id,
-                    $"{player.DisplayName}'s attack on {defendingTerritory.CountryName} fails; " +
+                    $"{Wording.PlayerName(player)}'s attack on {defendingTerritory.CountryName} fails; " +
                     $"{attackingTerritory.CountryName} is down to 1 soldier.",
                     new GameEventPayload { FromCountryCode = battle.AttackerCountryCode, ToCountryCode = battle.DefenderCountryCode }));
                 break;
@@ -186,7 +187,7 @@ public sealed class GameEngine(
                     game,
                     GameEventType.CountryConquered,
                     player.Id,
-                    $"{player.DisplayName} conquers {defendingTerritory.CountryName} and garrisons it with {round.ConquestReward} soldiers.",
+                    $"{Wording.PlayerName(player)} conquers {defendingTerritory.CountryName} from {Wording.PlayerName(defendingPlayer)} and garrisons it with {Wording.Count(round.ConquestReward, "soldier")}.",
                     new GameEventPayload
                     {
                         FromCountryCode = battle.AttackerCountryCode,
@@ -206,7 +207,7 @@ public sealed class GameEngine(
 
         var events = new List<GameEvent>
         {
-            Log(game, GameEventType.AttackStopped, player.Id, $"{player.DisplayName} calls off the attack and ends the turn.", null),
+            Log(game, GameEventType.AttackStopped, player.Id, $"{Wording.PlayerName(player)} calls off the attack and ends the turn.", null),
         };
         game.FinishBattle();
         AdvanceTurn(game, events);
@@ -220,7 +221,7 @@ public sealed class GameEngine(
 
         var events = new List<GameEvent>
         {
-            Log(game, GameEventType.TurnSkipped, player.Id, $"{player.DisplayName} skips the turn.", null),
+            Log(game, GameEventType.TurnSkipped, player.Id, $"{Wording.PlayerName(player)} skips the turn.", null),
         };
         AdvanceTurn(game, events);
 
@@ -257,7 +258,7 @@ public sealed class GameEngine(
         {
             defeatedOwner.Eliminate();
             events.Add(Log(
-                game, GameEventType.PlayerEliminated, defeatedOwner.Id, $"{defeatedOwner.DisplayName} has been eliminated.", null));
+                game, GameEventType.PlayerEliminated, defeatedOwner.Id, $"{Wording.PlayerName(defeatedOwner)} has been eliminated.", null));
         }
 
         if (game.Territories.All(territory => territory.OwnerPlayerId == conqueror.Id))
@@ -266,18 +267,18 @@ public sealed class GameEngine(
             if (conqueror.IsHuman)
             {
                 game.Finish(GameStatus.Won, conqueror.Id);
-                events.Add(Log(game, GameEventType.GameWon, conqueror.Id, $"{conqueror.DisplayName} has conquered the world!", null));
+                events.Add(Log(game, GameEventType.GameWon, conqueror.Id, $"{Wording.PlayerName(conqueror)} has conquered the world!", null));
             }
             else
             {
                 game.Finish(GameStatus.Lost, conqueror.Id);
-                events.Add(Log(game, GameEventType.GameLost, conqueror.Id, $"{conqueror.DisplayName} has conquered the world. Game over.", null));
+                events.Add(Log(game, GameEventType.GameLost, conqueror.Id, $"{Wording.PlayerName(conqueror)} has conquered the world. Game over.", null));
             }
         }
         else if (defeatedOwner.IsHuman && defeatedOwner.IsEliminated)
         {
             game.Finish(GameStatus.Lost, null);
-            events.Add(Log(game, GameEventType.GameLost, defeatedOwner.Id, $"{defeatedOwner.DisplayName} has been eliminated. Game over.", null));
+            events.Add(Log(game, GameEventType.GameLost, defeatedOwner.Id, $"{Wording.PlayerName(defeatedOwner)} has been eliminated. Game over.", null));
         }
     }
 
@@ -295,10 +296,10 @@ public sealed class GameEngine(
 
         game.StartTurn(reinforcements);
 
-        var message = $"Round {game.RoundNumber}: {player.DisplayName}'s turn.";
+        var message = $"Round {game.RoundNumber}: {Wording.PlayerName(player)} to play.";
         if (reinforcements > 0)
         {
-            message += $" {reinforcements} reinforcements to place.";
+            message += $" {Wording.Count(reinforcements, "reinforcement")} to place.";
         }
 
         events.Add(Log(game, GameEventType.TurnStarted, player.Id, message, null));

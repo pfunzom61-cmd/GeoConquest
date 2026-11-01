@@ -1,0 +1,11 @@
+/* An empty list: a paper slip with what is missing and one action. */
+
+.gc-empty {
+    max-inline-size: 36rem;
+}
+
+.gc-empty__title {
+    margin-block-end: var(--gc-space-2);
+    font-size: var(--gc-text-card);
+    font-weight: 700;
+}

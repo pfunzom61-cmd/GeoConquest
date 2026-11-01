@@ -1,0 +1,7 @@
+@* An empty list: what is missing and the one clear thing to do about it. *@
+@model EmptyStateViewModel
+<section class="gc-panel gc-empty" aria-labelledby="empty-title">
+    <h2 class="gc-empty__title" id="empty-title">@Model.Title</h2>
+    <p>@Model.Message</p>
+    <a class="gc-button" href="@Model.ActionUrl">@Model.ActionLabel</a>
+</section>

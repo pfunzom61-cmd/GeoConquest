@@ -1,0 +1,18 @@
+@* Model: the trail as (label, url) pairs. The last one is the current page and has no link. *@
+@model IReadOnlyList<(string Label, string? Url)>
+<nav class="gc-breadcrumb" aria-label="Breadcrumb">
+    <ol class="gc-breadcrumb__list">
+        @for (var index = 0; index < Model.Count; index++)
+        {
+            var crumb = Model[index];
+            @if (index == Model.Count - 1)
+            {
+                <li class="gc-breadcrumb__item" aria-current="page">@crumb.Label</li>
+            }
+            else
+            {
+                <li class="gc-breadcrumb__item"><a href="@crumb.Url">@crumb.Label</a></li>
+            }
+        }
+    </ol>
+</nav>

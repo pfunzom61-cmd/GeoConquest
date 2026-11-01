@@ -1,20 +1,73 @@
 ﻿@{
     ViewData["Title"] = "Home";
+    var signedIn = User.Identity?.IsAuthenticated == true;
 }
 
-<h1>GeoConquest</h1>
-<p>Conquer nine rival countries before they conquer you. Pick your country, play your turns, and watch the NPCs answer.</p>
+<section class="gc-hero" aria-labelledby="hero-title">
+    <div class="gc-hero__head">
+        <h1 class="gc-heading gc-heading--hero" id="hero-title">GeoConquest</h1>
+        <p class="gc-stamp gc-hero__stamp">Conquered</p>
+    </div>
+    <p class="gc-hero__lede">Conquer nine rival countries before they conquer you. Pick your country, play your turns, and watch the NPCs answer.</p>
+</section>
 
-<ul>
-    <li><a asp-controller="LiveGames" asp-action="Index">Watch a live game</a> (no account needed)</li>
-    @if (User.Identity?.IsAuthenticated == true)
+<h2 class="gc-visually-hidden">Where to start</h2>
+<ul class="gc-grid gc-grid--actions">
+    <li class="gc-card gc-card--action" data-color="color-1">
+        <span class="gc-card__tab" aria-hidden="true">Watch</span>
+        <div class="gc-card__stripe" aria-hidden="true"></div>
+        <div class="gc-card__body">
+            <h3 class="gc-card__name">Watch a live game</h3>
+            <p class="gc-card__text">See battles, dice and every NPC decision as they happen. No account needed.</p>
+        </div>
+        <p class="gc-card__action"><a class="gc-button" asp-controller="LiveGames" asp-action="Index">Watch live games</a></p>
+    </li>
+    @if (signedIn)
     {
-        <li><a asp-controller="Games" asp-action="Index">Resume a campaign</a></li>
-        <li><a asp-controller="Games" asp-action="New">Start a new campaign</a></li>
+        <li class="gc-card gc-card--action" data-color="color-0">
+            <span class="gc-card__tab" aria-hidden="true">Resume</span>
+            <div class="gc-card__stripe" aria-hidden="true"></div>
+            <div class="gc-card__body">
+                <h3 class="gc-card__name">Resume a campaign</h3>
+                <p class="gc-card__text">Pick up a game where you left it. Your countries and soldiers are as you left them.</p>
+            </div>
+            <p class="gc-card__action"><a class="gc-button" asp-controller="Games" asp-action="Index">My campaigns</a></p>
+        </li>
+        <li class="gc-card gc-card--action" data-color="color-2">
+            <span class="gc-card__tab" aria-hidden="true">New</span>
+            <div class="gc-card__stripe" aria-hidden="true"></div>
+            <div class="gc-card__body">
+                <h3 class="gc-card__name">Start a new campaign</h3>
+                <p class="gc-card__text">Choose any country in the world. Nine rivals are picked at random.</p>
+            </div>
+            <p class="gc-card__action"><a class="gc-button" asp-controller="Games" asp-action="New">Choose a country</a></p>
+        </li>
     }
     else
     {
-        <li><a asp-controller="Account" asp-action="Register">Create an account</a> to play</li>
-        <li><a asp-controller="Account" asp-action="Login">Log in</a></li>
+        <li class="gc-card gc-card--action" data-color="color-0">
+            <span class="gc-card__tab" aria-hidden="true">Join</span>
+            <div class="gc-card__stripe" aria-hidden="true"></div>
+            <div class="gc-card__body">
+                <h3 class="gc-card__name">Create an account</h3>
+                <p class="gc-card__text">Take command of a country and play your own campaigns. It takes under a minute.</p>
+            </div>
+            <p class="gc-card__action"><a class="gc-button" asp-controller="Account" asp-action="Register">Create an account</a></p>
+        </li>
+        <li class="gc-card gc-card--action" data-color="color-2">
+            <span class="gc-card__tab" aria-hidden="true">Return</span>
+            <div class="gc-card__stripe" aria-hidden="true"></div>
+            <div class="gc-card__body">
+                <h3 class="gc-card__name">Log in</h3>
+                <p class="gc-card__text">Already registered? Sign in to resume your campaigns.</p>
+            </div>
+            <p class="gc-card__action"><a class="gc-button" asp-controller="Account" asp-action="Login">Log in</a></p>
+        </li>
     }
 </ul>
+
+<p class="gc-hero__help">New to the rules? <a asp-action="HowToPlay">Read how to play</a>.</p>
+
+@section Head {
+    <link rel="stylesheet" href="~/css/pages/home.css" asp-append-version="true" />
+}

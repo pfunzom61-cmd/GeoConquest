@@ -1,0 +1,33 @@
+/* The landing page: a stencil hero with one stamp, then three dossier action cards. */
+
+.gc-hero {
+    margin-block: var(--gc-space-5) var(--gc-space-6);
+}
+
+.gc-hero__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--gc-space-3) var(--gc-space-6);
+    margin-block-end: var(--gc-space-3);
+}
+
+.gc-hero__head .gc-heading {
+    margin: 0;
+}
+
+/* The stamp is the page's one bold mark. Red needs paper behind it, so it sits on a slip. */
+.gc-hero__stamp {
+    padding: var(--gc-space-2) var(--gc-space-4);
+    font-size: 1.5rem;
+    background-color: var(--gc-paper);
+}
+
+.gc-hero__lede {
+    max-inline-size: 36rem;
+    font-size: var(--gc-text-card);
+}
+
+.gc-hero__help {
+    margin-block-start: var(--gc-space-6);
+}

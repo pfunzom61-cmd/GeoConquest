@@ -1,0 +1,7 @@
+@model NavLinkViewModel
+@{
+    var routeValues = ViewContext.RouteData.Values;
+    var isCurrent = string.Equals(routeValues["controller"]?.ToString(), Model.Controller, StringComparison.OrdinalIgnoreCase)
+        && string.Equals(routeValues["action"]?.ToString(), Model.Action, StringComparison.OrdinalIgnoreCase);
+}
+<a class="gc-nav__link" asp-controller="@Model.Controller" asp-action="@Model.Action" aria-current="@(isCurrent ? "page" : null)">@Model.Label</a>

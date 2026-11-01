@@ -1,51 +1,54 @@
 @model LiveGamesViewModel
 @{
-    ViewData["Title"] = "Live Games";
+    ViewData["Title"] = "Live games";
 }
 
-<h1>Live Games</h1>
-<p>Games in progress right now. Pick one to watch; you do not need an account.</p>
+<div class="gc-page-head">
+    <h1 class="gc-heading gc-heading--title gc-page-head__title">Live games</h1>
+</div>
+<p>Games in progress right now. Pick one to watch. You do not need an account.</p>
 
-<form method="get" asp-controller="LiveGames" asp-action="Index" role="search">
-    <label for="search">Search by player or country</label>
-    <input id="search" name="search" type="search" value="@Model.Search" />
-    <button type="submit">Search</button>
+<form class="gc-filters" method="get" asp-controller="LiveGames" asp-action="Index" role="search" data-busy-form>
+    <div class="gc-filters__field gc-filters__field--wide">
+        <label class="gc-filters__label" for="search">Search by player or country</label>
+        <input class="gc-input" id="search" name="search" type="search" value="@Model.Search" />
+    </div>
+    <button class="gc-button gc-button--light" type="submit" data-busy-text="Searching">Search</button>
 </form>
 
 @if (Model.Games.Count == 0)
 {
-    <p>No live games found.</p>
+    <partial name="_EmptyState" model="@(!string.IsNullOrWhiteSpace(Model.Search)
+        ? new EmptyStateViewModel("No live games match", "No running game has that player or country. Clear the search to see every live game.", "Clear the search", Url.Action("Index", "LiveGames")!)
+        : User.Identity?.IsAuthenticated == true
+            ? new EmptyStateViewModel("No games are running", "Nobody is playing right now. Start a campaign and others can watch it with your link.", "Start a new campaign", Url.Action("New", "Games")!)
+            : new EmptyStateViewModel("No games are running", "Nobody is playing right now. Create an account to start a campaign of your own.", "Create an account", Url.Action("Register", "Account")!))" />
 }
 else
 {
-    <table>
-        <caption>Games in progress</caption>
-        <thead>
-            <tr>
-                <th scope="col">Commander</th>
-                <th scope="col">Country</th>
-                <th scope="col">Round</th>
-                <th scope="col">Now playing</th>
-                <th scope="col">Last active</th>
-                <th scope="col"><span class="visually-hidden">Watch</span></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var game in Model.Games)
-            {
-                <tr>
-                    <th scope="row">@game.OwnerDisplayName</th>
-                    <td>@game.CountryName</td>
-                    <td>@game.Round</td>
-                    <td>@game.CurrentPlayerName</td>
-                    <td>@game.LastActive.ToString("yyyy-MM-dd HH:mm") UTC</td>
-                    <td>
-                        <a asp-controller="Games" asp-action="Play" asp-route-id="@game.GameId">
-                            Watch<span class="visually-hidden"> @game.OwnerDisplayName's game</span>
-                        </a>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <h2 class="gc-visually-hidden">Games in progress</h2>
+    <ul class="gc-grid">
+        @foreach (var game in Model.Games)
+        {
+            <partial name="_ListCard" model="@(new ListCardViewModel(
+                $"Round {game.Round}",
+                game.CountryCode,
+                game.CountryName,
+                [$"Commander: {game.OwnerDisplayName}", $"Now playing: {game.CurrentPlayerName}", $"Last active {game.LastActive:d MMM yyyy, HH:mm} UTC"],
+                null,
+                "Round",
+                game.Round.ToString(),
+                "Watch",
+                $"{game.OwnerDisplayName}'s game",
+                Url.Action("Play", "Games", new { id = game.GameId })!))" />
+        }
+    </ul>
+}
+
+@section Head {
+    <link rel="stylesheet" href="~/css/pages/lists.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script type="module" src="~/js/form-busy.js" asp-append-version="true"></script>
 }
