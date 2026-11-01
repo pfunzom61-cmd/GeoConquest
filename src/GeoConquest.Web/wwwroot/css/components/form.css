@@ -1,0 +1,63 @@
+/* Form fields, hints and validation messages. Forms sit on paper, so focus rings are ink. */
+
+.gc-form,
+.gc-group {
+    --gc-focus: var(--gc-ink);
+}
+
+.gc-field {
+    display: grid;
+    gap: var(--gc-space-1);
+    margin-block-end: var(--gc-space-3);
+}
+
+.gc-label {
+    font-weight: 600;
+}
+
+.gc-input,
+.gc-select {
+    inline-size: 100%;
+    min-block-size: var(--gc-target);
+    padding: var(--gc-space-2) var(--gc-space-3);
+    font-family: var(--gc-font-body);
+    font-size: var(--gc-text-base);
+    color: var(--gc-ink);
+    background-color: var(--gc-paper-light);
+    border: 2px solid var(--gc-ink);
+    border-radius: 0;
+}
+
+.gc-input--number {
+    font-family: var(--gc-font-mono);
+    font-weight: 700;
+}
+
+.gc-hint {
+    margin: 0 0 var(--gc-space-3);
+    font-size: var(--gc-text-small);
+}
+
+/* The error is marked by a bar as well as by colour. */
+.gc-error {
+    margin-block: 0 var(--gc-space-3);
+    padding: var(--gc-space-2) var(--gc-space-3);
+    font-weight: 600;
+    color: var(--gc-red);
+    background-color: var(--gc-paper-light);
+    border-inline-start: 6px solid var(--gc-red);
+}
+
+.gc-group {
+    min-inline-size: 0;
+    margin: 0 0 var(--gc-space-5);
+    padding: 0;
+    border: 0;
+}
+
+.gc-group__title {
+    padding: 0;
+    margin-block-end: var(--gc-space-2);
+    font-weight: 700;
+    font-size: var(--gc-text-card);
+}

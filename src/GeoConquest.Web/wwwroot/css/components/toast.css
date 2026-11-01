@@ -1,0 +1,47 @@
+/* Toasts: short confirmations of what just happened. The containers carry the live-region roles. */
+
+.gc-toasts {
+    position: fixed;
+    inset-block-end: var(--gc-space-4);
+    inset-inline: var(--gc-gutter);
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--gc-space-2);
+    pointer-events: none;
+}
+
+.gc-toasts__stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--gc-space-2);
+}
+
+.gc-toast {
+    max-inline-size: 26rem;
+    margin: 0;
+    padding: var(--gc-space-3) var(--gc-space-4);
+    font-weight: 600;
+    color: var(--gc-paper);
+    background-color: var(--gc-ink);
+    border: 2px solid var(--gc-paper);
+    border-inline-start-width: 8px;
+    pointer-events: auto;
+    animation: gc-toast-in var(--gc-time-medium) var(--gc-ease);
+}
+
+/* An error toast is a paper slip with a red edge and the word "Problem", so it is not told apart by colour alone. */
+.gc-toast--error {
+    color: var(--gc-ink);
+    background-color: var(--gc-paper);
+    border-color: var(--gc-red);
+}
+
+@keyframes gc-toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(0.75rem);
+    }
+}

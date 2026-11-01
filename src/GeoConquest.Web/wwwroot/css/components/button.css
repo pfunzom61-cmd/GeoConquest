@@ -1,0 +1,70 @@
+/* Buttons. Primary buttons are ink keys with a hard lower edge; every button is at least 44px high. */
+
+.gc-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gc-space-2);
+    min-block-size: var(--gc-target);
+    min-inline-size: var(--gc-target);
+    padding: var(--gc-space-2) var(--gc-space-4);
+    font-family: var(--gc-font-body);
+    font-size: var(--gc-text-base);
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    text-decoration: none;
+    color: var(--gc-paper);
+    background-color: var(--gc-ink);
+    border: 2px solid var(--gc-ink);
+    box-shadow: 0 var(--gc-edge) 0 #000;
+    cursor: pointer;
+    transition: transform var(--gc-time-fast) var(--gc-ease), box-shadow var(--gc-time-fast) var(--gc-ease);
+}
+
+.gc-button:hover {
+    transform: translateY(-1px);
+}
+
+.gc-button:active {
+    transform: translateY(var(--gc-edge));
+    box-shadow: none;
+}
+
+/* On the table (dark) the key is paper-coloured so it keeps its edge. */
+.gc-button--light {
+    color: var(--gc-ink);
+    background-color: var(--gc-paper);
+    border-color: var(--gc-paper);
+    box-shadow: 0 var(--gc-edge) 0 var(--gc-fog);
+}
+
+.gc-button--quiet {
+    color: inherit;
+    background-color: transparent;
+    border-color: currentcolor;
+    box-shadow: none;
+}
+
+.gc-button--danger {
+    color: var(--gc-red);
+    background-color: var(--gc-paper);
+    border-color: var(--gc-red);
+    box-shadow: 0 var(--gc-edge) 0 var(--gc-red);
+}
+
+.gc-button:disabled {
+    color: var(--gc-ink);
+    background-color: var(--gc-fog);
+    border-style: dashed;
+    border-color: var(--gc-ink);
+    box-shadow: none;
+    transform: none;
+    cursor: not-allowed;
+}
+
+.gc-button-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gc-space-3);
+}

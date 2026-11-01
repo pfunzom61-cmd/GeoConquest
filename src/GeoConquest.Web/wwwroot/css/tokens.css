@@ -1,0 +1,87 @@
+/* Design tokens: custom properties only. Contrast ratios are stated where a pair is used for text or controls. */
+
+:root {
+    /* Palette. Every pair that carries text or a control is listed with its WCAG ratio. */
+    --gc-table: #2c322b;  /* page background */
+    --gc-paper: #dad9c4;  /* dossier cards, forms, log, dice */
+    --gc-paper-light: #efeedd; /* form fields on paper, ink on it 13.6 */
+    --gc-ink: #1b201c;    /* text on paper, header, banner, CRT glass */
+    --gc-amber: #ffb000;  /* the commentary strip only */
+    --gc-red: #9e1029;    /* stamps, destructive actions, errors */
+    --gc-fog: #b9bfad;    /* secondary text on the table, disabled fills */
+    /* ink on paper 11.58, paper on table 9.20, fog on table 6.96, amber on ink 9.03,
+       red on paper 5.74, ink on fog 8.75. Never: ink on table, red on table, amber on paper. */
+
+    /* Player identity. Each colour is paired with a pattern, initials and a text label, never used alone.
+       Paper-coloured initials on each colour: at least 4.5. */
+    --gc-player-0: #1e4d8c;
+    --gc-player-1: #0a6647;
+    --gc-player-2: #7a3e0a;
+    --gc-player-3: #5a2a87;
+    --gc-player-4: #006273;
+    --gc-player-5: #5e5a00;
+    --gc-player-6: #4a4a9c;
+    --gc-player-7: #39485a;
+    --gc-player-8: #8a1f6a;
+    --gc-player-9: #2f6b1e;
+
+    /* Patterns paint in the element text colour, so an element sets color to its owner colour and then uses the pattern. */
+    --gc-pattern-0: repeating-linear-gradient(45deg, currentcolor 0 0.4rem, transparent 0.4rem 0.6rem);
+    --gc-pattern-1: radial-gradient(currentcolor 0.17rem, transparent 0.2rem) 0 0 / 0.6rem 0.6rem;
+    --gc-pattern-2: repeating-linear-gradient(90deg, currentcolor 0 0.5rem, transparent 0.5rem 0.7rem);
+    --gc-pattern-3: repeating-linear-gradient(-45deg, currentcolor 0 0.15rem, transparent 0.15rem 0.4rem);
+    --gc-pattern-4: repeating-linear-gradient(0deg, currentcolor 0 0.25rem, transparent 0.25rem 0.45rem);
+    --gc-pattern-5: conic-gradient(currentcolor 25%, transparent 0 50%, currentcolor 0 75%, transparent 0) 0 0 / 0.8rem 0.8rem;
+    --gc-pattern-6: repeating-linear-gradient(135deg, currentcolor 0 0.55rem, transparent 0.55rem 0.8rem);
+    --gc-pattern-7: linear-gradient(currentcolor 0.12rem, transparent 0.12rem) 0 0 / 0.6rem 0.6rem,
+        linear-gradient(90deg, currentcolor 0.12rem, transparent 0.12rem) 0 0 / 0.6rem 0.6rem;
+    --gc-pattern-8: radial-gradient(currentcolor 0.3rem, transparent 0.33rem) 0 0 / 1rem 1rem;
+    --gc-pattern-9: repeating-linear-gradient(0deg, currentcolor 0 0.12rem, transparent 0.12rem 0.3rem);
+
+    /* Type. Stardos Stencil is for headings only, Libre Franklin for text, Courier Prime for the log and counters. */
+    --gc-font-display: "Stardos Stencil", "Rockwell Extra Bold", "Arial Black", sans-serif;
+    --gc-font-body: "Libre Franklin", "Franklin Gothic Medium", "Arial Narrow", sans-serif;
+    --gc-font-mono: "Courier Prime", "Courier New", monospace;
+
+    --gc-text-small: 0.875rem;
+    --gc-text-base: 1rem;
+    --gc-text-card: 1.25rem;
+    --gc-text-section: 2rem;
+    --gc-text-counter: 2.75rem;
+    --gc-text-title: clamp(2.5rem, 9vw, 4rem);
+    --gc-leading-body: 1.5;
+    --gc-leading-heading: 1.1;
+    --gc-measure: 68ch;
+    --gc-measure-log: 76ch;
+
+    /* Space and shape: square corners, hard edges. */
+    --gc-space-1: 0.25rem;
+    --gc-space-2: 0.5rem;
+    --gc-space-3: 0.75rem;
+    --gc-space-4: 1rem;
+    --gc-space-5: 1.5rem;
+    --gc-space-6: 2rem;
+    --gc-space-7: 3rem;
+    --gc-gutter: 1rem;
+    --gc-page-width: 80rem;
+    --gc-target: 2.75rem;
+    --gc-banner-height: 7rem;
+    --gc-edge: 0.25rem;
+
+    /* Motion. UI answers an action in 150 to 400 ms, dice take up to about 900 ms. */
+    --gc-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --gc-time-fast: 150ms;
+    --gc-time-medium: 300ms;
+    --gc-time-slow: 400ms;
+    --gc-time-dice: 800ms;
+
+    /* Focus ring colour. Paper surfaces switch it to ink so it keeps 3:1 against the surface it sits on. */
+    --gc-focus: var(--gc-paper);
+}
+
+@media (min-width: 48rem) {
+    :root {
+        --gc-gutter: 1.5rem;
+        --gc-banner-height: 5rem;
+    }
+}
