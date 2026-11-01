@@ -1,7 +1,6 @@
 using System.Net;
 using System.Text.RegularExpressions;
 using GeoConquest.Web.Tests.Fakes;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace GeoConquest.Web.Tests;
