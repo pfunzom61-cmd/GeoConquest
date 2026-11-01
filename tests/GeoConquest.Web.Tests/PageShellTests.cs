@@ -1,3 +1,4 @@
+using System.Net;
 using GeoConquest.Core.Enums;
 using GeoConquest.Web.Tests.Fakes;
 
@@ -18,6 +19,26 @@ public sealed class PageShellTests(GeoConquestWebFactory factory) : IClassFixtur
         Assert.Contains("My campaigns", signedIn);
         Assert.Contains("Log out", signedIn);
         Assert.DoesNotContain(">Register<", signedIn);
+    }
+
+    [Fact]
+    public async Task UnknownGame_AnyVisitor_GetsAFriendly404Page()
+    {
+        var response = await factory.NewAnonymousClient().GetAsync("/games/no-such-game");
+
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        var page = await response.Content.ReadAsStringAsync();
+        Assert.Contains("Page not found", page);
+        Assert.Contains("Back to the home page", page);
+    }
+
+    [Fact]
+    public async Task AccessDenied_AnyVisitor_GetsAFriendly403Page()
+    {
+        var response = await factory.NewAnonymousClient().GetAsync("/Account/AccessDenied");
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Contains("You cannot open that", await response.Content.ReadAsStringAsync());
     }
 
     [Fact]
