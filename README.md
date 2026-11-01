@@ -58,13 +58,13 @@ Every rubric row, with the files and tests that are the evidence. Paths start at
 | 5 | OOP | Models guard their own state: `src/GeoConquest.Core/Models/Territory.cs`, `src/GeoConquest.Core/Models/Game.cs`. Interfaces with several implementations: `src/GeoConquest.Core/Interfaces/ICommentaryService.cs` (template, Groq, resilient wrapper), `src/GeoConquest.Core/Interfaces/INpcStrategy.cs`, `src/GeoConquest.Core/Interfaces/IDiceRoller.cs`. Rule breaches throw `src/GeoConquest.Core/Exceptions/GameRuleException.cs`. | `tests/GeoConquest.Core.Tests/Models/TerritoryTests.cs`, `tests/GeoConquest.Core.Tests/Models/GameTests.cs` |
 | 6 | Validation and security | Form validation: `src/GeoConquest.Web/ViewModels/RegisterViewModel.cs`, `src/GeoConquest.Web/ViewModels/AttackRequest.cs`. Domain guards in `src/GeoConquest.Core/Services/GameEngine.cs`. Error mapping: `src/GeoConquest.Web/Filters/GameErrorFilterAttribute.cs`. Anti-forgery, rate limiting: `src/GeoConquest.Web/Extensions/SecurityServiceCollectionExtensions.cs`. Dice: `src/GeoConquest.Core/Services/SecureDiceRoller.cs`. See [Security](#security). | `tests/GeoConquest.Web.Tests/AccountTests.cs` (password policy, anti-forgery, throttling), `tests/GeoConquest.Core.Tests/Services/GameEngineTests.cs` (rule guards), `tests/GeoConquest.Web.Tests/LiveUpdatesTests.cs` (no `innerHTML`) |
 | 7 | Functionality | `src/GeoConquest.Core/Services/GameEngine.cs` (turn state machine), `BattleService.cs`, `ReinforcementService.cs`, `GameSetupService.cs`, `SoldierAllocator.cs` in `src/GeoConquest.Core/Services/`. | `tests/GeoConquest.Core.Tests/Services/GameEngineTests.cs`, `BattleServiceTests.cs`, `ReinforcementServiceTests.cs`, `GameSetupServiceTests.cs`, `SoldierAllocatorTests.cs` (same folder) |
-| 8 | Lists, searching, filtering, viewing | My campaigns (search, status, sort): `src/GeoConquest.Web/Views/Games/Index.cshtml`. Live games (search): `src/GeoConquest.Web/Views/LiveGames/Index.cshtml`. Country picker with search: `src/GeoConquest.Web/Views/Games/New.cshtml`. Event log filter (all, battles, NPC decisions, commentary): `src/GeoConquest.Web/Views/Games/_EventLog.cshtml`. Logic: `src/GeoConquest.Core/Services/GameQueryService.cs`. | `tests/GeoConquest.Core.Tests/Services/GameApplicationServiceTests.cs`, `tests/GeoConquest.Web.Tests/GamesTests.cs` |
+| 8 | Lists, searching, filtering, viewing | My campaigns (search, status, sort): `src/GeoConquest.Web/Views/Games/Index.cshtml`. Live games (search, status, sort): `src/GeoConquest.Web/Views/LiveGames/Index.cshtml`. Country picker with search: `src/GeoConquest.Web/Views/Games/New.cshtml`. Event log filter (all, battles, NPC decisions, commentary): `src/GeoConquest.Web/Views/Games/_EventLog.cshtml`. Logic: `src/GeoConquest.Core/Services/GameQueryService.cs`. | `tests/GeoConquest.Core.Tests/Services/GameApplicationServiceTests.cs`, `tests/GeoConquest.Web.Tests/GamesTests.cs` |
 | 9 | User interface | Hand-written CSS with design tokens: `src/GeoConquest.Web/wwwroot/css/tokens.css`, `src/GeoConquest.Web/wwwroot/css/components/`, `src/GeoConquest.Web/wwwroot/css/pages/`. Self-hosted fonts: `src/GeoConquest.Web/wwwroot/fonts/`. Board: `src/GeoConquest.Web/Views/Games/Play.cshtml` and `src/GeoConquest.Web/wwwroot/js/board.js`. | `tests/GeoConquest.Web.Tests/PageShellTests.cs` |
 | 10 | Ease of navigation | Layout and nav: `src/GeoConquest.Web/Views/Shared/_Layout.cshtml`. Breadcrumb on the game page: `src/GeoConquest.Web/Views/Shared/_Breadcrumb.cshtml`. Turn banner and disabled-button reasons: `src/GeoConquest.Web/Views/Games/_TurnBanner.cshtml`, `src/GeoConquest.Web/Views/Games/_OrdersPanel.cshtml`. Empty states, 403/404 pages: `src/GeoConquest.Web/Views/Shared/_EmptyState.cshtml`, `src/GeoConquest.Web/Views/Shared/StatusPage.cshtml`. Rules page: `src/GeoConquest.Web/Views/Home/HowToPlay.cshtml`. | `tests/GeoConquest.Web.Tests/PageShellTests.cs` |
 | 11 | Authentication and authorization | ASP.NET Core Identity on MongoDB: `src/GeoConquest.Web/Extensions/IdentityServiceCollectionExtensions.cs`, `src/GeoConquest.Infrastructure/Identity/`. Only the owner may act on a game: `src/GeoConquest.Web/Authorization/GameOwnerHandler.cs`, `src/GeoConquest.Web/Authorization/GamePolicies.cs`. | `tests/GeoConquest.Web.Tests/AccountTests.cs` (register, login, lockout), `tests/GeoConquest.Web.Tests/GamesTests.cs` (another user gets 403, signed out gets 401) |
 | 12 | Sophistication | Exact attack win probability: `src/GeoConquest.Core/Services/BattleOddsCalculator.cs`. NPC decisions with reasons: `src/GeoConquest.Core/Services/StrategicNpcStrategy.cs`. NPCs play in the background and resume after a restart: `src/GeoConquest.Core/Services/NpcTurnProcessor.cs`, `src/GeoConquest.Web/BackgroundServices/`. Live updates: `src/GeoConquest.Web/Hubs/GameHub.cs`. | `tests/GeoConquest.Core.Tests/Services/BattleOddsCalculatorTests.cs`, `tests/GeoConquest.Core.Tests/Services/NpcSimulationTests.cs`, `tests/GeoConquest.Core.Tests/Services/NpcTurnProcessorTests.cs`, `tests/GeoConquest.Web.Tests/LiveUpdatesTests.cs` |
 | 13 | AI application | Prompt, guard, fallback, limits: `src/GeoConquest.Core/Services/CommentaryPromptBuilder.cs`, `CommentaryOutputGuard.cs`, `ResilientCommentaryService.cs`, `TemplateCommentaryService.cs`, `CommentaryRateLimiter.cs` (same folder). Groq client: `src/GeoConquest.Infrastructure/AI/GroqCommentaryService.cs`. NPC reasons use computed win chances: `src/GeoConquest.Core/Services/StrategicNpcStrategy.cs`. See [AI usage](#ai-usage). | `tests/GeoConquest.Core.Tests/Services/CommentaryOutputGuardTests.cs`, `CommentaryPromptBuilderTests.cs`, `ResilientCommentaryServiceTests.cs` (same folder), `tests/GeoConquest.Infrastructure.Tests/AI/GroqCommentaryServiceTests.cs` |
-| 14 | Overall effort | Commit history; CI in `.github/workflows/ci.yml`; 294 automated tests; this README with diagrams and screenshots in `docs/screenshots/`; live spectating (bonus feature, see below). | `dotnet test` |
+| 14 | Overall effort | Commit history; CI in `.github/workflows/ci.yml`; 298 automated tests; this README with diagrams and screenshots in `docs/screenshots/`; live spectating (bonus feature, see below). | `dotnet test` |
 
 ## Architecture
 
@@ -230,8 +230,8 @@ the result.
 
 ## Testing and CI
 
-294 automated tests, all passing: 223 in `tests/GeoConquest.Core.Tests` (rules, battles, odds, NPC play, commentary),
-28 in `tests/GeoConquest.Infrastructure.Tests` (database mapping, seed data, Groq client against a fake), and 43 in
+298 automated tests, all passing: 224 in `tests/GeoConquest.Core.Tests` (rules, battles, odds, NPC play, commentary),
+28 in `tests/GeoConquest.Infrastructure.Tests` (database mapping, seed data, Groq client against a fake), and 46 in
 `tests/GeoConquest.Web.Tests` (sign-in, owner against spectator, validation, live updates, error pages, using in-memory
 fakes).
 
@@ -247,13 +247,18 @@ every push and pull request, and prints a test summary.
 
 ## Bonus feature: watching a game live from its link
 
+This is the one bonus feature claimed: **bonus feature #10, real-time viewing from the shared game link**. The
+animations (dice tumble, counter tick, conquest stamp) are UI polish, and the win-chance figure shown to the owner is a
+play aid. Neither is claimed as a bonus feature.
+
 Anyone with a game's address (`/games/<id>`) can watch it in real time without an account. Moves, dice, NPC
 explanations and commentary appear as they happen, over SignalR with an automatic fall-back to polling if live
 connections are blocked. Spectators get a read-only board with no orders panel.
 
 To see it: sign in, start a campaign, press **Copy game link** on the board, and open that link in a private window or
 another browser where you are not signed in. Play a move in the first window and watch it appear in the second. The
-**Live games** page in the menu lists every game in progress, and you can open any of them to spectate.
+**Live games** page in the menu lists games in progress by default (it can also show finished games), and you can open
+any of them to spectate.
 
 ## Credits and licences
 
@@ -275,9 +280,8 @@ another browser where you are not signed in. Play a move in the first window and
   start.
 - **Commentary limits.** The free Groq tier allows only a few requests per minute, so busy NPC turns mostly show template
   commentary. Each line is labelled with its source.
-- **Lists are not paged.** Live games shows at most the 50 most recently updated games.
-- **Live games has search only.** My campaigns has search, status and sort; Live games lists in-progress games, so it
-  has no status filter or sort.
+- **Lists are not paged.** Live games considers only the 50 most recently updated games for the chosen status, so its
+  search and round sort apply to those 50.
 - **Fresh clone needs your own database.** The app has no built-in demo data; the demo account above was created on the
   hosted site.
 
