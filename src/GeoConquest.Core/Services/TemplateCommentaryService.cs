@@ -23,8 +23,8 @@ public sealed class TemplateCommentaryService : ICommentaryService
         var defender = context.DefenderCountryName;
         var attackerDice = string.Join(", ", context.AttackerDice);
         var defenderDice = string.Join(", ", context.DefenderDice);
-        var attackerLeft = Soldiers(context.AttackerSoldiersAfter);
-        var defenderLeft = Soldiers(context.DefenderSoldiersAfter);
+        var attackerLeft = Wording.Count(context.AttackerSoldiersAfter, "soldier");
+        var defenderLeft = Wording.Count(context.DefenderSoldiersAfter, "soldier");
 
         return (context.Outcome, context.Momentum) switch
         {
@@ -57,6 +57,4 @@ public sealed class TemplateCommentaryService : ICommentaryService
             ],
         };
     }
-
-    private static string Soldiers(int count) => count == 1 ? "1 soldier" : $"{count} soldiers";
 }

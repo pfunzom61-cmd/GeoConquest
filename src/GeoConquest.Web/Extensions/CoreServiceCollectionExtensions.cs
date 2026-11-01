@@ -14,6 +14,7 @@ public static class CoreServiceCollectionExtensions
         services.AddSingleton<IShuffler, SecureShuffler>();
         services.AddSingleton<IBattleService, BattleService>();
         services.AddSingleton<IBattleOddsCalculator, BattleOddsCalculator>();
+        services.AddSingleton<IAttackOddsEstimator, CappedAttackOddsEstimator>();
         services.AddSingleton<IReinforcementService, ReinforcementService>();
         services.AddSingleton<IGameSetupService, GameSetupService>();
         services.AddSingleton<IGameEngine, GameEngine>();

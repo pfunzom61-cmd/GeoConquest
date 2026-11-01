@@ -21,6 +21,7 @@ public sealed class GamesController(
     IAuthorizationService authorizationService,
     IAntiforgery antiforgery,
     INpcTurnQueue npcTurnQueue,
+    IAttackOddsEstimator oddsEstimator,
     UserManager<ApplicationUser> userManager) : Controller
 {
     private const int RecentEventCount = 100;
@@ -93,7 +94,7 @@ public sealed class GamesController(
         }
 
         return View(new BoardPageViewModel(
-            GameStateViewModel.From(game, viewerIsOwner),
+            GameStateViewModel.From(game, viewerIsOwner, oddsEstimator),
             recentEvents.Select(GameEventViewModel.From).ToList()));
     }
 
