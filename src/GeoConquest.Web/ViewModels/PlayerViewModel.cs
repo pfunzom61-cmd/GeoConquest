@@ -5,4 +5,11 @@ namespace GeoConquest.Web.ViewModels;
 /// <paramref name="HomeCountryCode"/> is the country the player started with, so the board can tell a conquered country from one still held by its first owner.
 /// </summary>
 public sealed record PlayerViewModel(
-    string Id, string Name, bool IsHuman, bool IsEliminated, string ColorKey, string HomeCountryCode, int CountryCount);
+    string Id, string Name, bool IsHuman, bool IsEliminated, string ColorKey, string HomeCountryCode, int CountryCount)
+{
+    /// <summary>Two characters that mark the player next to their colour and pattern: the country code for an NPC, the start of the name for the human.</summary>
+    public string Initials => IsHuman ? new string(Name.Where(char.IsLetterOrDigit).Take(2).ToArray()).ToUpperInvariant() : HomeCountryCode;
+
+    /// <summary>How the board names this player in words, so that no one is told apart by colour alone.</summary>
+    public string Label(bool viewerIsOwner) => !IsHuman ? $"{Name} (NPC)" : viewerIsOwner ? $"{Name} (you)" : $"{Name} (player)";
+}

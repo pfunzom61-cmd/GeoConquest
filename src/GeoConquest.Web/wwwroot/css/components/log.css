@@ -1,0 +1,71 @@
+/* The event log (typed on paper, newest first) and its filter chips. */
+
+.gc-log {
+    --gc-focus: var(--gc-ink);
+
+    padding: var(--gc-space-4);
+    color: var(--gc-ink);
+    background-color: var(--gc-paper);
+}
+
+.gc-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gc-space-2);
+    margin-block-end: var(--gc-space-3);
+}
+
+.gc-chip {
+    min-block-size: var(--gc-target);
+    padding: var(--gc-space-1) var(--gc-space-4);
+    font-family: var(--gc-font-body);
+    font-size: var(--gc-text-base);
+    font-weight: 600;
+    color: var(--gc-ink);
+    background-color: transparent;
+    border: 2px solid var(--gc-ink);
+    cursor: pointer;
+}
+
+/* Pressed is a filled chip with bold type, so it does not rely on colour. */
+.gc-chip[aria-pressed="true"] {
+    font-weight: 700;
+    color: var(--gc-paper);
+    background-color: var(--gc-ink);
+}
+
+.gc-log__list {
+    max-inline-size: var(--gc-measure-log);
+    max-block-size: 26rem;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    font-family: var(--gc-font-mono);
+    font-size: 1rem;
+    line-height: 1.45;
+    list-style: none;
+}
+
+.gc-log__entry {
+    padding-block: var(--gc-space-2);
+    border-block-end: 1px dashed var(--gc-ink);
+    overflow-wrap: anywhere;
+}
+
+.gc-log__seq {
+    font-weight: 700;
+}
+
+/* An NPC's explanation is typed in from the margin; commentary is italic. */
+.gc-log__entry[data-kind="npc"] {
+    padding-inline-start: var(--gc-space-3);
+    border-inline-start: 4px solid var(--gc-ink);
+}
+
+.gc-log__entry[data-kind="commentary"] {
+    font-style: italic;
+}
+
+.gc-log__entry[data-kind="battle"] {
+    font-weight: 700;
+}

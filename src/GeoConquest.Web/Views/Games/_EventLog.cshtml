@@ -1,0 +1,12 @@
+@* Every move, with dice, losses, outcomes and each NPC's reasons. It shows everything until a filter is chosen. *@
+<section class="gc-board__log gc-log" aria-labelledby="log-title" data-log-section>
+    <h2 class="gc-heading" id="log-title">Event log</h2>
+    <div class="gc-chips" role="group" aria-label="Filter the event log">
+        <button class="gc-chip" type="button" aria-pressed="true" data-filter="all">All</button>
+        <button class="gc-chip" type="button" aria-pressed="false" data-filter="battles">Battles</button>
+        <button class="gc-chip" type="button" aria-pressed="false" data-filter="npc">NPC decisions</button>
+        <button class="gc-chip" type="button" aria-pressed="false" data-filter="commentary">Commentary</button>
+    </div>
+    <p class="gc-hint" data-bind="log-empty" hidden>Nothing to show for this filter yet.</p>
+    <ul class="gc-log__list" role="log" aria-live="off" aria-label="Events, newest first" tabindex="0" data-log></ul>
+</section>

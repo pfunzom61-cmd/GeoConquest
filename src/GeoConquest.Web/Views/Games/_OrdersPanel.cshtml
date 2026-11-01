@@ -1,0 +1,86 @@
+@* The owner's orders. Drawn once; board-orders.js shows the groups that fit the phase and fills the lists. The server still checks every order. *@
+@model GameStateViewModel
+@{
+    var humanId = Model.Players.First(player => player.IsHuman).Id;
+}
+<section class="gc-panel gc-board__orders" aria-labelledby="orders-title" data-orders tabindex="-1">
+    <h2 class="gc-heading gc-panel__title" id="orders-title">Your orders</h2>
+    <p class="gc-error" data-error hidden></p>
+    <p class="gc-orders__waiting" data-orders-waiting hidden></p>
+
+    <form class="gc-group" data-group="allocate" hidden>
+        <fieldset class="gc-group">
+            <legend class="gc-group__title">Place reinforcements</legend>
+            @foreach (var territory in Model.Territories)
+            {
+                <div class="gc-orders__row" data-allocate-row="@territory.CountryCode" hidden>
+                    <label class="gc-label" for="place-@territory.CountryCode">@territory.CountryName <span data-bind="allocate-current"></span></label>
+                    <input class="gc-input gc-input--number" id="place-@territory.CountryCode" type="number" min="0" step="1" value="0" inputmode="numeric" data-allocate-input="@territory.CountryCode" />
+                </div>
+            }
+            <p class="gc-hint" data-bind="allocate-total"></p>
+            <button class="gc-button" type="submit" data-action="allocate" aria-describedby="allocate-reason">Place reinforcements</button>
+            <p class="gc-hint" id="allocate-reason" data-reason hidden></p>
+        </fieldset>
+    </form>
+
+    <form class="gc-group" data-group="transfer" hidden>
+        <fieldset class="gc-group">
+            <legend class="gc-group__title">Move soldiers</legend>
+            <div class="gc-field">
+                <label class="gc-label" for="transfer-from">From</label>
+                <select class="gc-select" id="transfer-from" data-transfer-from></select>
+            </div>
+            <div class="gc-field">
+                <label class="gc-label" for="transfer-to">To</label>
+                <select class="gc-select" id="transfer-to" data-transfer-to></select>
+            </div>
+            <div class="gc-field">
+                <label class="gc-label" for="transfer-count">Soldiers to move</label>
+                <input class="gc-input gc-input--number" id="transfer-count" type="number" min="1" step="1" value="1" inputmode="numeric" required data-transfer-count />
+            </div>
+            <button class="gc-button" type="submit" data-action="transfer" aria-describedby="transfer-reason">Move soldiers</button>
+            <p class="gc-hint" id="transfer-reason" data-reason hidden></p>
+        </fieldset>
+    </form>
+
+    <form class="gc-group" data-group="attack" hidden>
+        <fieldset class="gc-group">
+            <legend class="gc-group__title">Attack</legend>
+            <div class="gc-field">
+                <label class="gc-label" for="attack-from">Attack from</label>
+                <select class="gc-select" id="attack-from" data-attack-from></select>
+            </div>
+            <div class="gc-field">
+                <label class="gc-label" for="attack-target">Target</label>
+                <select class="gc-select" id="attack-target" data-attack-target></select>
+            </div>
+            <p class="gc-orders__odds" data-bind="attack-odds"></p>
+            <button class="gc-button" type="submit" data-action="attack" aria-describedby="attack-reason">Start attack</button>
+            <p class="gc-hint" id="attack-reason" data-reason hidden></p>
+        </fieldset>
+    </form>
+
+    <section class="gc-group" data-group="battle" aria-label="Attack in progress" hidden>
+        <p data-bind="battle-summary"></p>
+        <p class="gc-orders__odds" data-bind="battle-odds"></p>
+        <div class="gc-button-row">
+            <button class="gc-button" type="button" data-action="roll">Roll dice</button>
+            <button class="gc-button gc-button--danger" type="button" data-action="stop" data-confirm-title="Stop the attack?"
+                    data-confirm-body="Stopping the attack ends your turn. The countries keep the soldiers they have now." data-confirm-label="Stop attack">Stop attack</button>
+        </div>
+    </section>
+
+    <section class="gc-group" data-group="turn" aria-label="End of turn" hidden>
+        <div class="gc-button-row">
+            <button class="gc-button" type="button" data-action="endTurn">End turn</button>
+            <button class="gc-button gc-button--danger" type="button" data-action="skip" data-confirm-title="Skip your turn?"
+                    data-confirm-body="You will not attack this round. Your countries keep their soldiers." data-confirm-label="Skip turn">Skip turn</button>
+        </div>
+    </section>
+
+    <section class="gc-group" aria-label="NPC pace">
+        <button class="gc-button gc-button--quiet" type="button" data-fast-forward aria-pressed="false">Fast-forward NPC turns</button>
+        <p class="gc-hint" data-bind="fast-forward-hint"></p>
+    </section>
+</section>

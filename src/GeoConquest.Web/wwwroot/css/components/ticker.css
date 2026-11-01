@@ -1,0 +1,40 @@
+/* The commentary strip: a signal-amber CRT. The scanline effect is on this strip only. */
+
+.gc-ticker {
+    position: relative;
+    display: grid;
+    gap: var(--gc-space-2);
+    min-block-size: 6.5rem;
+    margin-block-start: var(--gc-space-4);
+    padding: var(--gc-space-3) var(--gc-space-4);
+    font-family: var(--gc-font-mono);
+    color: var(--gc-amber);
+    background-color: var(--gc-ink);
+    border: 3px solid #000;
+    box-shadow: 0 0 0 2px var(--gc-fog);
+}
+
+/* Scanlines darken the glass by about a fifth; amber on ink stays above 5:1 even there. */
+.gc-ticker::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent 0 2px, rgb(0 0 0 / 0.22) 2px 4px);
+    pointer-events: none;
+}
+
+.gc-ticker__label {
+    justify-self: start;
+    margin: 0;
+    padding: 0 var(--gc-space-2);
+    font-size: var(--gc-text-small);
+    font-weight: 700;
+    border: 1px solid currentcolor;
+}
+
+.gc-ticker__text {
+    margin: 0;
+    max-inline-size: none;
+    font-size: 1.15rem;
+    line-height: 1.4;
+}
