@@ -6,8 +6,8 @@ namespace GeoConquest.Core.Interfaces;
 /// <summary>Stores games. Each game is saved as one document, guarded by its <see cref="Game.Version"/>.</summary>
 public interface IGameRepository
 {
-    /// <summary>The most games <see cref="ListInProgressAsync"/> returns, so a public page can never pull the whole collection.</summary>
-    const int MaxInProgressGames = 50;
+    /// <summary>The most games <see cref="ListPublicAsync"/> returns, so a public page can never pull the whole collection.</summary>
+    const int MaxPublicGames = 50;
 
     Task<Game?> GetByIdAsync(string gameId, CancellationToken cancellationToken);
 
@@ -23,12 +23,12 @@ public interface IGameRepository
     /// <summary>Returns the owner's games, newest activity first, optionally only those with the given status.</summary>
     Task<IReadOnlyList<Game>> ListByOwnerAsync(string ownerUserId, GameStatus? status, CancellationToken cancellationToken);
 
-    /// <summary>Returns games still being played, most recently active first, at most <see cref="MaxInProgressGames"/> of them.</summary>
-    Task<IReadOnlyList<Game>> ListInProgressAsync(CancellationToken cancellationToken);
+    /// <summary>Returns the games matching the filter, most recently active first, at most <see cref="MaxPublicGames"/> of them.</summary>
+    Task<IReadOnlyList<Game>> ListPublicAsync(LiveGameStatusFilter statusFilter, CancellationToken cancellationToken);
 
     /// <summary>
     /// Returns the ids of every game in progress whose current player is an NPC (see <see cref="Game.AwaitsNpcTurn"/>).
-    /// Uncapped, unlike <see cref="ListInProgressAsync"/>: it is how play resumes after a restart.
+    /// Uncapped, unlike <see cref="ListPublicAsync"/>: it is how play resumes after a restart.
     /// </summary>
     Task<IReadOnlyList<string>> ListGameIdsAwaitingNpcTurnAsync(CancellationToken cancellationToken);
 }

@@ -24,10 +24,17 @@ public sealed class GameQueryService(IGameRepository gameRepository, IGameEventR
         };
     }
 
-    public async Task<IReadOnlyList<Game>> ListLiveGamesAsync(string? search, CancellationToken cancellationToken)
+    public async Task<IReadOnlyList<Game>> ListLiveGamesAsync(
+        string? search, LiveGameStatusFilter statusFilter, LiveGameSort sort, CancellationToken cancellationToken)
     {
-        var games = await gameRepository.ListInProgressAsync(cancellationToken);
-        return games.Where(game => Matches(game, search)).ToList();
+        var games = await gameRepository.ListPublicAsync(statusFilter, cancellationToken);
+        var matching = games.Where(game => Matches(game, search));
+
+        return sort switch
+        {
+            LiveGameSort.Round => matching.OrderByDescending(game => game.RoundNumber).ThenByDescending(game => game.UpdatedAt).ToList(),
+            _ => matching.OrderByDescending(game => game.UpdatedAt).ToList(),
+        };
     }
 
     public async Task<IReadOnlyList<GameEvent>> GetRecentEventsAsync(string gameId, int count, CancellationToken cancellationToken)

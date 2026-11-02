@@ -43,6 +43,19 @@ public sealed class GameSyncTests(GeoConquestWebFactory factory) : IClassFixture
         Assert.Equal(sequences[^1], latest.GetProperty("state").GetProperty("lastEventSequence").GetInt32());
     }
 
+    [Fact]
+    public async Task Sync_AnonymousSpectator_SeesAllTenCountriesWithTheirSoldierCounts()
+    {
+        var owner = await factory.RegisterAsync();
+        var gameId = await GameTestSupport.CreateGameAsync(owner);
+
+        var sync = await GetSyncAsync(gameId, afterSequence: 0);
+
+        var territories = sync.GetProperty("state").GetProperty("territories").EnumerateArray().ToList();
+        Assert.Equal(10, territories.Count);
+        Assert.All(territories, territory => Assert.True(territory.GetProperty("soldiers").GetInt32() >= 1));
+    }
+
     private async Task<JsonElement> GetSyncAsync(string gameId, int afterSequence)
     {
         var response = await factory.NewAnonymousClient().GetAsync($"/api/games/{gameId}/sync?afterSequence={afterSequence}");

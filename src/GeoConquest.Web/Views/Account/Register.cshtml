@@ -14,8 +14,9 @@
 
         <div class="gc-field">
             <label class="gc-label" asp-for="DisplayName"></label>
+            <p class="gc-hint" id="DisplayName-hint">Shown publicly on your games, so do not use an email address.</p>
             <input class="gc-input" asp-for="DisplayName" autocomplete="nickname" required minlength="2" maxlength="30"
-                   aria-describedby="DisplayName-error" aria-invalid="@(Invalid("DisplayName") ? "true" : null)" />
+                   aria-describedby="DisplayName-hint DisplayName-error" aria-invalid="@(Invalid("DisplayName") ? "true" : null)" />
             <span class="gc-field__error" id="DisplayName-error" asp-validation-for="DisplayName"></span>
         </div>
 

@@ -480,3 +480,8 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Local secrets (user-secrets live outside the repo; this is a safety net)
+secrets.json
+*.pfx
+appsettings.*.local.json
