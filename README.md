@@ -6,7 +6,7 @@ INF4001N Honours Entrance Examination for 2027.
 [![CI](https://github.com/pfunzom61-cmd/GeoConquest/actions/workflows/ci.yml/badge.svg)](https://github.com/pfunzom61-cmd/GeoConquest/actions/workflows/ci.yml)
 
 **Deployed application:** https://geoconquest.onrender.com
-**Demo video:** (link added at submission)
+**Demo video:** https://youtu.be/r2sBqL3AHdM
 
 ---
 
