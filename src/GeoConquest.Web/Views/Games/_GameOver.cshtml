@@ -1,0 +1,29 @@
+@* The summary shown instead of the orders once the game ends. Present from the start but hidden, so a game that ends while the page is open can show it. *@
+@model GameStateViewModel
+@{
+    var inProgress = Model.Status == "InProgress";
+    var humanCountries = Model.Players.First(player => player.IsHuman).CountryCount;
+}
+<section class="gc-panel gc-board__gameover" aria-labelledby="gameover-title" data-gameover hidden="@inProgress">
+    <h2 class="gc-visually-hidden" id="gameover-title">Game over</h2>
+    <p class="gc-gameover__result" data-bind="result-title">@BoardText.ResultTitle(Model.Status)</p>
+    <p data-bind="next-step">@Model.NextStep</p>
+    <dl class="gc-gameover__facts">
+        <div class="gc-gameover__fact">
+            <dt>Rounds played</dt>
+            <dd data-bind="round">@Model.Round</dd>
+        </div>
+        <div class="gc-gameover__fact">
+            <dt>Countries @(Model.ViewerIsOwner ? "you held" : "the player held")</dt>
+            <dd><span data-bind="human-countries">@humanCountries</span> of @Model.Territories.Count</dd>
+        </div>
+    </dl>
+    @if (Model.ViewerIsOwner)
+    {
+        <a class="gc-button" asp-controller="Games" asp-action="New">Start a new campaign</a>
+    }
+    else
+    {
+        <a class="gc-button" asp-controller="LiveGames" asp-action="Index">Watch another live game</a>
+    }
+</section>

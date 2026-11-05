@@ -1,0 +1,47 @@
+@model LoginViewModel
+@{
+    ViewData["Title"] = "Log in";
+    bool Invalid(string key) => ViewData.ModelState[key]?.Errors.Count > 0;
+}
+
+<div class="gc-auth">
+    <div class="gc-page-head">
+        <h1 class="gc-heading gc-heading--title gc-page-head__title">Log in</h1>
+    </div>
+
+    <form class="gc-panel gc-form" method="post" asp-action="Login" data-busy-form>
+        <div asp-validation-summary="ModelOnly" role="alert"></div>
+        <input type="hidden" asp-for="ReturnUrl" />
+
+        <div class="gc-field">
+            <label class="gc-label" asp-for="Email"></label>
+            <input class="gc-input" asp-for="Email" type="email" autocomplete="username" required maxlength="254"
+                   aria-describedby="Email-error" aria-invalid="@(Invalid("Email") ? "true" : null)" />
+            <span class="gc-field__error" id="Email-error" asp-validation-for="Email"></span>
+        </div>
+
+        <div class="gc-field">
+            <label class="gc-label" asp-for="Password"></label>
+            <input class="gc-input" asp-for="Password" autocomplete="current-password" required
+                   aria-describedby="Password-error" aria-invalid="@(Invalid("Password") ? "true" : null)" />
+            <span class="gc-field__error" id="Password-error" asp-validation-for="Password"></span>
+        </div>
+
+        <div class="gc-field gc-field--check">
+            <input class="gc-check" asp-for="RememberMe" />
+            <label class="gc-label" asp-for="RememberMe"></label>
+        </div>
+
+        <button class="gc-button" type="submit" data-busy-text="Logging in">Log in</button>
+    </form>
+
+    <p>New here? <a asp-action="Register">Create an account</a>.</p>
+</div>
+
+@section Head {
+    <link rel="stylesheet" href="~/css/pages/account.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script type="module" src="~/js/form-busy.js" asp-append-version="true"></script>
+}

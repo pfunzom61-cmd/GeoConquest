@@ -1,7 +1,21 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\GeoConquest.Core\GeoConquest.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Pinned above the version AspNetCore.Identity.MongoDbCore requires: older drivers bring vulnerable SharpCompress/Snappier. -->
+    <PackageReference Include="MongoDB.Driver" Version="3.13.0" />
+    <PackageReference Include="AspNetCore.Identity.MongoDbCore" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Seed\countries.json" LogicalName="GeoConquest.Infrastructure.Seed.countries.json" />
   </ItemGroup>
 
   <PropertyGroup>

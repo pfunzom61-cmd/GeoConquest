@@ -1,0 +1,195 @@
+/* The game board page. On a phone everything stacks, and the owner's orders move up under the banner on their turn. */
+
+.gc-board {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--gc-space-6);
+}
+
+.gc-board__side {
+    display: contents;
+}
+
+.gc-board__map {
+    order: 1;
+}
+
+.gc-board__arena {
+    order: 2;
+}
+
+.gc-board__orders {
+    order: 3;
+}
+
+.gc-board[data-turn="owner"] .gc-board__orders {
+    order: 0;
+}
+
+.gc-board__gameover {
+    order: -1;
+}
+
+.gc-board__players {
+    order: 4;
+}
+
+.gc-board__log {
+    order: 5;
+}
+
+.gc-map__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--gc-space-3) var(--gc-space-5);
+    margin-block-end: var(--gc-space-2);
+}
+
+.gc-map__tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gc-space-3);
+}
+
+.gc-map__tool {
+    display: grid;
+    gap: var(--gc-space-1);
+    font-size: var(--gc-text-small);
+    font-weight: 600;
+}
+
+.gc-map__tool .gc-select {
+    --gc-focus: var(--gc-paper);
+}
+
+.gc-map__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+    gap: var(--gc-space-3) var(--gc-space-3);
+    margin: 0;
+    padding: 0;
+}
+
+.gc-orders__waiting {
+    font-weight: 600;
+}
+
+.gc-orders__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 6rem;
+    align-items: center;
+    gap: var(--gc-space-2);
+    margin-block-end: var(--gc-space-2);
+}
+
+.gc-orders__odds {
+    font-weight: 700;
+}
+
+.gc-players__list {
+    display: grid;
+    gap: var(--gc-space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.gc-players__item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--gc-space-1) var(--gc-space-2);
+    padding-block: var(--gc-space-1);
+    border-block-end: 1px dashed var(--gc-ink);
+}
+
+.gc-players__out {
+    margin-block-start: var(--gc-space-3);
+}
+
+.gc-players__out-summary {
+    font-weight: 700;
+}
+
+.gc-players__item[data-eliminated="true"] .gc-players__name {
+    text-decoration: line-through;
+}
+
+.gc-players__name {
+    font-weight: 600;
+}
+
+.gc-players__count,
+.gc-players__now {
+    font-size: var(--gc-text-small);
+}
+
+.gc-players__now {
+    font-weight: 700;
+}
+
+.gc-players__summary {
+    min-block-size: var(--gc-target);
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.gc-gameover__result {
+    margin-block-end: var(--gc-space-3);
+    font-family: var(--gc-font-display);
+    font-size: var(--gc-text-hero);
+    line-height: 1;
+}
+
+.gc-gameover__facts {
+    margin: 0 0 var(--gc-space-4);
+}
+
+.gc-gameover__fact {
+    display: flex;
+    justify-content: space-between;
+    padding-block: var(--gc-space-2);
+    border-block-end: 1px dashed var(--gc-ink);
+}
+
+.gc-gameover__fact dd {
+    margin: 0;
+    font-family: var(--gc-font-mono);
+    font-weight: 700;
+}
+
+.gc-gameover__fact dt {
+    font-weight: 600;
+}
+
+@media (min-width: 64rem) {
+    .gc-board {
+        grid-template-columns: minmax(0, 1fr) 22rem;
+        grid-template-areas:
+            "map side"
+            "arena side"
+            "log side";
+        align-items: start;
+    }
+
+    .gc-board__side {
+        grid-area: side;
+        display: grid;
+        gap: var(--gc-space-5);
+    }
+
+    .gc-board__map {
+        grid-area: map;
+    }
+
+    .gc-board__arena {
+        grid-area: arena;
+    }
+
+    .gc-board__log {
+        grid-area: log;
+    }
+}

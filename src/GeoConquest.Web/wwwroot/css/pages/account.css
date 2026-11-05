@@ -1,0 +1,42 @@
+/* Log in, register, and the error pages: paper slips on the table. */
+
+.gc-auth {
+    max-inline-size: 30rem;
+}
+
+.gc-field__error {
+    font-weight: 600;
+    color: var(--gc-red);
+}
+
+.gc-field__error:empty {
+    display: none;
+}
+
+.gc-field--check {
+    display: flex;
+    align-items: center;
+    gap: var(--gc-space-3);
+}
+
+.gc-check {
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    margin: 0;
+    accent-color: var(--gc-ink);
+}
+
+.gc-hint--rules {
+    padding: var(--gc-space-2) var(--gc-space-3);
+    background-color: var(--gc-paper-light);
+    border-inline-start: 6px solid var(--gc-ink);
+}
+
+.gc-status {
+    max-inline-size: 40rem;
+}
+
+.gc-status__code {
+    margin-block-end: var(--gc-space-4);
+    font-size: 1.5rem;
+}

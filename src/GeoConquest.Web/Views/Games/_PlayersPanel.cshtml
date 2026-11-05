@@ -1,0 +1,23 @@
+@* Players still in the game are listed; eliminated ones are gathered under one collapsed line, and the big stamp stays on the cards. *@
+@model GameStateViewModel
+@{
+    var eliminated = Model.Players.Count(player => player.IsEliminated);
+}
+<details class="gc-panel gc-board__players gc-players" open>
+    <summary class="gc-players__summary"><h2 class="gc-heading gc-panel__title">Players</h2></summary>
+    <ul class="gc-players__list" data-players-active>
+        @foreach (var player in Model.Players.Where(player => !player.IsEliminated))
+        {
+            <partial name="_PlayerRow" model="@((player, Model))" />
+        }
+    </ul>
+    <details class="gc-players__out" data-players-out hidden="@(eliminated == 0)">
+        <summary class="gc-players__summary gc-players__out-summary">Eliminated (<span data-bind="eliminated-count">@eliminated</span>)</summary>
+        <ul class="gc-players__list" data-players-eliminated>
+            @foreach (var player in Model.Players.Where(player => player.IsEliminated))
+            {
+                <partial name="_PlayerRow" model="@((player, Model))" />
+            }
+        </ul>
+    </details>
+</details>

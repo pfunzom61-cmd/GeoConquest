@@ -1,0 +1,247 @@
+/* The dossier card: one country, drawn once by the server and patched by the board script. */
+
+.gc-card {
+    --gc-focus: var(--gc-ink);
+
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    margin-block-start: 1.4rem; /* room for the folder tab */
+    color: var(--gc-ink);
+    background-color: var(--gc-paper);
+    list-style: none;
+    transition: opacity var(--gc-time-medium) var(--gc-ease);
+}
+
+.gc-card__tab {
+    position: absolute;
+    inset-block-end: 100%;
+    inset-inline-start: 0;
+    padding: 0.1rem var(--gc-space-3);
+    font-size: var(--gc-text-small);
+    font-weight: 700;
+    color: var(--gc-ink);
+    background-color: var(--gc-paper);
+}
+
+.gc-card__stripe {
+    block-size: 1.25rem;
+    color: var(--gc-owner);
+    background: var(--gc-owner-pattern), var(--gc-paper);
+    border-block-end: 3px solid var(--gc-owner);
+}
+
+.gc-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gc-space-2);
+    padding: var(--gc-space-3) var(--gc-space-3) 0;
+}
+
+.gc-card__title {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--gc-space-2);
+}
+
+.gc-card__name {
+    flex: 1;
+    min-inline-size: 0;
+    margin: 0;
+    font-size: 1.0625rem;
+    line-height: 1.2;
+    /* Break at real syllables (the page is lang="en"), and only split a word as a last resort. */
+    hyphens: auto;
+    overflow-wrap: break-word;
+}
+
+.gc-card__owner {
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+    display: flex;
+    align-items: center;
+    gap: var(--gc-space-2);
+    margin: 0;
+    font-size: var(--gc-text-small);
+}
+
+/* Reserved so a stamp never lands on text and nothing moves when one appears. */
+.gc-card__stamp-zone {
+    min-block-size: 3rem;
+    padding: var(--gc-space-2) 0 0 var(--gc-space-3);
+}
+
+.gc-card__foot {
+    margin-block-start: auto;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--gc-space-2);
+    padding: 0 var(--gc-space-3) var(--gc-space-2);
+}
+
+.gc-card__label {
+    margin: 0;
+    font-size: var(--gc-text-small);
+}
+
+.gc-card__note {
+    margin: 0;
+    font-size: var(--gc-text-small);
+    font-weight: 700;
+}
+
+.gc-counter {
+    display: inline-block;
+    min-inline-size: 2ch;
+    font-family: var(--gc-font-mono);
+    font-size: var(--gc-text-counter);
+    font-weight: 700;
+    line-height: 1;
+    text-align: end;
+    font-variant-numeric: tabular-nums;
+}
+
+.gc-counter--tick {
+    animation: gc-counter-tick var(--gc-time-medium) var(--gc-ease);
+}
+
+@keyframes gc-counter-tick {
+    from {
+        opacity: 0.2;
+        transform: translateY(-0.4em) scale(1.25);
+    }
+}
+
+/* The owner's countries have a heavy frame; targets are named in words and have a dashed frame. */
+.gc-card[data-yours="true"] {
+    box-shadow: inset 0 0 0 4px var(--gc-ink);
+}
+
+.gc-card[data-target="true"] {
+    outline: 3px dashed var(--gc-red);
+    outline-offset: -3px;
+}
+
+/* Dimmed, not hidden: all ten countries stay on the table. Ink on a card at this opacity is still above 4.5:1. */
+.gc-card[data-dim="true"] {
+    opacity: 0.7;
+}
+
+.gc-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-color: var(--gc-ink);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.gc-card--flash::after {
+    animation: gc-flash var(--gc-time-medium) var(--gc-ease);
+}
+
+@keyframes gc-flash {
+    35% {
+        opacity: 0.4;
+    }
+}
+
+.gc-card[data-tilt="2"] .gc-stamp {
+    rotate: -9deg;
+}
+
+.gc-card[data-tilt="3"] .gc-stamp {
+    rotate: -3deg;
+}
+
+/* The one orchestrated moment: the cards are dealt onto the table when the board loads, once. */
+.gc-map--dealing .gc-card {
+    animation: gc-deal var(--gc-time-slow) var(--gc-ease) backwards;
+}
+
+.gc-map--dealing .gc-card:nth-child(2) { animation-delay: 50ms; }
+.gc-map--dealing .gc-card:nth-child(3) { animation-delay: 100ms; }
+.gc-map--dealing .gc-card:nth-child(4) { animation-delay: 150ms; }
+.gc-map--dealing .gc-card:nth-child(5) { animation-delay: 200ms; }
+.gc-map--dealing .gc-card:nth-child(6) { animation-delay: 250ms; }
+.gc-map--dealing .gc-card:nth-child(7) { animation-delay: 300ms; }
+.gc-map--dealing .gc-card:nth-child(8) { animation-delay: 350ms; }
+.gc-map--dealing .gc-card:nth-child(9) { animation-delay: 400ms; }
+.gc-map--dealing .gc-card:nth-child(10) { animation-delay: 450ms; }
+
+@keyframes gc-deal {
+    from {
+        opacity: 0;
+        transform: rotate(-4deg) scale(0.94);
+    }
+}
+
+/* The same card, used as a list entry, an action on the landing page, or a player's file. */
+.gc-card__action {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--gc-space-2);
+    margin: 0;
+    padding: 0 var(--gc-space-3) var(--gc-space-3);
+}
+
+.gc-card__text {
+    margin: 0;
+}
+
+.gc-card--action .gc-card__name {
+    font-size: var(--gc-text-card);
+}
+
+.gc-card--action .gc-card__body {
+    flex: 1;
+}
+
+.gc-card--file {
+    max-inline-size: 40rem;
+}
+
+.gc-card--file .gc-card__name {
+    font-family: var(--gc-font-display);
+    font-size: var(--gc-text-section);
+}
+
+.gc-counter--small {
+    min-inline-size: 0;
+    font-size: var(--gc-text-card);
+}
+
+.gc-file__details {
+    margin: 0;
+}
+
+.gc-file__details dt,
+.gc-file__stat dt {
+    font-size: var(--gc-text-small);
+}
+
+.gc-file__details dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+    font-weight: 600;
+}
+
+.gc-file__stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+    gap: var(--gc-space-3);
+    margin: 0;
+    padding: var(--gc-space-4) var(--gc-space-3) 0;
+}
+
+.gc-file__stat dd {
+    margin: 0;
+    text-align: start;
+}
+
+.gc-file__note {
+    margin: 0;
+    padding: var(--gc-space-3);
+    font-size: var(--gc-text-small);
+}

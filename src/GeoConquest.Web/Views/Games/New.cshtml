@@ -1,0 +1,59 @@
+@model NewCampaignViewModel
+@{
+    ViewData["Title"] = "New campaign";
+}
+
+<div class="gc-page-head">
+    <h1 class="gc-heading gc-heading--title gc-page-head__title">New campaign</h1>
+</div>
+<p>Choose the country you will command. Nine other countries are picked at random and played by NPCs.
+   Your starting soldiers depend on the country's population.</p>
+
+<form class="gc-form gc-picker-form" method="post" asp-action="Create" data-busy-form>
+    <div asp-validation-summary="All" role="alert"></div>
+
+    <div class="gc-filters">
+        <div class="gc-filters__field gc-filters__field--wide">
+            <label class="gc-filters__label" for="country-filter">Search countries</label>
+            <input class="gc-input" id="country-filter" type="search" autocomplete="off" aria-controls="country-picker" />
+        </div>
+    </div>
+    <p class="gc-hint" id="country-filter-status" role="status"></p>
+
+    <fieldset class="gc-group">
+        <legend class="gc-visually-hidden">Country to command</legend>
+        <ul class="gc-picker" id="country-picker">
+            @foreach (var country in Model.Countries)
+            {
+                var inputId = $"country-{country.IsoCode}";
+                <li class="gc-picker__item" data-name="@country.Name.ToLowerInvariant()">
+                    <label class="gc-pick" for="@inputId">
+                        <input type="radio" id="@inputId" name="SelectedCountryCode" value="@country.IsoCode"
+                               checked="@(Model.SelectedCountryCode == country.IsoCode)" />
+                        <span class="gc-flag" aria-hidden="true">
+                            <span class="gc-flag__code">@country.IsoCode</span>
+                            <img class="gc-flag__image" src="https://flagcdn.com/w40/@(country.IsoCode.ToLowerInvariant()).png" width="32" height="24" loading="lazy" alt="" />
+                        </span>
+                        <span class="gc-pick__name">@country.Name</span>
+                        <span class="gc-pick__meta">Population @country.Population.ToString("N0")</span>
+                        <span class="gc-pick__soldiers"><span class="gc-counter gc-counter--small">@country.SoldierValue</span> starting @(country.SoldierValue == 1 ? "soldier" : "soldiers")</span>
+                    </label>
+                </li>
+            }
+        </ul>
+    </fieldset>
+
+    <div class="gc-picker__bar">
+        <button class="gc-button" type="submit" data-busy-text="Starting">Start campaign</button>
+        <p class="gc-hint">Pick a country, then start. You can run as many campaigns as you like.</p>
+    </div>
+</form>
+
+@section Head {
+    <link rel="stylesheet" href="~/css/pages/lists.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script type="module" src="~/js/country-picker.js" asp-append-version="true"></script>
+    <script type="module" src="~/js/form-busy.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,106 @@
+using GeoConquest.Core.Enums;
+using GeoConquest.Core.Interfaces;
+using GeoConquest.Infrastructure.Identity;
+using GeoConquest.Web.Extensions;
+using GeoConquest.Web.ViewModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+
+namespace GeoConquest.Web.Controllers;
+
+/// <summary>Registration, sign-in and sign-out. Identity does the work; this controller only translates results for the views.</summary>
+public sealed class AccountController(
+    UserManager<ApplicationUser> userManager,
+    SignInManager<ApplicationUser> signInManager,
+    IGameQueryService gameQueryService) : Controller
+{
+    // The same message for an unknown email and a wrong password, so the form cannot be used to discover accounts.
+    private const string InvalidSignInMessage = "That email and password do not match.";
+    private const string LockedOutMessage = "Too many failed attempts. This account is locked for 15 minutes.";
+
+    [HttpGet]
+    public IActionResult Register() => View(new RegisterViewModel());
+
+    [HttpPost]
+    [EnableRateLimiting(SecurityServiceCollectionExtensions.AuthRateLimitPolicy)]
+    public async Task<IActionResult> Register(RegisterViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var user = new ApplicationUser { UserName = model.Email, Email = model.Email, DisplayName = model.DisplayName };
+        var result = await userManager.CreateAsync(user, model.Password);
+
+        if (!result.Succeeded)
+        {
+            // The email is also the username, so a taken email would otherwise report the same problem twice.
+            var errors = result.Errors.Where(error => error.Code != nameof(IdentityErrorDescriber.DuplicateUserName));
+            foreach (var error in errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            return View(model);
+        }
+
+        await signInManager.SignInAsync(user, isPersistent: false);
+        return RedirectToAction(nameof(Profile));
+    }
+
+    [HttpGet]
+    public IActionResult Login(string? returnUrl = null) => View(new LoginViewModel { ReturnUrl = returnUrl });
+
+    [HttpPost]
+    [EnableRateLimiting(SecurityServiceCollectionExtensions.AuthRateLimitPolicy)]
+    public async Task<IActionResult> Login(LoginViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        var result = await signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: true);
+
+        if (result.Succeeded)
+        {
+            // Only local addresses: a crafted link must not be able to send a signed-in player to another site.
+            return Url.IsLocalUrl(model.ReturnUrl) ? LocalRedirect(model.ReturnUrl) : RedirectToAction(nameof(Profile));
+        }
+
+        ModelState.AddModelError(string.Empty, result.IsLockedOut ? LockedOutMessage : InvalidSignInMessage);
+        return View(model);
+    }
+
+    [HttpPost]
+    [Authorize]
+    public async Task<IActionResult> Logout()
+    {
+        await signInManager.SignOutAsync();
+        return RedirectToAction(nameof(HomeController.Index), "Home");
+    }
+
+    [HttpGet]
+    [Authorize]
+    public async Task<IActionResult> Profile(CancellationToken cancellationToken)
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user is null)
+        {
+            return Challenge();
+        }
+
+        var campaigns = await gameQueryService.ListCampaignsAsync(userManager.GetUserId(User)!, null, null, CampaignSort.Newest, cancellationToken);
+        return View(ProfileViewModel.From(user.DisplayName, user.Email ?? string.Empty, campaigns));
+    }
+
+    [HttpGet]
+    public IActionResult AccessDenied()
+    {
+        Response.StatusCode = StatusCodes.Status403Forbidden;
+        return View("StatusPage", StatusPageViewModel.For(StatusCodes.Status403Forbidden));
+    }
+}

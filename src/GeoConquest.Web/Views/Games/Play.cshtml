@@ -1,0 +1,96 @@
+@model BoardPageViewModel
+@{
+    var state = Model.State;
+    var title = $"{state.OwnerDisplayName}'s campaign";
+    ViewData["Title"] = title;
+    var requestToken = ViewData["RequestToken"] as string;
+    var inProgress = state.Status == "InProgress";
+    var playersById = state.Players.ToDictionary(player => player.Id);
+
+    IReadOnlyList<(string Label, string? Url)> trail = state.ViewerIsOwner
+        ? [("My campaigns", Url.Action("Index", "Games")), (title, null)]
+        : [("Live games", Url.Action("Index", "LiveGames")), (title, null)];
+}
+
+@section Head {
+    @if (requestToken is not null)
+    {
+        <meta name="request-verification-token" content="@requestToken" />
+    }
+    <link rel="stylesheet" href="~/css/components/banner.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/dice.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/ticker.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components/log.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/pages/board.css" asp-append-version="true" />
+}
+
+<partial name="_Breadcrumb" model="trail" />
+
+<div class="gc-page-head">
+    <h1 class="gc-heading gc-heading--title gc-page-head__title">@title</h1>
+    <div class="gc-page-head__tools">
+        @if (!state.ViewerIsOwner)
+        {
+            <p class="gc-badge">Spectating (read only)</p>
+        }
+        <button class="gc-button gc-button--quiet" type="button" data-share>Copy game link</button>
+    </div>
+</div>
+
+<partial name="_TurnBanner" model="state" />
+
+<div class="gc-board" data-board data-turn="@(state.CanAct ? "owner" : "other")">
+    <div class="gc-board__side">
+        @if (state.ViewerIsOwner && inProgress)
+        {
+            <partial name="_OrdersPanel" model="state" />
+        }
+        <partial name="_GameOver" model="state" />
+        <partial name="_PlayersPanel" model="state" />
+    </div>
+
+    <section class="gc-board__map gc-map gc-map--dealing" aria-labelledby="countries-title" data-map>
+        <div class="gc-map__head">
+            <h2 class="gc-heading" id="countries-title">Countries</h2>
+            <div class="gc-map__tools">
+                <label class="gc-map__tool" for="card-sort">Sort by
+                    <select class="gc-select" id="card-sort" data-card-sort>
+                        <option value="board">Board order</option>
+                        <option value="soldiers-desc">Most soldiers</option>
+                        <option value="soldiers-asc">Fewest soldiers</option>
+                        <option value="owner">Owner</option>
+                        <option value="country">Country name</option>
+                    </select>
+                </label>
+                <label class="gc-map__tool" for="card-filter">Highlight
+                    <select class="gc-select" id="card-filter" data-card-filter>
+                        <option value="all">All countries</option>
+                    </select>
+                </label>
+            </div>
+        </div>
+        <ul class="gc-map__grid" data-card-grid>
+            @for (var position = 0; position < state.Territories.Count; position++)
+            {
+                var territory = state.Territories[position];
+                <partial name="_TerritoryCard" model="@(new TerritoryCardViewModel(territory, playersById[territory.OwnerPlayerId], position, state.ViewerIsOwner))" />
+            }
+        </ul>
+    </section>
+
+    <div class="gc-board__arena">
+        <partial name="_BattleArena" />
+        <partial name="_CommentaryTicker" />
+    </div>
+
+    <partial name="_EventLog" />
+</div>
+
+<script type="application/json" id="board-data">@Json.Serialize(Model)</script>
+<noscript><p class="gc-error">The board needs JavaScript to show live state and take your orders. Turn it on and reload this page.</p></noscript>
+
+@section Scripts {
+    @* Pinned client library, served from this site. board.js falls back to polling if it is missing. *@
+    <script src="~/lib/signalr/signalr.min.js" asp-append-version="true"></script>
+    <script type="module" src="~/js/board.js" asp-append-version="true"></script>
+}

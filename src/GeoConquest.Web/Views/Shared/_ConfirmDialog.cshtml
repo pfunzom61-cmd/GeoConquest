@@ -1,0 +1,11 @@
+@* One dialog for every "are you sure": confirm.js fills in the words. Cancel comes first and has the focus. *@
+<dialog class="gc-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-body" data-confirm-dialog>
+    <form method="dialog">
+        <h2 class="gc-dialog__title" id="confirm-title" data-confirm-title></h2>
+        <p id="confirm-body" data-confirm-body></p>
+        <div class="gc-button-row">
+            <button class="gc-button gc-button--quiet" type="submit" value="cancel" autofocus>Go back</button>
+            <button class="gc-button gc-button--danger" type="submit" value="confirm" data-confirm-accept></button>
+        </div>
+    </form>
+</dialog>

@@ -1,0 +1,51 @@
+@model ProfileViewModel
+@{
+    ViewData["Title"] = "Profile";
+}
+
+<div class="gc-page-head">
+    <h1 class="gc-heading gc-heading--title gc-page-head__title">Profile</h1>
+</div>
+
+<section class="gc-card gc-card--file" data-color="color-0" aria-labelledby="file-title">
+    <span class="gc-card__tab" aria-hidden="true">Player file</span>
+    <div class="gc-card__stripe" aria-hidden="true"></div>
+    <div class="gc-card__body">
+        <div class="gc-card__title">
+            <span class="gc-player-badge" aria-hidden="true">
+                <span class="gc-player-badge__initials">@Model.Initials</span>
+                <span class="gc-player-badge__pattern"></span>
+            </span>
+            <h2 class="gc-card__name" id="file-title">@Model.DisplayName</h2>
+        </div>
+        <dl class="gc-file__details">
+            <div>
+                <dt>Email</dt>
+                <dd>@Model.Email</dd>
+            </div>
+        </dl>
+    </div>
+    <dl class="gc-file__stats">
+        <div class="gc-file__stat">
+            <dt>Campaigns played</dt>
+            <dd class="gc-counter">@Model.CampaignsPlayed</dd>
+        </div>
+        <div class="gc-file__stat">
+            <dt>Campaigns won</dt>
+            <dd class="gc-counter">@Model.CampaignsWon</dd>
+        </div>
+        <div class="gc-file__stat">
+            <dt>Countries conquered</dt>
+            <dd class="gc-counter">@Model.CountriesConquered</dd>
+        </div>
+    </dl>
+    <p class="gc-file__note">Countries conquered counts the countries you hold now across your campaigns that you did not start with.</p>
+    <p class="gc-card__action">
+        <a class="gc-button" asp-controller="Games" asp-action="Index">My campaigns</a>
+        <a class="gc-button gc-button--quiet" asp-controller="Games" asp-action="New">Start a new campaign</a>
+    </p>
+</section>
+
+@section Head {
+    <link rel="stylesheet" href="~/css/pages/account.css" asp-append-version="true" />
+}

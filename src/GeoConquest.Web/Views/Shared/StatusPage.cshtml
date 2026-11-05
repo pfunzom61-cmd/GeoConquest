@@ -1,0 +1,31 @@
+@* The friendly 403, 404, 429 and 500 page. One clear way forward. *@
+@model StatusPageViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    var signedIn = User.Identity?.IsAuthenticated == true;
+}
+
+<section class="gc-panel gc-status" aria-labelledby="status-title">
+    <p class="gc-stamp gc-status__code">@Model.Code</p>
+    <h1 class="gc-heading gc-heading--title" id="status-title">@Model.Title</h1>
+    <p>@Model.Message</p>
+    @if (Model.RequestId is not null)
+    {
+        <p class="gc-hint">Reference for support: <span class="gc-mono">@Model.RequestId</span></p>
+    }
+    <div class="gc-button-row">
+        <a class="gc-button" asp-controller="Home" asp-action="Index">Back to the home page</a>
+        @if (signedIn)
+        {
+            <a class="gc-button gc-button--quiet" asp-controller="Games" asp-action="Index">My campaigns</a>
+        }
+        else
+        {
+            <a class="gc-button gc-button--quiet" asp-controller="LiveGames" asp-action="Index">Watch a live game</a>
+        }
+    </div>
+</section>
+
+@section Head {
+    <link rel="stylesheet" href="~/css/pages/account.css" asp-append-version="true" />
+}

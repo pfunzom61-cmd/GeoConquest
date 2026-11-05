@@ -1,0 +1,79 @@
+@{
+    ViewData["Title"] = "How to play";
+}
+
+<div class="gc-page-head">
+    <h1 class="gc-heading gc-heading--title gc-page-head__title">How to play</h1>
+</div>
+
+<div class="gc-prose">
+    <section class="gc-panel" aria-labelledby="goal">
+        <h2 class="gc-subheading" id="goal">The goal</h2>
+        <p>Each game has ten countries: yours and nine others, each played by an NPC. Conquer all ten to win. If you lose your last country you are eliminated and the game is lost.</p>
+        <p>Anyone with a game's link can watch it live without an account. Only the owner can play.</p>
+    </section>
+
+    <section class="gc-panel" aria-labelledby="setup">
+        <h2 class="gc-subheading" id="setup">Setting up</h2>
+        <p>You choose your country from the whole world list. Nine others are picked at random. Every country starts with soldiers set by its population:</p>
+        <dl class="gc-prose__tiers">
+            <div><dt>Up to 5 million</dt><dd>1 soldier</dd></div>
+            <div><dt>Up to 10 million</dt><dd>2 soldiers</dd></div>
+            <div><dt>Up to 25 million</dt><dd>3 soldiers</dd></div>
+            <div><dt>Up to 50 million</dt><dd>4 soldiers</dd></div>
+            <div><dt>Up to 75 million</dt><dd>5 soldiers</dd></div>
+            <div><dt>Up to 100 million</dt><dd>6 soldiers</dd></div>
+            <div><dt>Up to 125 million</dt><dd>7 soldiers</dd></div>
+            <div><dt>Up to 150 million</dt><dd>8 soldiers</dd></div>
+            <div><dt>Over 150 million</dt><dd>9 soldiers</dd></div>
+        </dl>
+        <p>The first player is chosen at random, then everyone takes turns.</p>
+    </section>
+
+    <section class="gc-panel" aria-labelledby="turn">
+        <h2 class="gc-subheading" id="turn">Your turn</h2>
+        <p>From round 2, each turn starts with 2 new soldiers for every country you hold, which you place wherever you like. Round 1 ends when everyone has had one turn.</p>
+        <p>Then you may move soldiers between your countries (each keeps at least 1), attack once, or skip. After an attack that conquers or fails you may move soldiers again, then end your turn.</p>
+    </section>
+
+    <section class="gc-panel" aria-labelledby="attack">
+        <h2 class="gc-subheading" id="attack">Attacking</h2>
+        <p>Any country can attack any other. The attacking country needs at least 2 soldiers, and it always leaves 1 behind. Each roll uses as many dice per side as the smaller of: the attacker's soldiers minus 1, or the defender's soldiers.</p>
+        <p>The first attacking die faces the first defending die, the second faces the second, and so on in the order they were rolled. The higher die wins and the loser loses 1 soldier. A tie loses nothing.</p>
+        <p>You roll again and again until the defender has no soldiers (conquered), your attacker is down to 1 soldier (failed), or you stop. Stopping ends your turn.</p>
+        <p>The board shows an estimated win chance for each attack you could make.</p>
+    </section>
+
+    <section class="gc-panel" aria-labelledby="conquest">
+        <h2 class="gc-subheading" id="conquest">Conquering</h2>
+        <p>A conquered country is garrisoned with whichever is larger: 2 soldiers, or half of its starting soldier value. You may then move more soldiers in from the attacking country. A conquered country carries a red CONQUERED stamp. A player who loses their last country is eliminated, and their turns are skipped.</p>
+    </section>
+
+    <section class="gc-panel" aria-labelledby="watching">
+        <h2 class="gc-subheading" id="watching">Watching the war</h2>
+        <p>Every country and soldier count is on the board at all times. Each attack shows its dice, losses and outcome. Every NPC move comes with a short reason, and commentary under each roll is marked as written by the AI or by a template.</p>
+        <p>Fast-forward speeds up the NPC turns but still shows every move. It switches itself off when your turn comes round.</p>
+    </section>
+
+    <section class="gc-panel" aria-labelledby="rules">
+        <h2 class="gc-subheading" id="rules">Rule interpretations</h2>
+        <p>Where the brief left a detail open, these are the choices this game makes:</p>
+        <ul class="gc-prose__list">
+            <li>A population of exactly 5 million, 10 million and so on belongs to the lower tier (5,000,000 gives 1 soldier).</li>
+            <li>A country's starting soldiers (its soldier value) never change. Its current soldiers are tracked separately.</li>
+            <li>Dice are not capped at 3. The number per side follows the brief: the smaller of the two soldier counts, after the attacker leaves 1 behind. Dice are compared in the order rolled, not sorted.</li>
+            <li>After a conquest the reward soldiers are placed in the new country, and you may move more in from the attacking country (it keeps at least 1).</li>
+            <li>The order of a turn is: place reinforcements, optional moves, an optional single attack, optional moves after it, end turn. Moves are allowed after an attack only once it has ended by conquest or failure.</li>
+            <li>Your own country is never one of the nine random ones, and each of the nine is its own NPC.</li>
+            <li>You lose if you are eliminated, or if an NPC owns all ten countries. You win by owning all ten.</li>
+            <li>Population figures are a snapshot, stored with their source and date.</li>
+            <li>Spectators see the same board, battles, commentary and NPC reasons as the owner, live.</li>
+            <li>Only the owner can turn fast-forward on, and not after the game is over.</li>
+            <li>In round 1 the NPCs never attack your countries, so you are not eliminated before your first turn. From round 2 you are an ordinary target.</li>
+        </ul>
+    </section>
+</div>
+
+@section Head {
+    <link rel="stylesheet" href="~/css/pages/help.css" asp-append-version="true" />
+}

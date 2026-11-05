@@ -1,0 +1,99 @@
+/* My campaigns, Live games and the country picker. */
+
+.gc-picker-form {
+    padding: 0;
+    background: none;
+    border: 0;
+}
+
+.gc-picker {
+    display: grid;
+    gap: var(--gc-space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.gc-pick {
+    display: grid;
+    grid-template-columns: auto auto 1fr auto;
+    grid-template-areas:
+        "radio flag name soldiers"
+        "radio flag meta soldiers";
+    align-items: center;
+    gap: 0 var(--gc-space-3);
+    min-block-size: var(--gc-target);
+    padding: var(--gc-space-2) var(--gc-space-3);
+    color: var(--gc-ink);
+    background-color: var(--gc-paper);
+    border: 2px solid var(--gc-paper);
+    cursor: pointer;
+}
+
+.gc-pick input {
+    grid-area: radio;
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    margin: 0;
+    accent-color: var(--gc-ink);
+}
+
+.gc-pick .gc-flag {
+    grid-area: flag;
+}
+
+.gc-pick__name {
+    grid-area: name;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
+.gc-pick__meta {
+    grid-area: meta;
+    font-size: var(--gc-text-small);
+}
+
+.gc-pick__soldiers {
+    grid-area: soldiers;
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--gc-space-1);
+    font-size: var(--gc-text-small);
+}
+
+/* The chosen country is framed heavily, as well as ticked. */
+.gc-pick:has(input:checked) {
+    border-color: var(--gc-ink);
+    box-shadow: inset 0 0 0 2px var(--gc-ink);
+}
+
+.gc-pick:has(input:focus-visible) {
+    outline: 3px solid var(--gc-paper);
+    outline-offset: 2px;
+}
+
+.gc-picker__bar {
+    position: sticky;
+    inset-block-end: 0;
+    z-index: 10;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--gc-space-2) var(--gc-space-4);
+    margin-block-start: var(--gc-space-4);
+    padding: var(--gc-space-3) var(--gc-space-4);
+    color: var(--gc-paper);
+    background-color: var(--gc-ink);
+    border-block-start: 4px solid var(--gc-paper);
+}
+
+.gc-picker__bar .gc-button {
+    color: var(--gc-ink);
+    background-color: var(--gc-paper);
+    border-color: var(--gc-paper);
+    box-shadow: 0 var(--gc-edge) 0 var(--gc-fog);
+}
+
+.gc-picker__bar .gc-hint {
+    margin: 0;
+}

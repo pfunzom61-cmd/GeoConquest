@@ -1,0 +1,21 @@
+/* The confirmation dialog, used before anything that cannot be undone. */
+
+.gc-dialog {
+    --gc-focus: var(--gc-ink);
+
+    inline-size: min(28rem, calc(100vw - 2 * var(--gc-gutter)));
+    padding: var(--gc-space-5);
+    color: var(--gc-ink);
+    background-color: var(--gc-paper);
+    border: 4px solid var(--gc-ink);
+}
+
+.gc-dialog::backdrop {
+    background-color: rgb(0 0 0 / 0.65);
+}
+
+.gc-dialog__title {
+    margin-block-end: var(--gc-space-3);
+    font-family: var(--gc-font-display);
+    font-size: var(--gc-text-section);
+}

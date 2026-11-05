@@ -1,0 +1,74 @@
+@using GeoConquest.Core.Enums
+@model LiveGamesViewModel
+@{
+    ViewData["Title"] = "Live games";
+    var isFiltered = !string.IsNullOrWhiteSpace(Model.Search) || Model.Status != LiveGameStatusFilter.InProgress;
+}
+
+<div class="gc-page-head">
+    <h1 class="gc-heading gc-heading--title gc-page-head__title">Live games</h1>
+</div>
+<p>Pick a game to watch. You do not need an account. Search and sort apply to the 50 most recently updated games.</p>
+
+<form class="gc-filters" method="get" asp-controller="LiveGames" asp-action="Index" role="search" data-busy-form>
+    <div class="gc-filters__field gc-filters__field--wide">
+        <label class="gc-filters__label" for="search">Search by player or country</label>
+        <input class="gc-input" id="search" name="search" type="search" value="@Model.Search" />
+    </div>
+    <div class="gc-filters__field">
+        <label class="gc-filters__label" for="status">Status</label>
+        <select class="gc-select" id="status" name="status">
+            @foreach (var status in Enum.GetValues<LiveGameStatusFilter>())
+            {
+                <option value="@status" selected="@(Model.Status == status)">@(status == LiveGameStatusFilter.InProgress ? "In progress" : status.ToString())</option>
+            }
+        </select>
+    </div>
+    <div class="gc-filters__field">
+        <label class="gc-filters__label" for="sort">Sort by</label>
+        <select class="gc-select" id="sort" name="sort">
+            @foreach (var sort in Enum.GetValues<LiveGameSort>())
+            {
+                <option value="@sort" selected="@(Model.Sort == sort)">@(sort == LiveGameSort.RecentlyUpdated ? "Recently updated" : sort.ToString())</option>
+            }
+        </select>
+    </div>
+    <button class="gc-button gc-button--light" type="submit" data-busy-text="Applying">Apply</button>
+</form>
+
+@if (Model.Games.Count == 0)
+{
+    <partial name="_EmptyState" model="@(isFiltered
+        ? new EmptyStateViewModel("No games match", "No game fits that search and status. Clear the filters to see games in progress.", "Clear the filters", Url.Action("Index", "LiveGames")!)
+        : User.Identity?.IsAuthenticated == true
+            ? new EmptyStateViewModel("No games are running", "Nobody is playing right now. Start a campaign and others can watch it with your link.", "Start a new campaign", Url.Action("New", "Games")!)
+            : new EmptyStateViewModel("No games are running", "Nobody is playing right now. Create an account to start a campaign of your own.", "Create an account", Url.Action("Register", "Account")!))" />
+}
+else
+{
+    <h2 class="gc-visually-hidden">Games</h2>
+    <ul class="gc-grid">
+        @foreach (var game in Model.Games)
+        {
+            <partial name="_ListCard" model="@(new ListCardViewModel(
+                $"Round {game.Round}",
+                game.CountryCode,
+                game.CountryName,
+                [$"Commander: {game.OwnerDisplayName}", game.IsInProgress ? $"Now playing: {game.CurrentPlayerName}" : $"Result: {game.Status}", $"Last active {game.LastActive:d MMM yyyy, HH:mm} UTC"],
+                game.IsInProgress ? null : game.Status.ToString(),
+                "Round",
+                game.Round.ToString(),
+                game.IsInProgress ? "Watch" : "View",
+                $"{game.OwnerDisplayName}'s game",
+                Url.Action("Play", "Games", new { id = game.GameId })!))" />
+        }
+    </ul>
+}
+
+@section Head {
+    <link rel="stylesheet" href="~/css/pages/lists.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script type="module" src="~/js/form-busy.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,111 @@
+/* Identity marks: player badges, owner patterns, flags, stamps, and status badges. */
+
+/* Each player colour travels with a pattern. Elements set data-color, then paint with --gc-owner and --gc-owner-pattern. */
+[data-color="color-0"] { --gc-owner: var(--gc-player-0); --gc-owner-pattern: var(--gc-pattern-0); }
+[data-color="color-1"] { --gc-owner: var(--gc-player-1); --gc-owner-pattern: var(--gc-pattern-1); }
+[data-color="color-2"] { --gc-owner: var(--gc-player-2); --gc-owner-pattern: var(--gc-pattern-2); }
+[data-color="color-3"] { --gc-owner: var(--gc-player-3); --gc-owner-pattern: var(--gc-pattern-3); }
+[data-color="color-4"] { --gc-owner: var(--gc-player-4); --gc-owner-pattern: var(--gc-pattern-4); }
+[data-color="color-5"] { --gc-owner: var(--gc-player-5); --gc-owner-pattern: var(--gc-pattern-5); }
+[data-color="color-6"] { --gc-owner: var(--gc-player-6); --gc-owner-pattern: var(--gc-pattern-6); }
+[data-color="color-7"] { --gc-owner: var(--gc-player-7); --gc-owner-pattern: var(--gc-pattern-7); }
+[data-color="color-8"] { --gc-owner: var(--gc-player-8); --gc-owner-pattern: var(--gc-pattern-8); }
+[data-color="color-9"] { --gc-owner: var(--gc-player-9); --gc-owner-pattern: var(--gc-pattern-9); }
+
+.gc-player-badge {
+    display: inline-flex;
+    flex: none;
+    align-items: stretch;
+    border: 2px solid var(--gc-ink);
+}
+
+.gc-player-badge__initials {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-inline-size: 2rem;
+    padding-inline: var(--gc-space-1);
+    font-size: var(--gc-text-small);
+    font-weight: 700;
+    color: var(--gc-paper);
+    background-color: var(--gc-owner);
+}
+
+.gc-player-badge__pattern {
+    inline-size: 0.9rem;
+    color: var(--gc-owner);
+    background: var(--gc-owner-pattern), var(--gc-paper);
+}
+
+.gc-flag {
+    position: relative;
+    flex: none;
+    inline-size: 2rem;
+    block-size: 1.5rem;
+    overflow: hidden;
+    border: 1px solid var(--gc-ink);
+    background-color: var(--gc-fog);
+}
+
+/* The country code sits behind the picture, so it shows if the image never loads. */
+.gc-flag__code {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--gc-ink);
+}
+
+.gc-flag__image {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+}
+
+/* Red-ink stamps: the one bold mark on the board. */
+.gc-stamp {
+    display: inline-block;
+    margin: 0;
+    padding: var(--gc-space-1) var(--gc-space-2);
+    font-family: var(--gc-font-body);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--gc-red);
+    border: 3px solid var(--gc-red);
+    rotate: -6deg;
+    opacity: 0.92;
+}
+
+.gc-stamp--slam {
+    animation: gc-stamp-slam var(--gc-time-slow) var(--gc-ease) backwards;
+}
+
+@keyframes gc-stamp-slam {
+    from {
+        opacity: 0;
+        transform: scale(1.8);
+    }
+
+    60% {
+        opacity: 1;
+        transform: scale(0.94);
+    }
+}
+
+/* Status badges, such as "Spectating (read only)". Shape and words carry the meaning. */
+.gc-badge {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--gc-target);
+    padding: var(--gc-space-1) var(--gc-space-3);
+    font-weight: 700;
+    color: var(--gc-ink);
+    background-color: var(--gc-paper);
+    border: 3px double var(--gc-ink);
+}
