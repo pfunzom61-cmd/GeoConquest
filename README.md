@@ -1,4 +1,4 @@
-# GeoConquest
+<img width="1917" height="917" alt="image" src="https://github.com/user-attachments/assets/5a4bada5-b6a8-42b7-b027-9918801abd14" /># GeoConquest
 
 A single-player, Risk-style geopolitics game for the browser, submitted for the University of Cape Town
 INF4001N Honours Entrance Examination for 2027.
@@ -122,11 +122,11 @@ The following sequence exercises every criterion on the marksheet in roughly ten
 
 | | |
 |---|---|
-| Landing page | ![Landing page](docs/screenshots/landing.png) |
-| Board on a desktop | ![Board on a desktop](docs/screenshots/board-desktop.png) |
-| Board on a phone | ![Board on a phone](docs/screenshots/board-phone.png) |
-| A spectator's view | ![Spectator view](docs/screenshots/spectator.png) |
-| Game over | ![Game over](docs/screenshots/game-over.png) |
+| Landing page |<img width="1917" height="917" alt="image" src="https://github.com/user-attachments/assets/7ffd7b21-597b-414b-b90c-3f26bd71c981" />|
+| Board on a desktop (1) |<img width="1897" height="917" alt="image" src="https://github.com/user-attachments/assets/2d9eaa42-6071-44fe-8726-35ea6c9e1766" />|
+| Board on a desktop (2) |<img width="1901" height="920" alt="image" src="https://github.com/user-attachments/assets/db8aad90-5b0f-42a5-ab0f-0157905e00fe" />|
+| A spectator's view | <img width="1901" height="916" alt="image" src="https://github.com/user-attachments/assets/9e9d5d8b-acdc-442d-aa2d-c5a6e9360acc" />|
+
 
 ---
 
